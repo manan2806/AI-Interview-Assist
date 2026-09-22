@@ -1,0 +1,78 @@
+*************** Agar Frontend me change karo ***************
+Example: frontend/src/pages/Dashboard.jsx me change kiya.
+
+-> Step 1 — Code save karo
+VS Code me changes save karo.
+
+-> Step 2 — Local test karo
+npm run dev
+
+Browser me:
+http://localhost:5173
+
+Check karo ki change sahi hai.
+
+-> Step 3 — Build check karo
+npm run build
+
+Agar:
+✓ built successfully
+aaye to good ✅
+
+-> Step 4 — GitHub par push karo
+Frontend folder me:
+
+git add .
+git commit -m "Updated frontend"
+git push origin main
+
+-> Step 5 — Vercel automatically deploy karega 🚀
+
+GitHub me main par push hote hi Vercel automatically new deployment start karega.
+Tumhe Vercel par manually deploy karne ki zarurat nahi hai.
+Phir:
+https://ai-interview-assist-two.vercel.app
+refresh karo.
+
+*************** Agar Backend me change karo ***************
+
+Example:
+backend/routes/interview_routes.py
+me change kiya.
+
+-> Step 1
+Code save karo.
+
+-> Step 2 — Local backend test karo
+python app.py
+ya tumhare project me jo command currently use ho rahi hai.
+
+Check:
+http://localhost:5000
+
+Expected:
+AI Interview Assist Backend is Running 🚀
+
+-> Step 3 — GitHub push
+git add .
+git commit -m "Updated backend"
+git push origin main
+
+-> Step 4 — Render automatically deploy karega 🚀
+GitHub push ke baad Render automatically latest code deploy karega.
+
+Backend URL same rahega:
+https://ai-interview-assist-backend.onrender.com
+
+
+*************** Agar Frontend + Backend dono change kiye ***************
+
+Bas:
+git add .
+git commit -m "Updated frontend and backend"
+git push origin main
+
+Phir:
+GitHub → Vercel + Render → Automatic Deployment
+
+Dono update ho jayenge.
