@@ -1,0 +1,39 @@
+frontend/
+│
+├── public/
+│
+├── src/
+│   │
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── Loader.jsx
+│   │   └── ErrorMessage.jsx
+│   │
+│   ├── pages/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── Profile.jsx
+│   │   ├── ProfileImprovement.jsx
+│   │   ├── InterviewSetup.jsx
+│   │   ├── InterviewStart.jsx
+│   │   ├── InterviewResult.jsx
+│   │   ├── InterviewHistory.jsx
+│   │   └── InterviewDetails.jsx
+│   │
+│   ├── services/
+│   │   └── api.js
+│   │
+│   ├── utils/
+│   │   └── auth.js
+│   │
+│   ├── routes/
+│   │   └── ProtectedRoute.jsx
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+│
+├── package.json
+├── vite.config.js
+└── index.html

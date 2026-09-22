@@ -1,0 +1,46 @@
+//( in mongodb atlas) Username : rangoonwalamanan_db_user  Password : s5M9kY1S7LXxbIb8 
+
+
+*** Backend ***
+✅ STEP 1 — Project Setup + Flask Backend
+✅ STEP 2 — MongoDB Connection
+✅ STEP 3 — User Registration API + Password Hashing
+✅ STEP 4 — User Login API + Password Verification
+✅ STEP 5 — User Profile + JWT Protected
+✅ STEP 6 — Update User Profile
+✅ STEP 7 — Interview Setup API
+✅ STEP 8 — AI se interview questions generate karenge based on Job Role + Experience + Difficulty
+✅ STEP 9 — Start Interview + One-by-One Questions + Save Answers
+✅ STEP 10 — AI Answer Evaluation 
+✅ STEP 11 — Overall Interview Score + Performance Analysis
+✅ STEP 12 — Interview Result / Report
+✅ STEP 13 — Interview History API
+✅ STEP 14 — Interview Details
+✅ STEP 15 — Retake Interview
+✅ STEP 16 — Profile improvements
+STEP 17 — React Frontend
+
+*** Frontend ***
+✅ 17.1 React project setup
+✅ 17.2 Folder structure
+✅ 17.3 API service / Axios setup
+✅ 17.4 Login & Register UI
+✅ 17.5 JWT token handling
+✅ 17.6 Protected Routes
+✅ 17.7 Dashboard
+✅ 17.8 Profile + Edit Profile
+✅ 17.9 Profile Improvement UI
+✅ 17.10 Interview Setup page
+✅ 17.11 Interview Start page
+✅ 17.12 One-by-one Questions + Answer submission
+✅ 17.13 Evaluation / Result page
+✅ 17.14 Interview History
+✅ 17.15 Interview Details
+✅ 17.16 Retake Interview
+✅ 17.17 Loading/Error handling
+17.18 Final UI polish + testing
+
+
+*** Extra STEP ***
+STEP 1 — AI Avatar
+STEP 2 — Voice + Lip Sync + Eye Expressions
