@@ -1178,27 +1178,123 @@ Return exactly:
     ]
 }}
 """
-        max_retries = 3
+        # GEMINI REQUEST WITH RETRY + FALLBACK
+        models_to_try = [
+            "gemini-3.6-flash",
+            "gemini-2.5-flash"
+        ]
 
-        for attempt in range(max_retries):
-            try:
-                response = gemini_client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=prompt,
-                    config={
-                        "response_mime_type": "application/json"
-                    }
-                )
+        response = None
+        last_error = None
+
+        for model_name in models_to_try:
+
+            max_retries = 4
+
+            for attempt in range(max_retries):
+
+                try:
+
+                    print(
+                        f"🤖 Trying Gemini model: {model_name} "
+                        f"(attempt {attempt + 1}/{max_retries})"
+                    )
+
+                    response = gemini_client.models.generate_content(
+
+                        model=model_name,
+
+                        contents=prompt,
+
+                        config={
+                            "response_mime_type":
+                                "application/json"
+                        }
+                    )
+
+                    if response and response.text:
+
+                        print(
+                            f"✅ Gemini response received "
+                            f"from {model_name}"
+                        )
+
+                        break
+
+                    raise Exception(
+                        "Gemini returned an empty response."
+                    )
+
+                except Exception as e:
+
+                    last_error = e
+
+                    error_message = str(e)
+
+                    print(
+                        f"⚠️ Gemini error with {model_name}: "
+                        f"{error_message}"
+                    )
+
+                    # Retry temporary errors
+                    if (
+                        (
+                            "503" in error_message
+                            or
+                            "UNAVAILABLE" in error_message
+                            or
+                            "429" in error_message
+                            or
+                            "RESOURCE_EXHAUSTED"
+                            in error_message
+                        )
+                        and
+                        attempt < max_retries - 1
+                    ):
+
+                        wait_time = 3 * (
+                            2 ** attempt
+                        )
+
+                        print(
+                            f"⏳ Retrying in "
+                            f"{wait_time} seconds..."
+                        )
+
+                        time.sleep(
+                            wait_time
+                        )
+
+                        continue
+
+                    break
+
+            # If successful, stop trying models
+            if response and response.text:
                 break
 
-            except Exception as e:
-                error_message = str(e)
+            print(
+                f"⚠️ Model {model_name} failed. "
+                f"Trying next model..."
+            )
 
-                if "503" in error_message and attempt < max_retries - 1:
-                    time.sleep(3)
-                    continue
+        # No model worked
+        if not response or not response.text:
 
-                raise e
+            return jsonify({
+
+                "success": False,
+
+                "message":
+                    "AI question generation is temporarily unavailable. "
+                    "Please try again after a few seconds.",
+
+                "error":
+                    str(last_error)
+                    if last_error
+                    else "Unknown Gemini error."
+
+            }), 503
 
         if not response.text:
             return jsonify({
