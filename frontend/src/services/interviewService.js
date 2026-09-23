@@ -25,6 +25,15 @@ export const startInterview = async (interviewId) => {
     return response.data;
 };
 
+export const resumeInterview = async (interviewId) => {
+
+    const response = await api.get(
+        `/api/interview/${interviewId}/resume`
+    );
+
+    return response.data;
+};
+
 export const getCurrentQuestion = async (interviewId) => {
     const response = await api.get(
         `/api/interview/${interviewId}/current-question`
