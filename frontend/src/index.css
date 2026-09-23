@@ -28,26 +28,18 @@ input {
   color: #222;
 }
 
-/* HOME NAVBAR */
+/* NAVBAR */
 .home-navbar {
   height: 72px;
-
   padding: 0 7%;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   background: #ffffff;
-
   border-bottom: 1px solid #eeeeee;
-
   position: sticky;
   top: 0;
-
   z-index: 1000;
-
-  box-sizing: border-box;
 }
 
 /* LOGO */
