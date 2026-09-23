@@ -4832,6 +4832,28 @@ input {
   font-size: 14px;
 }
 
+/* DELETE INTERVIEW BUTTON*/
+.history-delete-button {
+  background: #dc3545;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.history-delete-button:hover {
+  background: #b02a37;
+  transform: translateY(-1px);
+}
+
+.history-delete-button:active {
+  transform: scale(0.97);
+}
+
 /* BOTTOM */
 .history-card-bottom {
   display: flex;

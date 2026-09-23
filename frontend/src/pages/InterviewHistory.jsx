@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { getInterviewHistory } from "../services/interviewService";
+import { getInterviewHistory, deleteInterview } from "../services/interviewService";
 
 function InterviewHistory() {
 
@@ -67,6 +67,63 @@ function InterviewHistory() {
 
             setLoading(false);
 
+        }
+    };
+
+    // ==========================================
+    // DELETE INTERVIEW
+    // ==========================================
+
+    const handleDelete = async (interviewId) => {
+
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this interview?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            const data = await deleteInterview(
+                interviewId
+            );
+
+            console.log(
+                "Delete Interview Response:",
+                data
+            );
+
+            if (data?.success) {
+
+                setInterviews((prevInterviews) =>
+                    prevInterviews.filter(
+                        (interview) =>
+                            interview.interview_id !== interviewId
+                    )
+                );
+
+            } else {
+
+                alert(
+                    data?.message ||
+                    "Failed to delete interview."
+                );
+            }
+
+        } catch (err) {
+
+            console.error(
+                "Delete Interview Error:",
+                err
+            );
+
+            alert(
+                err?.response?.data?.message ||
+                err?.message ||
+                "Something went wrong while deleting interview."
+            );
         }
     };
 
@@ -582,9 +639,19 @@ function InterviewHistory() {
                                                     >
                                                         View Result
                                                     </button>
-
                                                 )}
 
+                                            <button
+                                                type="button"
+                                                className="history-delete-button"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        interview.interview_id
+                                                    )
+                                                }
+                                            >
+                                                🗑️ Delete
+                                            </button>
                                         </div>
 
                                     </div>

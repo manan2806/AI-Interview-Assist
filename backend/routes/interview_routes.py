@@ -2345,6 +2345,80 @@ def interview_history():
         }), 500
 
 # ==========================================
+# DELETE INTERVIEW
+# ==========================================
+@interview_bp.route(
+    "/<interview_id>",
+    methods=["DELETE"]
+)
+@jwt_required()
+def delete_interview(interview_id):
+
+    try:
+        # GET LOGGED-IN USER
+        user_id = get_jwt_identity()
+
+        # VALIDATE INTERVIEW ID
+        interview_object_id = get_interview_object_id(
+            interview_id
+        )
+
+        if not interview_object_id:
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid interview ID."
+            }), 400
+
+        # CHECK INTERVIEW EXISTS
+        # AND BELONGS TO CURRENT USER
+        interview = interviews.find_one({
+            "_id": interview_object_id,
+            "user_id": user_id
+        })
+
+        if not interview:
+
+            return jsonify({
+                "success": False,
+                "message": "Interview not found."
+            }), 404
+
+        # DELETE INTERVIEW
+        delete_result = interviews.delete_one({
+            "_id": interview_object_id,
+            "user_id": user_id
+        })
+
+        # CHECK DELETE RESULT
+        if delete_result.deleted_count == 0:
+
+            return jsonify({
+                "success": False,
+                "message": "Interview could not be deleted."
+            }), 400
+
+        # SUCCESS
+        return jsonify({
+            "success": True,
+            "message": "Interview deleted successfully.",
+            "interview_id": interview_id
+        }), 200
+
+    except Exception as e:
+
+        print(
+            "Delete Interview Error:",
+            str(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Something went wrong while deleting interview.",
+            "error": str(e)
+        }), 500
+
+# ==========================================
 # INTERVIEW DETAILS
 # ==========================================
 @interview_bp.route("/<interview_id>/details", methods=["GET"])
