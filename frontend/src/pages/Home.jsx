@@ -14,25 +14,89 @@ function Home() {
 
         <div className="home-page">
 
-            {/* ========================= NAVBAR ========================= */}
+            {/* =========================
+                NAVBAR
+            ========================= */}
+
             <nav className="home-navbar">
+                {/* LOGO */}
                 <div className="home-logo">
-                    <span>AI</span> Interview Assist
+
+                    <span>
+                        AI
+                    </span>
+
+                    Interview Assist
+
                 </div>
 
-                <div className="home-nav-links">
-                    <a href="#home">Home</a>
-                    <a href="#about">About</a>
-                    <a href="#features">Features</a>
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#contact">Contact Us</a>
+                {/* NAVIGATION LINKS */}
+                <div
+                    className={`home-nav-links ${menuOpen ? "mobile-menu-open" : ""
+                        }`}
+                >
 
-                    <Link to="/login">Login</Link>
-
-                    <Link to="/register" className="home-register-btn">
+                    <a
+                        href="#home"
+                        onClick={closeMenu}
+                    >
+                        Home
+                    </a>
+                    <a
+                        href="#about"
+                        onClick={closeMenu}
+                    >
+                        About
+                    </a>
+                    <a
+                        href="#features"
+                        onClick={closeMenu}
+                    >
+                        Features
+                    </a>
+                    <a
+                        href="#how-it-works"
+                        onClick={closeMenu}
+                    >
+                        How It Works
+                    </a>
+                    <a
+                        href="#contact"
+                        onClick={closeMenu}
+                    >
+                        Contact Us
+                    </a>
+                    <Link
+                        to="/login"
+                        onClick={closeMenu}
+                    >
+                        Login
+                    </Link>
+                    <Link
+                        to="/register"
+                        className="home-register-btn"
+                        onClick={closeMenu}
+                    >
                         Register
                     </Link>
+
                 </div>
+
+                {/* MOBILE MENU BUTTON */}
+                <button
+                    type="button"
+                    className="home-menu-btn"
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    aria-label="Toggle navigation menu"
+                    aria-expanded={menuOpen}
+                >
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </button>
+
             </nav>
 
             {/* =========================
