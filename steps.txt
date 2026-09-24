@@ -1,4 +1,4 @@
-//( in mongodb atlas) Username : rangoonwalamanan_db_user  Password : s5M9kY1S7LXxbIb8 
+//( in mongodb atlas) Username : rangoonwalamanan_db_user  Password : AIInterview2026 
 
 
 *** Backend ***
