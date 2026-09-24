@@ -60,9 +60,7 @@ def evaluate_all_answers_with_gemini(
     if gemini_client is None:
         raise Exception("Gemini client is not available.")
 
-    # ==========================================
     # PREPARE QUESTIONS + ANSWERS
-    # ==========================================
     interview_text = ""
 
     for index, question in enumerate(questions):
@@ -153,9 +151,7 @@ Return exactly this structure:
 }}
 """
 
-    # ==========================================
     # MODEL FALLBACK CONFIGURATION
-    # ==========================================
     models = [
         "gemini-3.8-flash",
         "gemini-3.5-flash-lite"
@@ -163,9 +159,7 @@ Return exactly this structure:
 
     last_error = None
 
-    # ==========================================
     # TRY EACH MODEL
-    # ==========================================
     for model in models:
         max_retries = 3
 
@@ -188,9 +182,7 @@ Return exactly this structure:
                 if not response or not response.text:
                     raise Exception("Gemini returned an empty response.")
 
-                # ==========================================
                 # PARSE JSON
-                # ==========================================
                 response_text = response.text.strip()
 
                 if response_text.startswith("```json"):
@@ -210,9 +202,7 @@ Return exactly this structure:
                 if not isinstance(evaluations, list):
                     raise Exception("Gemini returned invalid evaluations.")
 
-                # ==========================================
                 # VALIDATE EVALUATION COUNT
-                # ==========================================
                 if len(evaluations) != len(questions):
                     raise Exception(
                         "Gemini evaluated an unexpected number of questions. "
@@ -220,9 +210,7 @@ Return exactly this structure:
                         f"Received: {len(evaluations)}"
                     )
 
-                # ==========================================
                 # NORMALIZE EVALUATIONS
-                # ==========================================
                 normalized_evaluations = []
                 expected_question_numbers = []
 
@@ -246,9 +234,7 @@ Return exactly this structure:
 
                     received_question_numbers.append(question_number)
 
-                    # ==========================================
                     # FIND ORIGINAL QUESTION
-                    # ==========================================
                     original_question = None
 
                     for question in questions:
@@ -261,9 +247,7 @@ Return exactly this structure:
                             f"Gemini returned an invalid question number: {question_number}"
                         )
 
-                    # ==========================================
                     # NORMALIZE SCORE
-                    # ==========================================
                     score = evaluation.get("score", 0)
 
                     try:
@@ -278,9 +262,7 @@ Return exactly this structure:
 
                     evaluation["score"] = score
 
-                    # ==========================================
                     # DEFAULT FIELDS
-                    # ==========================================
                     evaluation.setdefault("correctness", "Incorrect")
                     evaluation.setdefault("relevance", "Irrelevant")
                     evaluation.setdefault("technical_accuracy", "Poor")
@@ -292,17 +274,13 @@ Return exactly this structure:
                     evaluation["question_number"] = question_number
                     evaluation["evaluated_at"] = datetime.utcnow()
 
-                    # ==========================================
                     # ADD ORIGINAL QUESTION
-                    # ==========================================
                     evaluation["question"] = original_question.get(
                         "question",
                         ""
                     )
 
-                    # ==========================================
                     # ADD CANDIDATE ANSWER
-                    # ==========================================
                     candidate_answer = ""
 
                     for answer_data in answers:
@@ -313,17 +291,13 @@ Return exactly this structure:
                     evaluation["answer"] = candidate_answer
                     normalized_evaluations.append(evaluation)
 
-                # ==========================================
                 # VALIDATE QUESTION NUMBERS
-                # ==========================================
                 if set(received_question_numbers) != set(expected_question_numbers):
                     raise Exception(
                         "Gemini returned mismatched question numbers."
                     )
 
-                # ==========================================
                 # SUCCESS
-                # ==========================================
                 print(
                     f"✅ Complete interview evaluation received from {model}."
                 )
@@ -339,9 +313,7 @@ Return exactly this structure:
                     f"{error_message}"
                 )
 
-                # ==========================================
                 # TEMPORARY ERROR
-                # ==========================================
                 is_temporary_error = (
                     "503" in error_message
                     or "UNAVAILABLE" in error_message
@@ -359,10 +331,7 @@ Return exactly this structure:
                     time.sleep(wait_time)
                     continue
 
-                # ==========================================
-                # CURRENT MODEL FAILED
-                # MOVE TO FALLBACK MODEL
-                # ==========================================
+                # CURRENT MODEL FAILED , MOVE TO FALLBACK MODEL
                 print(
                     f"➡️ Model {model} failed. "
                     "Trying next Gemini model..."
