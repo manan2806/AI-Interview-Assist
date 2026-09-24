@@ -143,6 +143,8 @@ def login():
                 "message": "Email and password are required"
             }), 400
 
+        print("🔍 LOGIN DATABASE OBJECT:", database.db)
+        print("🔍 LOGIN DATABASE TYPE:", type(database.db))
         # CHECK DATABASE
         if database.db is None:
             return jsonify({
