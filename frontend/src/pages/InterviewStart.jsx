@@ -89,7 +89,7 @@ function InterviewStart() {
                 // EVALUATION PENDING
                 // ==========================================
                 if (
-                    data.status ===
+                    resumeData.status ===
                     "evaluation_pending"
                 ) {
 
