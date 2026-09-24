@@ -7,7 +7,7 @@ import hashlib
 import smtplib
 from datetime import datetime, timedelta
 from email.message import EmailMessage
-from database import db
+import database
 from utils.auth_utils import generate_token
 
 auth_bp = Blueprint("auth", __name__)
@@ -43,13 +43,13 @@ def register():
             }), 400
 
         # CHECK DATABASE
-        if db is None:
+        if database.db is None:
             return jsonify({
                 "success": False,
                 "message": "Database is not connected"
             }), 500
 
-        users = db["users"]
+        users = database.db["users"]
 
         # CLEAN EMAIL
         email = email.strip().lower()
@@ -144,13 +144,13 @@ def login():
             }), 400
 
         # CHECK DATABASE
-        if db is None:
+        if database.db is None:
             return jsonify({
                 "success": False,
                 "message": "Database is not connected"
             }), 500
 
-        users = db["users"]
+        users = database.db["users"]
 
         # FIND USER
         user = users.find_one({
@@ -287,13 +287,13 @@ def forgot_password():
 
         email = email.strip().lower()
 
-        if db is None:
+        if database.db is None:
             return jsonify({
                 "success": False,
                 "message": "Database is not connected"
             }), 500
 
-        users = db["users"]
+        users = database.db["users"]
 
         user = users.find_one({
             "email": email
@@ -381,13 +381,13 @@ def verify_otp():
         email = email.strip().lower()
         otp = otp.strip()
 
-        if db is None:
+        if database.db is None:
             return jsonify({
                 "success": False,
                 "message": "Database is not connected"
             }), 500
 
-        users = db["users"]
+        users = database.db["users"]
 
         user = users.find_one({
             "email": email
@@ -503,13 +503,13 @@ def reset_password():
                 "message": "Password must be at least 6 characters"
             }), 400
 
-        if db is None:
+        if database.db is None:
             return jsonify({
                 "success": False,
                 "message": "Database is not connected"
             }), 500
 
-        users = db["users"]
+        users = database.db["users"]
 
         user = users.find_one({
             "email": email
