@@ -1,8 +1,5 @@
 import os
-import smtplib
-
-from email.message import EmailMessage
-
+import resend
 
 def send_interview_report_email(
     recipient_email,
@@ -11,228 +8,194 @@ def send_interview_report_email(
     job_role
 ):
     """
-    Send interview report PDF through SMTP.
+    Send interview report PDF through Resend API.
     """
 
     # ==========================================
-    # SMTP CONFIGURATION
+    # RESEND CONFIGURATION
     # ==========================================
-
-    smtp_host = os.getenv(
-        "SMTP_HOST",
-        "smtp.gmail.com"
-    )
-
-    smtp_port = int(
-        os.getenv(
-            "SMTP_PORT",
-            "587"
-        )
-    )
-
-    smtp_email = os.getenv(
-        "SMTP_EMAIL"
-    )
-
-    smtp_password = os.getenv(
-        "SMTP_PASSWORD"
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    sender_email = os.getenv(
+        "RESEND_FROM_EMAIL",
+        "onboarding@resend.dev"
     )
 
     # ==========================================
     # VALIDATION
     # ==========================================
-
-    if not smtp_email:
-        raise Exception(
-            "SMTP_EMAIL is not configured."
-        )
-
-    if not smtp_password:
-        raise Exception(
-            "SMTP_PASSWORD is not configured."
-        )
+    if not resend_api_key:
+        raise Exception("RESEND_API_KEY is not configured.")
 
     if not recipient_email:
-        raise Exception(
-            "Recipient email is missing."
-        )
+        raise Exception("Recipient email is missing.")
 
     if not pdf_path:
-        raise Exception(
-            "PDF path is missing."
-        )
+        raise Exception("PDF path is missing.")
 
     if not os.path.exists(pdf_path):
-        raise Exception(
-            "PDF file was not found."
-        )
+        raise Exception("PDF file was not found.")
 
     # ==========================================
-    # EMAIL MESSAGE
+    # SET RESEND API KEY
     # ==========================================
+    resend.api_key = resend_api_key
 
-    message = EmailMessage()
-
-    message["Subject"] = (
-        f"AI Interview Report - {job_role}"
-    )
-
-    message["From"] = smtp_email
-
-    message["To"] = recipient_email
-
+    # ==========================================
+    # CANDIDATE NAME
+    # ==========================================
     name = recipient_name or "Candidate"
 
-    message.set_content(
-        f"""
-Hello {name},
+    # ==========================================
+    # EMAIL SUBJECT
+    # ==========================================
+    subject = f"AI Interview Report - {job_role}"
 
-Your AI Interview has been completed successfully.
+    # ==========================================
+    # EMAIL BODY
+    # ==========================================
+    html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AI Interview Report</title>
+</head>
+<body style="
+    margin:0;
+    padding:0;
+    background:#f5f5f5;
+    font-family:Arial,Helvetica,sans-serif;
+">
+    <div style="
+        max-width:650px;
+        margin:30px auto;
+        background:#ffffff;
+        padding:35px;
+        border-radius:12px;
+        box-sizing:border-box;
+    ">
+        <h2 style="
+            margin-top:0;
+            color:#4a148c;
+        ">
+            AI Interview Assist
+        </h2>
 
-Please find your complete interview performance report attached as a PDF.
+        <p>Hello <strong>{name}</strong>,</p>
 
-Job Role: {job_role}
+        <p>
+            Your AI Interview has been completed successfully.
+        </p>
 
-The report contains:
+        <p>
+            Please find your complete interview performance
+            report attached as a PDF.
+        </p>
 
-- Interview details
-- Overall score
-- Performance level
-- AI analysis
-- Strengths
-- Weaknesses
-- Recommendations
-- Technical skill assessment
-- Readiness assessment
-- Question-wise performance
-- Answer evaluation
-- AI feedback
+        <div style="
+            margin:25px 0;
+            padding:20px;
+            background:#f7f3fa;
+            border-radius:8px;
+        ">
+            <p style="margin-top:0;">
+                <strong>Job Role:</strong> {job_role}
+            </p>
 
-Thank you for using AI Interview Assist.
+            <p style="margin-bottom:0;">
+                <strong>📎 Interview Performance Report</strong>
+            </p>
+        </div>
 
-Best Regards,
-AI Interview Assist
+        <p>The report contains:</p>
+
+        <ul>
+            <li>Interview details</li>
+            <li>Overall score</li>
+            <li>Performance level</li>
+            <li>AI analysis</li>
+            <li>Strengths</li>
+            <li>Weaknesses</li>
+            <li>Recommendations</li>
+            <li>Technical skill assessment</li>
+            <li>Readiness assessment</li>
+            <li>Question-wise performance</li>
+            <li>Answer evaluation</li>
+            <li>AI feedback</li>
+        </ul>
+
+        <p>
+            Thank you for using <strong>AI Interview Assist</strong>.
+        </p>
+
+        <p>
+            Best Regards,<br>
+            <strong>AI Interview Assist</strong>
+        </p>
+    </div>
+</body>
+</html>
 """
-    )
 
     # ==========================================
     # READ PDF
     # ==========================================
-
-    with open(
-        pdf_path,
-        "rb"
-    ) as pdf_file:
-
-        pdf_data = pdf_file.read()
-
-    # ==========================================
-    # ATTACH PDF
-    # ==========================================
-
-    message.add_attachment(
-        pdf_data,
-        maintype="application",
-        subtype="pdf",
-        filename="AI_Interview_Report.pdf"
-    )
+    try:
+        with open(pdf_path, "rb") as pdf_file:
+            pdf_data = pdf_file.read()
+    except Exception as error:
+        print("❌ PDF Read Error:", str(error))
+        raise Exception(
+            f"Unable to read PDF file: {str(error)}"
+        )
 
     # ==========================================
-    # SEND EMAIL
+    # PDF FILE NAME
     # ==========================================
+    pdf_file_name = "AI_Interview_Report.pdf"
 
-    print("📧 Connecting to SMTP server...")
-    print(f"SMTP SERVER: {smtp_host}")
-    print(f"SMTP PORT: {smtp_port}")
-    print(f"SENDER EMAIL: {smtp_email}")
+    # ==========================================
+    # SEND EMAIL USING RESEND API
+    # ==========================================
+    print("==========================================")
+    print("📧 Sending interview report using Resend API...")
+    print(f"RECIPIENT EMAIL: {recipient_email}")
+    print(f"SENDER EMAIL: {sender_email}")
+    print(f"PDF FILE: {pdf_file_name}")
+    print("==========================================")
 
     try:
+        response = resend.Emails.send({
+            "from": sender_email,
+            "to": [recipient_email],
+            "subject": subject,
+            "html": html_content,
+            "attachments": [
+                {
+                    "filename": pdf_file_name,
+                    "content": pdf_data
+                }
+            ]
+        })
 
-        # IMPORTANT:
-        # timeout prevents Render/Gunicorn worker
-        # from hanging indefinitely.
+        # ==========================================
+        # SUCCESS
+        # ==========================================
+        print("==========================================")
+        print("✅ INTERVIEW REPORT EMAIL SENT")
+        print("RESEND RESPONSE:", response)
+        print("==========================================")
 
-        with smtplib.SMTP(
-            smtp_host,
-            smtp_port,
-            timeout=10
-        ) as server:
-
-            print("📧 SMTP connection established.")
-
-            server.starttls()
-
-            print("🔐 TLS connection established.")
-
-            server.login(
-                smtp_email,
-                smtp_password
-            )
-
-            print("✅ SMTP login successful.")
-
-            server.send_message(
-                message
-            )
-
-            print(
-                "✅ Interview report email sent successfully."
-            )
-
-    except smtplib.SMTPAuthenticationError as error:
-
-        print(
-            "❌ SMTP Authentication Error:",
-            error
-        )
-
-        raise Exception(
-            "SMTP authentication failed. "
-            "Check SMTP_EMAIL and SMTP_PASSWORD."
-        )
-
-    except smtplib.SMTPConnectError as error:
-
-        print(
-            "❌ SMTP Connection Error:",
-            error
-        )
-
-        raise Exception(
-            "Unable to connect to SMTP server."
-        )
-
-    except TimeoutError as error:
-
-        print(
-            "❌ SMTP Connection Timeout:",
-            error
-        )
-
-        raise Exception(
-            "SMTP connection timed out."
-        )
-
-    except OSError as error:
-
-        print(
-            "❌ SMTP Network Error:",
-            error
-        )
-
-        raise Exception(
-            "SMTP network connection failed."
-        )
+        return True
 
     except Exception as error:
-
-        print(
-            "❌ Email Sending Error:",
-            error
-        )
+        # ==========================================
+        # RESEND ERROR
+        # ==========================================
+        print("==========================================")
+        print("❌ RESEND EMAIL ERROR:", str(error))
+        print("==========================================")
 
         raise Exception(
-            f"Email sending failed: {str(error)}"
+            f"Resend email sending failed: {str(error)}"
         )
-
-    return True
