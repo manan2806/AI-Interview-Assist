@@ -349,12 +349,7 @@ Return exactly this structure:
 # ==========================================
 # GENERATE OVERALL AI ANALYSIS
 # ==========================================
-def generate_overall_analysis(
-    job_role,
-    experience_level,
-    difficulty,
-    evaluations
-):
+def generate_overall_analysis(job_role, experience_level, difficulty, evaluations):
     """
     Generate overall interview analysis using Gemini.
 
@@ -371,30 +366,21 @@ def generate_overall_analysis(
     if gemini_client is None:
         raise Exception("Gemini client is not available")
 
+    # VALIDATE EVALUATIONS
+    if not evaluations:
+        raise Exception("No evaluations available for AI analysis")
+
     # PREPARE EVALUATION DATA
     evaluation_text = ""
 
     for index, evaluation in enumerate(evaluations, start=1):
-
-        question = evaluation.get(
-            "question",
-            ""
-        )
-
-        answer = evaluation.get(
-            "answer",
-            ""
-        )
-
-        score = evaluation.get(
-            "score",
-            0
-        )
-
-        feedback = evaluation.get(
-            "feedback",
-            ""
-        )
+        question = evaluation.get("question", "")
+        answer = evaluation.get("answer", "")
+        score = evaluation.get("score", 0)
+        feedback = evaluation.get("feedback", "")
+        correctness = evaluation.get("correctness", "")
+        relevance = evaluation.get("relevance", "")
+        technical_accuracy = evaluation.get("technical_accuracy", "")
 
         evaluation_text += f"""
 Question {index}:
@@ -406,6 +392,15 @@ Candidate Answer:
 Score:
 {score}/10
 
+Correctness:
+{correctness}
+
+Relevance:
+{relevance}
+
+Technical Accuracy:
+{technical_accuracy}
+
 Feedback:
 {feedback}
 
@@ -415,11 +410,14 @@ Feedback:
     # ==========================================
     # CREATE PROMPT
     # ==========================================
-
     prompt = f"""
-You are an expert interview evaluator.
+You are an expert professional interview evaluator.
 
-Analyze the candidate's complete interview.
+Analyze the candidate's COMPLETE interview.
+
+IMPORTANT:
+You MUST analyze the actual candidate answers and evaluation
+feedback. Do not return empty arrays.
 
 Job Role:
 {job_role}
@@ -433,139 +431,248 @@ Difficulty:
 Interview Evaluations:
 {evaluation_text}
 
-Provide an overall professional assessment.
+Your task is to provide a professional overall assessment.
 
 Return ONLY valid JSON.
 
-The JSON must have exactly these fields:
+The JSON must contain exactly these fields:
 
 {{
-    "summary": "A short overall summary of the candidate's performance.",
-
+    "summary": "A short but meaningful overall summary of the candidate's interview performance.",
     "strengths": [
-        "strength 1",
-        "strength 2",
-        "strength 3"
+        "Specific strength based on the candidate's actual answers.",
+        "Another specific strength based on the evaluation.",
+        "Another specific strength if supported by the interview."
     ],
-
     "weaknesses": [
-        "weakness 1",
-        "weakness 2",
-        "weakness 3"
+        "Specific weakness based on the candidate's actual answers.",
+        "Another specific weakness based on the evaluation.",
+        "Another specific weakness if supported by the interview."
     ],
-
     "recommendations": [
-        "recommendation 1",
-        "recommendation 2",
-        "recommendation 3"
+        "Practical recommendation based on the identified weaknesses.",
+        "Another practical recommendation.",
+        "Another practical recommendation."
     ],
-
     "technical_skill_assessment":
-        "Assessment of the candidate's technical knowledge and skills.",
-
+        "Detailed assessment of the candidate's technical knowledge based only on the interview.",
     "readiness_assessment":
-        "Assessment of whether the candidate appears ready for the given role."
+        "Professional assessment of the candidate's current preparation for the specified role."
 }}
 
-Rules:
+IMPORTANT RULES:
 
-1. Analyze all answers, not only the scores.
-2. Do not invent information that is not present.
-3. Keep the assessment professional.
-4. Strengths must be based on actual answers.
-5. Weaknesses must be based on actual answers.
-6. Recommendations should be practical.
-7. Do not include Markdown.
-8. Return only JSON.
+1. Analyze ALL candidate answers.
+2. Analyze the evaluation feedback.
+3. Do NOT analyze scores alone.
+4. Strengths MUST be based on actual answers or evaluation feedback.
+5. Weaknesses MUST be based on actual answers or evaluation feedback.
+6. Recommendations MUST address the identified weaknesses.
+7. Do NOT invent technologies, skills, experience, or knowledge that the candidate did not demonstrate.
+8. If the candidate performed poorly in an area, clearly identify that area.
+9. If the candidate performed well in an area, clearly identify that strength.
+10. Always provide at least 1 strength if the interview contains meaningful positive evidence.
+11. Always provide at least 1 weakness if the interview contains meaningful negative evidence.
+12. Always provide at least 2 practical recommendations.
+13. Arrays must contain strings, not objects.
+14. Do NOT return empty arrays unless there is genuinely no information available.
+15. Do NOT use Markdown.
+16. Do NOT include ```json.
+17. Return ONLY valid JSON.
 """
 
     # CALL GEMINI
     response = gemini_client.models.generate_content(
         model="gemini-3.6-flash",
         contents=prompt,
-        config={
-            "response_mime_type": "application/json"
-        }
+        config={"response_mime_type": "application/json"}
     )
 
     # GET RESPONSE TEXT
-    response_text = response.text.strip()
+    if response is None:
+        raise Exception("Gemini returned an empty response")
 
-    # REMOVE MARKDOWN JSON BLOCK IF PRESENT
+    response_text = getattr(response, "text", None)
+
+    if not response_text:
+        raise Exception("Gemini returned empty response text")
+
+    response_text = response_text.strip()
+
+    print("========================================")
+    print("GEMINI OVERALL ANALYSIS RESPONSE:")
+    print(response_text)
+    print("========================================")
+
+    # REMOVE MARKDOWN CODE BLOCK
     if response_text.startswith("```json"):
-
-        response_text = response_text[
-            7:
-        ]
+        response_text = response_text[len("```json"):]
 
         if response_text.endswith("```"):
-            response_text = response_text[
-                :-3
-            ]
+            response_text = response_text[:-3]
 
         response_text = response_text.strip()
 
     elif response_text.startswith("```"):
-
-        response_text = response_text[
-            3:
-        ]
+        response_text = response_text[3:]
 
         if response_text.endswith("```"):
-            response_text = response_text[
-                :-3
-            ]
+            response_text = response_text[:-3]
 
         response_text = response_text.strip()
 
     # PARSE JSON
-    result = json.loads(
-        response_text
-    )
+    try:
+        result = json.loads(response_text)
+    except json.JSONDecodeError as json_error:
+        print("Gemini JSON Parse Error:", str(json_error))
+        print("Invalid Gemini Response:", response_text)
+        raise Exception("Gemini returned invalid JSON")
 
     # VALIDATE RESULT
     if not isinstance(result, dict):
-        raise Exception(
-            "Invalid AI analysis response"
+        raise Exception("Invalid AI analysis response")
+
+    # GET FIELDS
+    summary = result.get("summary", "")
+    strengths = result.get("strengths", [])
+    weaknesses = result.get("weaknesses", [])
+    recommendations = result.get("recommendations", [])
+    technical_skill_assessment = result.get("technical_skill_assessment", "")
+    readiness_assessment = result.get("readiness_assessment", "")
+
+    # VALIDATE ARRAY TYPES
+    if not isinstance(strengths, list):
+        strengths = []
+
+    if not isinstance(weaknesses, list):
+        weaknesses = []
+
+    if not isinstance(recommendations, list):
+        recommendations = []
+
+    # REMOVE EMPTY VALUES
+    strengths = [str(item).strip() for item in strengths if str(item).strip()]
+    weaknesses = [str(item).strip() for item in weaknesses if str(item).strip()]
+    recommendations = [
+        str(item).strip()
+        for item in recommendations
+        if str(item).strip()
+    ]
+
+    # FALLBACK ANALYSIS
+    total_score = 0
+    valid_scores = 0
+
+    for evaluation in evaluations:
+        score = evaluation.get("score", 0)
+
+        try:
+            score = float(score)
+        except (ValueError, TypeError):
+            continue
+
+        score = max(0, min(10, score))
+        total_score += score
+        valid_scores += 1
+
+    average_score = total_score / valid_scores if valid_scores > 0 else 0
+
+    # FALLBACK STRENGTHS
+    if not strengths:
+        if average_score >= 8:
+            strengths.append(
+                "The candidate demonstrated strong performance across the evaluated interview answers."
+            )
+        elif average_score >= 6:
+            strengths.append(
+                "The candidate demonstrated a reasonable understanding of the concepts evaluated during the interview."
+            )
+        else:
+            strengths.append(
+                "The candidate attempted the interview questions and demonstrated some understanding of the evaluated topics."
+            )
+
+    # FALLBACK WEAKNESSES
+    if not weaknesses:
+        if average_score < 6:
+            weaknesses.append(
+                "Several answers require improvement in technical accuracy, completeness, or clarity."
+            )
+        elif average_score < 8:
+            weaknesses.append(
+                "Some answers could be improved with greater technical depth and more complete explanations."
+            )
+        else:
+            weaknesses.append(
+                "Some areas can still be strengthened by providing deeper technical explanations and practical examples."
+            )
+
+    # FALLBACK RECOMMENDATIONS
+    if not recommendations:
+        recommendations.extend([
+            "Review the topics associated with the lower-scoring interview answers.",
+            "Practice explaining technical concepts clearly and with relevant examples.",
+            "Continue practicing interview questions related to the selected job role."
+        ])
+
+    # FALLBACK SUMMARY
+    if not summary:
+        summary = (
+            "The candidate completed the interview successfully. "
+            "The overall assessment is based on the evaluated "
+            "answers and their corresponding feedback."
         )
 
-    # Make sure fields exist
-    result.setdefault(
-        "summary",
-        ""
-    )
+    # FALLBACK TECHNICAL ASSESSMENT
+    if not technical_skill_assessment:
+        technical_skill_assessment = (
+            "The candidate's technical skill assessment is based "
+            "on the correctness, relevance, technical accuracy, "
+            "and scores of the evaluated answers."
+        )
 
-    result.setdefault(
-        "strengths",
-        []
-    )
+    # FALLBACK READINESS
+    if not readiness_assessment:
+        if average_score >= 8:
+            readiness_assessment = (
+                "The candidate demonstrated a strong level of "
+                "preparation based on the evaluated interview answers."
+            )
+        elif average_score >= 6:
+            readiness_assessment = (
+                "The candidate demonstrates a reasonable level "
+                "of preparation but should continue improving "
+                "technical depth and answer quality."
+            )
+        else:
+            readiness_assessment = (
+                "The candidate should continue practicing the "
+                "identified weak areas before taking similar "
+                "technical interviews."
+            )
 
-    result.setdefault(
-        "weaknesses",
-        []
-    )
+    # FINAL RESULT
+    final_result = {
+        "summary": summary,
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "recommendations": recommendations,
+        "technical_skill_assessment": technical_skill_assessment,
+        "readiness_assessment": readiness_assessment
+    }
 
-    result.setdefault(
-        "recommendations",
-        []
-    )
+    # DEBUG FINAL RESULT
+    print("========================================")
+    print("FINAL OVERALL AI ANALYSIS:")
+    print(json.dumps(final_result, indent=4, default=str))
+    print("========================================")
 
-    result.setdefault(
-        "technical_skill_assessment",
-        ""
-    )
-
-    result.setdefault(
-        "readiness_assessment",
-        ""
-    )
-
-    return result
+    return final_result
 
 # ==========================================
 # GENERATE OVERALL RESULT
 # ==========================================
-
 @interview_bp.route(
     "/<interview_id>/overall-result",
     methods=["POST"]
