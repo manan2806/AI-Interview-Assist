@@ -476,48 +476,28 @@ function InterviewHistory() {
                                     }
                                 >
                                     {/* TOP */}
-                                    <div className="history-card-top">
+                                    <div className="history-role">
 
-                                        <div className="history-role">
-
-                                            <div className="history-role-icon">
-                                                💼
-                                            </div>
-
-                                            <div>
-
-                                                <h2>
-                                                    {interview.job_role ||
-                                                        "Unknown Role"}
-                                                </h2>
-
-                                                <p>
-                                                    {interview.interview_type ||
-                                                        "Interview"}
-                                                </p>
-
-                                            </div>
-
+                                        <div className="history-role-icon">
+                                            💼
                                         </div>
 
-                                        <div className="history-score">
+                                        <div>
 
-                                            <strong>
+                                            <h2>
+                                                {interview.job_role || "Unknown Role"}
+                                            </h2>
 
-                                                {interview.overall_score !==
-                                                    null &&
-                                                    interview.overall_score !==
-                                                    undefined
-                                                    ? `${Number(
-                                                        interview.overall_score
-                                                    ).toFixed(1)}%`
-                                                    : "N/A"}
+                                            <p>
+                                                {interview.interview_type || "Interview"}
+                                            </p>
 
-                                            </strong>
-
-                                            <span>
-                                                Overall Score
-                                            </span>
+                                            <p className="history-interview-id">
+                                                Interview ID:{" "}
+                                                <span>
+                                                    {interview.interview_id || "N/A"}
+                                                </span>
+                                            </p>
 
                                         </div>
 
