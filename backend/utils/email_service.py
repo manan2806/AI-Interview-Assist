@@ -43,25 +43,26 @@ def send_interview_report_email(
     # ==========================================
 
     if not smtp_email:
-
         raise Exception(
             "SMTP_EMAIL is not configured."
         )
 
     if not smtp_password:
-
         raise Exception(
             "SMTP_PASSWORD is not configured."
         )
 
     if not recipient_email:
-
         raise Exception(
             "Recipient email is missing."
         )
 
-    if not os.path.exists(pdf_path):
+    if not pdf_path:
+        raise Exception(
+            "PDF path is missing."
+        )
 
+    if not os.path.exists(pdf_path):
         raise Exception(
             "PDF file was not found."
         )
@@ -140,20 +141,98 @@ AI Interview Assist
     # SEND EMAIL
     # ==========================================
 
-    with smtplib.SMTP(
-        smtp_host,
-        smtp_port
-    ) as server:
+    print("📧 Connecting to SMTP server...")
+    print(f"SMTP SERVER: {smtp_host}")
+    print(f"SMTP PORT: {smtp_port}")
+    print(f"SENDER EMAIL: {smtp_email}")
 
-        server.starttls()
+    try:
 
-        server.login(
-            smtp_email,
-            smtp_password
+        # IMPORTANT:
+        # timeout prevents Render/Gunicorn worker
+        # from hanging indefinitely.
+
+        with smtplib.SMTP(
+            smtp_host,
+            smtp_port,
+            timeout=10
+        ) as server:
+
+            print("📧 SMTP connection established.")
+
+            server.starttls()
+
+            print("🔐 TLS connection established.")
+
+            server.login(
+                smtp_email,
+                smtp_password
+            )
+
+            print("✅ SMTP login successful.")
+
+            server.send_message(
+                message
+            )
+
+            print(
+                "✅ Interview report email sent successfully."
+            )
+
+    except smtplib.SMTPAuthenticationError as error:
+
+        print(
+            "❌ SMTP Authentication Error:",
+            error
         )
 
-        server.send_message(
-            message
+        raise Exception(
+            "SMTP authentication failed. "
+            "Check SMTP_EMAIL and SMTP_PASSWORD."
+        )
+
+    except smtplib.SMTPConnectError as error:
+
+        print(
+            "❌ SMTP Connection Error:",
+            error
+        )
+
+        raise Exception(
+            "Unable to connect to SMTP server."
+        )
+
+    except TimeoutError as error:
+
+        print(
+            "❌ SMTP Connection Timeout:",
+            error
+        )
+
+        raise Exception(
+            "SMTP connection timed out."
+        )
+
+    except OSError as error:
+
+        print(
+            "❌ SMTP Network Error:",
+            error
+        )
+
+        raise Exception(
+            "SMTP network connection failed."
+        )
+
+    except Exception as error:
+
+        print(
+            "❌ Email Sending Error:",
+            error
+        )
+
+        raise Exception(
+            f"Email sending failed: {str(error)}"
         )
 
     return True
