@@ -3161,6 +3161,7 @@ def interview_history():
 
             history.append({
                 "interview_id": str(interview["_id"]),
+                "interview_code": interview.get("interview_code", None),
                 "job_role": interview.get("job_role", ""),
                 "experience_level": interview.get("experience_level", ""),
                 "interview_type": interview.get("interview_type", ""),
