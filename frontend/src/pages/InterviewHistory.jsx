@@ -495,7 +495,7 @@ function InterviewHistory() {
                                             <p className="history-interview-id">
                                                 Interview ID:{" "}
                                                 <span>
-                                                    {interview.interview_id || "N/A"}
+                                                    {interview.interview_code || "N/A"}
                                                 </span>
                                             </p>
 

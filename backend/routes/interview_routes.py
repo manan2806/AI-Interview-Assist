@@ -5,7 +5,7 @@ from google import genai
 from bson import ObjectId
 from dotenv import load_dotenv
 
-import os ,json , time
+import os ,json , time , random
 
 from database import interviews , users
 from utils.pdf_generator import generate_interview_pdf
@@ -34,6 +34,20 @@ def get_interview_object_id(interview_id):
         return ObjectId(interview_id)
     except Exception:
         return None
+
+# ==========================================
+# HELPER - GENERATE INTERVIEW CODE
+# ==========================================
+def generate_interview_code():
+    while True:
+        code = f"INT{random.randint(100000, 999999)}"
+
+        existing_interview = interviews.find_one({
+            "interview_code": code
+        })
+
+        if not existing_interview:
+            return code
 
 # ==========================================
 # HELPER - GEMINI EVALUATION FOR ALL ANSWERS
@@ -1354,8 +1368,11 @@ def setup_interview():
                 "message": "Database is not connected."
             }), 500
 
+        interview_code = generate_interview_code()
+
         interview_data = {
             "user_id": user_id,
+            "interview_code": interview_code,
             "job_role": job_role.strip(),
             "experience_level": experience_level.strip(),
             "interview_type": interview_type.strip(),
@@ -1374,7 +1391,8 @@ def setup_interview():
         return jsonify({
             "success": True,
             "message": "Interview setup created successfully.",
-            "interview_id": str(result.inserted_id)
+            "interview_id": str(result.inserted_id),
+            "interview_code": interview_code
         }), 201
 
     except Exception as e:
