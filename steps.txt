@@ -18,7 +18,7 @@
 ✅ STEP 14 — Interview Details
 ✅ STEP 15 — Retake Interview
 ✅ STEP 16 — Profile improvements
-STEP 17 — React Frontend
+✅ STEP 17 — React Frontend
 
 *** Frontend ***
 ✅ 17.1 React project setup
@@ -42,6 +42,8 @@ STEP 17 — React Frontend
 
 
 *** Extra STEP ***
-STEP 1 — AI Avatar
-STEP 2 — Voice + Lip Sync + Eye Expressions
-STEP 3 — Support Diff. Language
+1 — AI Avatar
+2 — Voice + Lip Sync + Eye Expressions
+3 — Support Diff. Language
+4 — Performance Chart
+5 — Live Coding Interview (Technical roles ke liye)
