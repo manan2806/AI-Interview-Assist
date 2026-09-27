@@ -44,3 +44,4 @@ STEP 17 — React Frontend
 *** Extra STEP ***
 STEP 1 — AI Avatar
 STEP 2 — Voice + Lip Sync + Eye Expressions
+STEP 3 — Support Diff. Language
