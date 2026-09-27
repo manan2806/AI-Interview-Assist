@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
 from flask_bcrypt import Bcrypt
 import uuid
-import os
+import os , resend
 import secrets
 import hashlib
-import smtplib
+# import smtplib
 from datetime import datetime, timedelta
-from email.message import EmailMessage
+# from email.message import EmailMessage
 import database
 from utils.auth_utils import generate_token
 
@@ -224,45 +224,251 @@ def login():
 # ==========================================
 # SEND PASSWORD RESET OTP EMAIL
 # ==========================================
-def send_otp_email(email, otp):
+def send_otp_email(
+    recipient_email,
+    otp
+):
+    """
+    Send Forgot Password OTP through Resend API.
+    """
+
+    # ==========================================
+    # RESEND CONFIGURATION
+    # ==========================================
+
+    resend_api_key = os.getenv(
+        "RESEND_API_KEY"
+    )
+
+    sender_email = os.getenv(
+        "RESEND_FROM_EMAIL"
+    )
+
+    # ==========================================
+    # VALIDATION
+    # ==========================================
+
+    if not resend_api_key:
+        print(
+            "❌ RESEND_API_KEY is missing"
+        )
+        return False
+
+    if not sender_email:
+        print(
+            "❌ RESEND_FROM_EMAIL is missing"
+        )
+        return False
+
+    if not recipient_email:
+        print(
+            "❌ Recipient email is missing"
+        )
+        return False
+
+    if not otp:
+        print(
+            "❌ OTP is missing"
+        )
+        return False
+
+    # ==========================================
+    # RESEND API KEY
+    # ==========================================
+
+    resend.api_key = resend_api_key
+
+    # ==========================================
+    # EMAIL SUBJECT
+    # ==========================================
+
+    subject = (
+        "AI Interview Assist - Password Reset OTP"
+    )
+
+    # ==========================================
+    # HTML EMAIL
+    # ==========================================
+
+    html_content = f"""
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <title>
+            Password Reset OTP
+        </title>
+
+    </head>
+
+    <body
+        style="
+            margin:0;
+            padding:0;
+            background:#f5f5f5;
+            font-family:Arial,Helvetica,sans-serif;
+        "
+    >
+
+        <div
+            style="
+                max-width:600px;
+                margin:40px auto;
+                background:#ffffff;
+                padding:35px;
+                border-radius:12px;
+                box-sizing:border-box;
+            "
+        >
+
+            <h2
+                style="
+                    margin-top:0;
+                    color:#4a148c;
+                "
+            >
+                AI Interview Assist
+            </h2>
+
+            <p>
+                Hello,
+            </p>
+
+            <p>
+                We received a request to reset the
+                password for your AI Interview Assist
+                account.
+            </p>
+
+            <p>
+                Your One-Time Password (OTP) is:
+            </p>
+
+            <div
+                style="
+                    margin:25px 0;
+                    padding:20px;
+                    background:#f7f3fa;
+                    border-radius:10px;
+                    text-align:center;
+                "
+            >
+
+                <span
+                    style="
+                        font-size:32px;
+                        font-weight:bold;
+                        letter-spacing:8px;
+                        color:#4a148c;
+                    "
+                >
+                    {otp}
+                </span>
+
+            </div>
+
+            <p>
+                This OTP is valid for
+                <strong>10 minutes</strong>.
+            </p>
+
+            <p>
+                If you did not request a password reset,
+                you can safely ignore this email.
+            </p>
+
+            <p>
+                Best Regards,<br>
+                <strong>
+                    AI Interview Assist
+                </strong>
+            </p>
+
+        </div>
+
+    </body>
+
+    </html>
+    """
+
+    # ==========================================
+    # SEND EMAIL
+    # ==========================================
+
+    print(
+        "=========================================="
+    )
+
+    print(
+        "📧 Sending OTP email using Resend API..."
+    )
+
+    print(
+        f"RECIPIENT EMAIL: {recipient_email}"
+    )
+
+    print(
+        f"SENDER EMAIL: {sender_email}"
+    )
+
+    print(
+        "=========================================="
+    )
+
     try:
-        sender_email = os.getenv("MAIL_EMAIL")
-        sender_password = os.getenv("MAIL_PASSWORD")
 
-        if not sender_email or not sender_password:
-            print("MAIL_EMAIL or MAIL_PASSWORD is missing")
-            return False
+        response = resend.Emails.send(
+            {
+                "from": sender_email,
 
-        message = EmailMessage()
-        message["Subject"] = "AI Interview Assist - Password Reset OTP"
-        message["From"] = sender_email
-        message["To"] = email
+                "to": [
+                    recipient_email
+                ],
 
-        message.set_content(f"""
-Hello,
+                "subject": subject,
 
-You requested to reset your password for AI Interview Assist.
+                "html": html_content
+            }
+        )
 
-Your OTP is:
-{otp}
+        print(
+            "=========================================="
+        )
 
-This OTP is valid for 10 minutes.
+        print(
+            "✅ OTP EMAIL SENT SUCCESSFULLY"
+        )
 
-If you did not request a password reset, please ignore this email.
+        print(
+            "RESEND RESPONSE:",
+            response
+        )
 
-Regards,
-AI Interview Assist Team
-""")
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.send_message(message)
+        print(
+            "=========================================="
+        )
 
         return True
 
-    except Exception as e:
-        print("Email sending error:", e)
+    except Exception as error:
+
+        print(
+            "=========================================="
+        )
+
+        print(
+            "❌ RESEND OTP EMAIL ERROR:",
+            str(error)
+        )
+
+        print(
+            "=========================================="
+        )
+
         return False
 
 # ==========================================
