@@ -231,11 +231,7 @@ def send_otp_email(
     """
     Send Forgot Password OTP through Resend API.
     """
-
-    # ==========================================
     # RESEND CONFIGURATION
-    # ==========================================
-
     resend_api_key = os.getenv(
         "RESEND_API_KEY"
     )
@@ -244,10 +240,7 @@ def send_otp_email(
         "RESEND_FROM_EMAIL"
     )
 
-    # ==========================================
     # VALIDATION
-    # ==========================================
-
     if not resend_api_key:
         print(
             "❌ RESEND_API_KEY is missing"
@@ -272,24 +265,15 @@ def send_otp_email(
         )
         return False
 
-    # ==========================================
     # RESEND API KEY
-    # ==========================================
-
     resend.api_key = resend_api_key
 
-    # ==========================================
     # EMAIL SUBJECT
-    # ==========================================
-
     subject = (
         "AI Interview Assist - Password Reset OTP"
     )
 
-    # ==========================================
     # HTML EMAIL
-    # ==========================================
-
     html_content = f"""
     <!DOCTYPE html>
 
@@ -395,10 +379,7 @@ def send_otp_email(
     </html>
     """
 
-    # ==========================================
     # SEND EMAIL
-    # ==========================================
-
     print(
         "=========================================="
     )
@@ -532,7 +513,9 @@ def forgot_password():
             }
         )
 
+        print("🚀 FORGOT PASSWORD: Calling NEW Resend send_otp_email()")
         email_sent = send_otp_email(email, otp)
+        print("🚀 FORGOT PASSWORD: send_otp_email returned:",email_sent)
 
         if not email_sent:
             users.update_one(
