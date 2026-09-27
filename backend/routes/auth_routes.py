@@ -4,19 +4,19 @@ import uuid
 import os 
 import secrets
 import hashlib
-import smtplib
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 from google_auth_oauthlib.flow import Flow
-import database
+import database 
+import base64
 from utils.auth_utils import generate_token
+from utils.gmail_service import get_gmail_service
 
 auth_bp = Blueprint("auth", __name__)
 bcrypt = Bcrypt()
 
 # GMAIL API OAUTH CONFIGURATION
-
 GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 GMAIL_CREDENTIALS_FILE = "gmail_oauth_credentials.json"
 GMAIL_REDIRECT_URI = ("https://ai-interview-assist-backend.onrender.com" "/oauth2callback")
@@ -231,131 +231,446 @@ def login():
 # ==========================================
 # SEND PASSWORD RESET OTP EMAIL
 # ==========================================
-def send_otp_email(
-    recipient_email,
-    otp
-):
-    """
-    Send password reset OTP through Gmail API.
-    """
+def send_otp_email(recipient_email, otp):
 
-    # ==========================================
     # VALIDATION
-    # ==========================================
-
     if not recipient_email:
-        raise Exception(
-            "Recipient email is missing."
-        )
+        raise Exception("Recipient email is missing.")
 
     if not otp:
-        raise Exception(
-            "OTP is missing."
-        )
+        raise Exception("OTP is missing.")
 
-    # ==========================================
     # EMAIL DETAILS
-    # ==========================================
-
-    subject = (
-        "AI Interview Assist - Password Reset OTP"
-    )
+    subject = "AI Interview Assist - Password Reset OTP"
 
     # ==========================================
-    # EMAIL BODY
+    # PROFESSIONAL HTML EMAIL
     # ==========================================
+    html_body = f"""
+<!DOCTYPE html>
+<html>
 
-    body = f"""
-Hello,
+<head>
+    <meta charset="UTF-8">
 
-We received a request to reset your
-AI Interview Assist account password.
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-Your OTP is:
+    <title>AI Interview Assist - Password Reset</title>
+</head>
 
-{otp}
+<body
+    style="
+        margin:0;
+        padding:0;
+        background-color:#f5f3f8;
+        font-family:Arial,Helvetica,sans-serif;
+    "
+>
 
-This OTP is valid for 10 minutes.
+<table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
+    border="0"
+    style="
+        width:100%;
+        background-color:#f5f3f8;
+        padding:40px 15px;
+    "
+>
+    <tr>
+        <td align="center">
 
-Please do not share this OTP with anyone.
+            <!-- MAIN CARD -->
 
-If you did not request a password reset,
-you can safely ignore this email.
+            <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                style="
+                    max-width:560px;
+                    background-color:#ffffff;
+                    border-radius:16px;
+                    overflow:hidden;
+                "
+            >
 
-Best Regards,
-AI Interview Assist
+                <!-- HEADER -->
+
+                <tr>
+                    <td
+                        align="center"
+                        style="
+                            background-color:#4a148c;
+                            padding:32px 25px;
+                        "
+                    >
+
+                        <div
+                            style="
+                                width:60px;
+                                height:60px;
+                                line-height:60px;
+                                background-color:#ffffff;
+                                border-radius:50%;
+                                color:#4a148c;
+                                font-size:24px;
+                                font-weight:bold;
+                                margin:0 auto 15px auto;
+                            "
+                        >
+                            AI
+                        </div>
+
+                        <h1
+                            style="
+                                margin:0;
+                                color:#ffffff;
+                                font-size:24px;
+                                font-weight:700;
+                                line-height:1.3;
+                            "
+                        >
+                            AI Interview Assist
+                        </h1>
+
+                        <p
+                            style="
+                                margin:8px 0 0 0;
+                                color:#e9dff2;
+                                font-size:14px;
+                                line-height:1.5;
+                            "
+                        >
+                            Password Reset Verification
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- CONTENT -->
+
+                <tr>
+                    <td
+                        style="
+                            padding:35px;
+                        "
+                    >
+
+                        <h2
+                            style="
+                                margin:0 0 18px 0;
+                                color:#333333;
+                                font-size:22px;
+                                font-weight:700;
+                            "
+                        >
+                            Reset Your Password
+                        </h2>
+
+                        <p
+                            style="
+                                margin:0 0 15px 0;
+                                color:#555555;
+                                font-size:15px;
+                                line-height:1.7;
+                            "
+                        >
+                            Hello,
+                        </p>
+
+                        <p
+                            style="
+                                margin:0 0 22px 0;
+                                color:#555555;
+                                font-size:15px;
+                                line-height:1.7;
+                            "
+                        >
+                            We received a request to reset the password
+                            for your
+                            <strong>AI Interview Assist</strong>
+                            account.
+                        </p>
+
+                        <!-- OTP LABEL -->
+
+                        <p
+                            align="center"
+                            style="
+                                margin:0 0 10px 0;
+                                color:#666666;
+                                font-size:14px;
+                                line-height:1.5;
+                            "
+                        >
+                            Your One-Time Password (OTP) is
+                        </p>
+
+                        <!-- OTP BOX -->
+
+                        <table
+                            width="100%"
+                            cellpadding="0"
+                            cellspacing="0"
+                            border="0"
+                            style="
+                                margin:15px 0 20px 0;
+                            "
+                        >
+                            <tr>
+                                <td
+                                    align="center"
+                                    style="
+                                        background-color:#f7f1fb;
+                                        border:2px solid #e1cfee;
+                                        border-radius:12px;
+                                        padding:24px 15px;
+                                    "
+                                >
+
+                                    <div
+                                        style="
+                                            color:#4a148c;
+                                            font-size:36px;
+                                            font-weight:700;
+                                            letter-spacing:8px;
+                                            line-height:1.2;
+                                        "
+                                    >
+                                        {otp}
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- OTP EXPIRY -->
+
+                        <table
+                            width="100%"
+                            cellpadding="0"
+                            cellspacing="0"
+                            border="0"
+                            style="
+                                margin:0 0 25px 0;
+                            "
+                        >
+                            <tr>
+                                <td
+                                    align="center"
+                                    style="
+                                        background-color:#fff8e8;
+                                        border-radius:8px;
+                                        padding:13px;
+                                        color:#8a6500;
+                                        font-size:13px;
+                                        line-height:1.5;
+                                    "
+                                >
+
+                                    <strong>⏱ OTP Validity:</strong>
+
+                                    This OTP is valid for
+                                    <strong>10 minutes</strong>.
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- INSTRUCTIONS -->
+
+                        <p
+                            style="
+                                margin:0 0 15px 0;
+                                color:#555555;
+                                font-size:14px;
+                                line-height:1.7;
+                            "
+                        >
+                            Enter this OTP on the password reset
+                            page to verify your identity and
+                            continue resetting your password.
+                        </p>
+
+                        <!-- SECURITY MESSAGE -->
+
+                        <table
+                            width="100%"
+                            cellpadding="0"
+                            cellspacing="0"
+                            border="0"
+                            style="
+                                margin:20px 0 0 0;
+                            "
+                        >
+                            <tr>
+                                <td
+                                    style="
+                                        background-color:#f8f8f8;
+                                        border-left:4px solid #4a148c;
+                                        padding:14px 16px;
+                                        color:#666666;
+                                        font-size:13px;
+                                        line-height:1.7;
+                                    "
+                                >
+
+                                    <strong style="color:#333333;">
+                                        Security Reminder
+                                    </strong>
+
+                                    <br>
+
+                                    Never share this OTP with anyone.
+                                    The AI Interview Assist team will
+                                    never ask you to share your OTP.
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- UNREQUESTED RESET MESSAGE -->
+
+                        <p
+                            style="
+                                margin:22px 0 0 0;
+                                color:#777777;
+                                font-size:13px;
+                                line-height:1.7;
+                            "
+                        >
+                            If you did not request a password reset,
+                            you can safely ignore this email.
+                            Your account will remain secure.
+                        </p>
+
+                        <!-- SIGNATURE -->
+
+                        <p
+                            style="
+                                margin:28px 0 0 0;
+                                color:#555555;
+                                font-size:14px;
+                                line-height:1.6;
+                            "
+                        >
+                            Best Regards,<br>
+
+                            <strong style="color:#4a148c;">
+                                AI Interview Assist Team
+                            </strong>
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- FOOTER -->
+
+                <tr>
+                    <td
+                        align="center"
+                        style="
+                            background-color:#fafafa;
+                            border-top:1px solid #eeeeee;
+                            padding:20px 25px;
+                        "
+                    >
+
+                        <p
+                            style="
+                                margin:0 0 7px 0;
+                                color:#777777;
+                                font-size:12px;
+                                line-height:1.5;
+                            "
+                        >
+                            AI Interview Assist
+                        </p>
+
+                        <p
+                            style="
+                                margin:0;
+                                color:#999999;
+                                font-size:11px;
+                                line-height:1.5;
+                            "
+                        >
+                            This is an automated email.
+                            Please do not reply to this message.
+                        </p>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
 """
 
-    # ==========================================
-    # IMPORT GMAIL API SERVICE
-    # ==========================================
+    # CREATE HTML EMAIL
+    message = EmailMessage()
 
-    from utils.gmail_service import send_gmail_email
+    message["To"] = recipient_email
+    message["Subject"] = subject
 
-    # ==========================================
-    # SEND EMAIL
-    # ==========================================
-
-    print(
-        "=========================================="
+    # HTML ONLY
+    message.set_content(
+        html_body,
+        subtype="html"
     )
 
-    print(
-        "📧 Sending password reset OTP using Gmail API..."
-    )
-
-    print(
-        f"RECIPIENT EMAIL: {recipient_email}"
-    )
-
-    print(
-        "=========================================="
-    )
+    # GMAIL API SEND
+    print("==========================================")
+    print("📧 Sending password reset OTP using Gmail API...")
+    print(f"RECIPIENT EMAIL: {recipient_email}")
+    print("==========================================")
 
     try:
 
-        email_sent = send_gmail_email(
-            recipient_email,
-            subject,
-            body
-        )
+        gmail_service = get_gmail_service()
 
-        if not email_sent:
-
-            print(
-                "❌ Gmail API failed to send OTP email."
+        encoded_message = (
+            base64.urlsafe_b64encode(
+                message.as_bytes()
             )
-
-            return False
-
-        print(
-            "=========================================="
+            .decode()
         )
 
-        print(
-            "✅ OTP EMAIL SENT SUCCESSFULLY"
+        result = (
+            gmail_service
+            .users()
+            .messages()
+            .send(
+                userId="me",
+                body={
+                    "raw": encoded_message
+                }
+            )
+            .execute()
         )
 
-        print(
-            "=========================================="
-        )
+        print("==========================================")
+        print("✅ OTP EMAIL SENT SUCCESSFULLY")
+        print("📨 Gmail Message ID:", result.get("id"))
+        print("==========================================")
 
         return True
 
     except Exception as error:
 
-        print(
-            "=========================================="
-        )
-
-        print(
-            "❌ GMAIL API OTP ERROR:",
-            str(error)
-        )
-
-        print(
-            "=========================================="
-        )
+        print("==========================================")
+        print("❌ GMAIL API OTP ERROR:", str(error))
+        print("==========================================")
 
         return False
     
