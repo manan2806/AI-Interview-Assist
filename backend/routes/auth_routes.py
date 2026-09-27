@@ -1,19 +1,25 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify , redirect , session
 from flask_bcrypt import Bcrypt
 import uuid
 import os 
-# import resend
 import secrets
 import hashlib
 import smtplib
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 from datetime import datetime, timedelta
 from email.message import EmailMessage
+from google_auth_oauthlib.flow import Flow
 import database
 from utils.auth_utils import generate_token
 
 auth_bp = Blueprint("auth", __name__)
-
 bcrypt = Bcrypt()
+
+# GMAIL API OAUTH CONFIGURATION
+
+GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+GMAIL_CREDENTIALS_FILE = "gmail_oauth_credentials.json"
+GMAIL_REDIRECT_URI = ("https://ai-interview-assist-backend.onrender.com" "/oauth2callback")
 
 # ==========================================
 # USER REGISTER API
@@ -230,186 +236,48 @@ def send_otp_email(
     otp
 ):
     """
-    Send Forgot Password OTP through Gmail SMTP.
+    Send password reset OTP through Gmail API.
     """
-    # GMAIL SMTP CONFIGURATION
-    sender_email = os.getenv(
-        "MAIL_EMAIL"
-    )
 
-    sender_password = os.getenv(
-        "MAIL_PASSWORD"
-    )
-
-    smtp_server = os.getenv(
-        "MAIL_SERVER",
-        "smtp.gmail.com"
-    )
-
-    smtp_port = int(
-        os.getenv(
-            "MAIL_PORT",
-            "587"
-        )
-    )
-
+    # ==========================================
     # VALIDATION
-    if not sender_email:
-        print(
-            "❌ MAIL_EMAIL is missing"
-        )
-        return False
-
-    if not sender_password:
-        print(
-            "❌ MAIL_PASSWORD is missing"
-        )
-        return False
+    # ==========================================
 
     if not recipient_email:
-        print(
-            "❌ Recipient email is missing"
+        raise Exception(
+            "Recipient email is missing."
         )
-        return False
 
     if not otp:
-        print(
-            "❌ OTP is missing"
+        raise Exception(
+            "OTP is missing."
         )
-        return False
 
-    # EMAIL SUBJECT
+    # ==========================================
+    # EMAIL DETAILS
+    # ==========================================
+
     subject = (
         "AI Interview Assist - Password Reset OTP"
     )
 
-    # HTML EMAIL
-    html_content = f"""
-    <!DOCTYPE html>
+    # ==========================================
+    # EMAIL BODY
+    # ==========================================
 
-    <html>
-
-    <head>
-
-        <meta charset="UTF-8">
-
-        <title>
-            Password Reset OTP
-        </title>
-
-    </head>
-
-    <body
-        style="
-            margin:0;
-            padding:0;
-            background:#f5f5f5;
-            font-family:Arial,Helvetica,sans-serif;
-        "
-    >
-
-        <div
-            style="
-                max-width:600px;
-                margin:40px auto;
-                background:#ffffff;
-                padding:35px;
-                border-radius:12px;
-                box-sizing:border-box;
-            "
-        >
-
-            <h2
-                style="
-                    margin-top:0;
-                    color:#4a148c;
-                "
-            >
-                AI Interview Assist
-            </h2>
-
-            <p>
-                Hello,
-            </p>
-
-            <p>
-                We received a request to reset the
-                password for your AI Interview Assist
-                account.
-            </p>
-
-            <p>
-                Your One-Time Password (OTP) is:
-            </p>
-
-            <div
-                style="
-                    margin:25px 0;
-                    padding:20px;
-                    background:#f7f3fa;
-                    border-radius:10px;
-                    text-align:center;
-                "
-            >
-
-                <span
-                    style="
-                        font-size:32px;
-                        font-weight:bold;
-                        letter-spacing:8px;
-                        color:#4a148c;
-                    "
-                >
-                    {otp}
-                </span>
-
-            </div>
-
-            <p>
-                This OTP is valid for
-                <strong>10 minutes</strong>.
-            </p>
-
-            <p>
-                If you did not request a password reset,
-                you can safely ignore this email.
-            </p>
-
-            <p>
-                Best Regards,<br>
-                <strong>
-                    AI Interview Assist
-                </strong>
-            </p>
-
-        </div>
-
-    </body>
-
-    </html>
-    """
-
-    # CREATE EMAIL
-    message = EmailMessage()
-
-    message["Subject"] = subject
-
-    message["From"] = sender_email
-
-    message["To"] = recipient_email
-
-    message.set_content(
-        f"""
+    body = f"""
 Hello,
 
-We received a request to reset the password
-for your AI Interview Assist account.
+We received a request to reset your
+AI Interview Assist account password.
 
-Your One-Time Password (OTP) is:
+Your OTP is:
 
 {otp}
 
 This OTP is valid for 10 minutes.
+
+Please do not share this OTP with anyone.
 
 If you did not request a password reset,
 you can safely ignore this email.
@@ -417,37 +285,27 @@ you can safely ignore this email.
 Best Regards,
 AI Interview Assist
 """
-    )
 
-    # HTML VERSION
-    message.add_alternative(
-        html_content,
-        subtype="html"
-    )
+    # ==========================================
+    # IMPORT GMAIL API SERVICE
+    # ==========================================
 
+    from utils.gmail_service import send_gmail_email
+
+    # ==========================================
     # SEND EMAIL
+    # ==========================================
+
     print(
         "=========================================="
     )
 
     print(
-        "📧 Sending OTP email using Gmail SMTP..."
+        "📧 Sending password reset OTP using Gmail API..."
     )
 
     print(
         f"RECIPIENT EMAIL: {recipient_email}"
-    )
-
-    print(
-        f"SENDER EMAIL: {sender_email}"
-    )
-
-    print(
-        f"SMTP SERVER: {smtp_server}"
-    )
-
-    print(
-        f"SMTP PORT: {smtp_port}"
     )
 
     print(
@@ -456,25 +314,19 @@ AI Interview Assist
 
     try:
 
-        with smtplib.SMTP(
-            smtp_server,
-            smtp_port
-        ) as server:
+        email_sent = send_gmail_email(
+            recipient_email,
+            subject,
+            body
+        )
 
-            server.ehlo()
+        if not email_sent:
 
-            server.starttls()
-
-            server.ehlo()
-
-            server.login(
-                sender_email,
-                sender_password
+            print(
+                "❌ Gmail API failed to send OTP email."
             )
 
-            server.send_message(
-                message
-            )
+            return False
 
         print(
             "=========================================="
@@ -497,7 +349,7 @@ AI Interview Assist
         )
 
         print(
-            "❌ GMAIL SMTP OTP ERROR:",
+            "❌ GMAIL API OTP ERROR:",
             str(error)
         )
 
@@ -829,6 +681,184 @@ def reset_password():
 
     except Exception as e:
         print("Reset password error:", e)
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+# ==========================================
+# GMAIL OAUTH AUTHORIZATION
+# ==========================================
+
+@auth_bp.route("/gmail-authorize", methods=["GET"])
+def gmail_authorize():
+
+    try:
+
+        if not os.path.exists(
+            GMAIL_CREDENTIALS_FILE
+        ):
+            return jsonify({
+                "success": False,
+                "message": (
+                    "gmail_oauth_credentials.json "
+                    "not found"
+                )
+            }), 500
+
+        flow = Flow.from_client_secrets_file(
+            GMAIL_CREDENTIALS_FILE,
+            scopes=GMAIL_SCOPES
+        )
+
+        flow.redirect_uri = (
+            "http://localhost:5000/oauth2callback"
+        )
+
+        authorization_url, state = (
+            flow.authorization_url(
+                access_type="offline",
+                include_granted_scopes="true",
+                prompt="consent"
+            )
+        )
+
+        # Save OAuth state
+        session["gmail_oauth_state"] = state
+
+        # Save PKCE code verifier
+        session["gmail_code_verifier"] = (
+            flow.code_verifier
+        )
+
+        return redirect(
+            authorization_url
+        )
+
+    except Exception as e:
+
+        print(
+            "Gmail authorization error:",
+            str(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+# ==========================================
+# GMAIL OAUTH CALLBACK
+# ==========================================
+
+@auth_bp.route("/oauth2callback", methods=["GET"])
+def oauth2callback():
+
+    try:
+
+        if not os.path.exists(
+            GMAIL_CREDENTIALS_FILE
+        ):
+            return jsonify({
+                "success": False,
+                "message": (
+                    "gmail_oauth_credentials.json "
+                    "not found"
+                )
+            }), 500
+
+        # Get saved OAuth state
+        saved_state = session.get(
+            "gmail_oauth_state"
+        )
+
+        # Get saved PKCE verifier
+        code_verifier = session.get(
+            "gmail_code_verifier"
+        )
+
+        if not saved_state:
+            return jsonify({
+                "success": False,
+                "message": "OAuth state is missing"
+            }), 400
+
+        if not code_verifier:
+            return jsonify({
+                "success": False,
+                "message": "OAuth code verifier is missing"
+            }), 400
+
+        flow = Flow.from_client_secrets_file(
+            GMAIL_CREDENTIALS_FILE,
+            scopes=GMAIL_SCOPES,
+            state=saved_state
+        )
+
+        flow.redirect_uri = (
+            "http://localhost:5000/oauth2callback"
+        )
+
+        # Restore PKCE verifier
+        flow.code_verifier = code_verifier
+
+        authorization_response = request.url
+
+        flow.fetch_token(
+            authorization_response=authorization_response
+        )
+
+        credentials = flow.credentials
+
+        # Save Gmail token
+        with open(
+            "gmail_token.json",
+            "w"
+        ) as token_file:
+
+            token_file.write(
+                credentials.to_json()
+            )
+
+        # Remove temporary OAuth session data
+        session.pop(
+            "gmail_oauth_state",
+            None
+        )
+
+        session.pop(
+            "gmail_code_verifier",
+            None
+        )
+
+        print(
+            "=========================================="
+        )
+
+        print(
+            "✅ GMAIL OAUTH AUTHORIZATION SUCCESSFUL"
+        )
+
+        print(
+            "✅ gmail_token.json CREATED"
+        )
+
+        print(
+            "=========================================="
+        )
+
+        return """
+        <h2>Gmail Authorization Successful ✅</h2>
+        <p>You can close this browser window.</p>
+        """
+
+    except Exception as e:
+
+        print(
+            "Gmail OAuth callback error:",
+            str(e)
+        )
 
         return jsonify({
             "success": False,

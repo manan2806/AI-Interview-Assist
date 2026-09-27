@@ -1,7 +1,7 @@
 import os
-import smtplib
-
+import base64
 from email.message import EmailMessage
+from utils.gmail_service import get_gmail_service
 
 
 def send_interview_report_email(
@@ -11,40 +11,12 @@ def send_interview_report_email(
     job_role
 ):
     """
-    Send interview report PDF through Gmail SMTP.
+    Send interview report PDF through Gmail API.
     """
 
-    # GMAIL SMTP CONFIGURATION
-    sender_email = os.getenv(
-        "MAIL_EMAIL"
-    )
-
-    sender_password = os.getenv(
-        "MAIL_PASSWORD"
-    )
-
-    smtp_server = os.getenv(
-        "MAIL_SERVER",
-        "smtp.gmail.com"
-    )
-
-    smtp_port = int(
-        os.getenv(
-            "MAIL_PORT",
-            "587"
-        )
-    )
-
+    # ==========================================
     # VALIDATION
-    if not sender_email:
-        raise Exception(
-            "MAIL_EMAIL is not configured."
-        )
-
-    if not sender_password:
-        raise Exception(
-            "MAIL_PASSWORD is not configured."
-        )
+    # ==========================================
 
     if not recipient_email:
         raise Exception(
@@ -61,7 +33,10 @@ def send_interview_report_email(
             "PDF file was not found."
         )
 
+    # ==========================================
     # EMAIL DETAILS
+    # ==========================================
+
     name = recipient_name or "Candidate"
 
     subject = (
@@ -71,6 +46,7 @@ def send_interview_report_email(
     # ==========================================
     # HTML EMAIL
     # ==========================================
+
     html_content = f"""
 <!DOCTYPE html>
 
@@ -163,53 +139,29 @@ def send_interview_report_email(
 
         <ul>
 
-            <li>
-                Interview details
-            </li>
+            <li>Interview details</li>
 
-            <li>
-                Overall score
-            </li>
+            <li>Overall score</li>
 
-            <li>
-                Performance level
-            </li>
+            <li>Performance level</li>
 
-            <li>
-                AI analysis
-            </li>
+            <li>AI analysis</li>
 
-            <li>
-                Strengths
-            </li>
+            <li>Strengths</li>
 
-            <li>
-                Weaknesses
-            </li>
+            <li>Weaknesses</li>
 
-            <li>
-                Recommendations
-            </li>
+            <li>Recommendations</li>
 
-            <li>
-                Technical skill assessment
-            </li>
+            <li>Technical skill assessment</li>
 
-            <li>
-                Readiness assessment
-            </li>
+            <li>Readiness assessment</li>
 
-            <li>
-                Question-wise performance
-            </li>
+            <li>Question-wise performance</li>
 
-            <li>
-                Answer evaluation
-            </li>
+            <li>Answer evaluation</li>
 
-            <li>
-                AI feedback
-            </li>
+            <li>AI feedback</li>
 
         </ul>
 
@@ -243,13 +195,14 @@ def send_interview_report_email(
 
     message = EmailMessage()
 
-    message["Subject"] = subject
-
-    message["From"] = sender_email
-
     message["To"] = recipient_email
 
+    message["Subject"] = subject
+
+    # ==========================================
     # PLAIN TEXT VERSION
+    # ==========================================
+
     message.set_content(
         f"""
 Hello {name},
@@ -284,13 +237,19 @@ AI Interview Assist
 """
     )
 
+    # ==========================================
     # HTML VERSION
+    # ==========================================
+
     message.add_alternative(
         html_content,
         subtype="html"
     )
 
+    # ==========================================
     # ATTACH PDF
+    # ==========================================
+
     try:
 
         with open(
@@ -318,21 +277,20 @@ AI Interview Assist
             f"Unable to attach PDF: {str(error)}"
         )
 
-    # SEND EMAIL
+    # ==========================================
+    # GMAIL API SEND
+    # ==========================================
+
     print(
         "=========================================="
     )
 
     print(
-        "📧 Sending interview report using Gmail SMTP..."
+        "📧 Sending interview report using Gmail API..."
     )
 
     print(
         f"RECIPIENT EMAIL: {recipient_email}"
-    )
-
-    print(
-        f"SENDER EMAIL: {sender_email}"
     )
 
     print(
@@ -344,38 +302,35 @@ AI Interview Assist
     )
 
     print(
-        f"SMTP SERVER: {smtp_server}"
-    )
-
-    print(
-        f"SMTP PORT: {smtp_port}"
-    )
-
-    print(
         "=========================================="
     )
 
     try:
 
-        with smtplib.SMTP(
-            smtp_server,
-            smtp_port
-        ) as server:
+        # Get Gmail API service
+        gmail_service = get_gmail_service()
 
-            server.ehlo()
-
-            server.starttls()
-
-            server.ehlo()
-
-            server.login(
-                sender_email,
-                sender_password
+        # Convert email to Gmail API format
+        encoded_message = (
+            base64.urlsafe_b64encode(
+                message.as_bytes()
             )
+            .decode()
+        )
 
-            server.send_message(
-                message
+        # Send email
+        result = (
+            gmail_service
+            .users()
+            .messages()
+            .send(
+                userId="me",
+                body={
+                    "raw": encoded_message
+                }
             )
+            .execute()
+        )
 
         print(
             "=========================================="
@@ -383,6 +338,11 @@ AI Interview Assist
 
         print(
             "✅ INTERVIEW REPORT EMAIL SENT SUCCESSFULLY"
+        )
+
+        print(
+            "📨 Gmail Message ID:",
+            result.get("id")
         )
 
         print(
@@ -398,7 +358,7 @@ AI Interview Assist
         )
 
         print(
-            "❌ GMAIL SMTP REPORT ERROR:",
+            "❌ GMAIL API REPORT ERROR:",
             str(error)
         )
 
@@ -407,5 +367,5 @@ AI Interview Assist
         )
 
         raise Exception(
-            f"Gmail SMTP email sending failed: {str(error)}"
+            f"Gmail API email sending failed: {str(error)}"
         )

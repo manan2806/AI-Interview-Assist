@@ -3,6 +3,8 @@
 # =========================
 
 backend/.env
+backend/gmail_oauth_credentials.json
+backend/gmail_token.json
 backend/venv/
 backend/.venv/
 backend/__pycache__/
