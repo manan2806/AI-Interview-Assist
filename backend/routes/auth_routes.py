@@ -381,10 +381,6 @@ def send_otp_email(
 
     # SEND EMAIL
     print(
-        "=========================================="
-    )
-
-    print(
         "📧 Sending OTP email using Resend API..."
     )
 
@@ -394,10 +390,6 @@ def send_otp_email(
 
     print(
         f"SENDER EMAIL: {sender_email}"
-    )
-
-    print(
-        "=========================================="
     )
 
     try:
@@ -417,10 +409,6 @@ def send_otp_email(
         )
 
         print(
-            "=========================================="
-        )
-
-        print(
             "✅ OTP EMAIL SENT SUCCESSFULLY"
         )
 
@@ -429,27 +417,14 @@ def send_otp_email(
             response
         )
 
-        print(
-            "=========================================="
-        )
-
         return True
 
     except Exception as error:
 
         print(
-            "=========================================="
-        )
-
-        print(
             "❌ RESEND OTP EMAIL ERROR:",
             str(error)
         )
-
-        print(
-            "=========================================="
-        )
-
         return False
 
 # ==========================================
