@@ -1,0 +1,38 @@
+FIELD                    | COMMON ROLES                              | INTERVIEW TOPICS
+---------------------------------------------------------------------------------------------------------
+Digital Marketing       | Digital Marketing Executive, Specialist  | SEO, Ads, Social Media, Campaigns
+SEO                      | SEO Executive, SEO Specialist             | Keywords, On-Page/Off-Page SEO, Google Search
+Performance Marketing   | Google Ads Specialist, Meta Ads Specialist| CPC, CTR, ROAS, Campaign Optimization
+Social Media             | Social Media Executive, Manager           | Content Ideas, Instagram Strategy, Analytics
+Content                  | Content Writer, Copywriter                | Writing, Grammar, Creativity, Copywriting
+Graphic Design           | Graphic Designer, Creative Executive      | Design Skills, Canva, Photoshop, Portfolio
+Sales                    | Sales Executive, Sales Representative     | Communication, Convincing, Targets, Objections
+Business Development     | BDE, BDM                                  | Lead Generation, Client Handling, Negotiation
+HR                       | HR Executive, Recruiter                  | Recruitment, Communication, HR Basics
+Finance / Accounts       | Accountant, Finance Executive             | Tally, GST, Excel, Accounting
+IT / Software            | Developer, QA, IT Support                 | Technical Skills, Coding, Projects, Practical Test
+Data / Analytics         | Data Analyst, Business Analyst            | Excel, SQL, Power BI, Dashboards
+E-Commerce               | E-commerce Executive, Marketplace Manager | Product Listing, Orders, Inventory, Ads
+Operations               | Operations Executive, Coordinator         | Process Management, Excel, Problem Solving
+Customer Support        | Customer Support Executive                | Communication, Customer Handling, Complaints
+Telecalling / Inside Sales| Telecaller, Inside Sales Executive      | Communication, Objection Handling, Sales
+Banking                  | Relationship Manager, Sales Officer       | Banking Basics, Sales, Customer Handling
+Hospitality              | Front Office, Guest Relations             | Communication, Customer Service, Guest Handling
+Healthcare Admin         | Hospital Coordinator, Front Desk          | Patient Handling, Coordination, Appointments
+Logistics / Supply Chain | Logistics Executive, Supply Chain Exec.  | Dispatch, Inventory, Orders, Coordination
+Pharma                   | Medical Representative, Pharma Sales      | Product Knowledge, Sales, Communication
+Real Estate              | Property Sales Executive, CRM Executive   | Lead Conversion, Client Handling, Negotiation
+Education                | Academic Counselor, Admission Counselor   | Counseling, Communication, Sales
+Media / Video            | Video Editor, Content Creator             | Editing, Creativity, Portfolio, Practical Task
+Freelancing              | SEO, Design, Content, Ads, Video Editing  | Portfolio, Skills, Pricing, Client Discussion
+
+
+
+Common Interview Rounds: 
+
+ROUND              | WHAT THEY CHECK
+---------------------------------------------------------
+HR Round            | Introduction, Education, Salary, Availability
+Technical Round     | Role-related Knowledge and Skills
+Practical Test      | Real-world Task / Assignment
+Manager Round       | Communication, Problem Solving, Role Understanding
