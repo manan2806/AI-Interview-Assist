@@ -5353,6 +5353,7 @@ html {
   display: flex;
   align-items: center;
   gap: 15px;
+  min-width: 0;
 }
 
 .history-role-icon {
@@ -5364,19 +5365,13 @@ html {
   align-items: center;
   justify-content: center;
   font-size: 23px;
+  flex-shrink: 0;
 }
 
-.history-interview-id {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #777;
-  word-break: break-all;
-}
-
-.history-interview-id span {
-  font-family: monospace;
-  color: #555;
-  font-weight: 600;
+/* Job role + interview type */
+.history-role-info {
+  min-width: 0;
+  flex: 1;
 }
 
 .history-role h2 {
@@ -5389,6 +5384,31 @@ html {
   margin: 0;
   color: #7b8494;
   font-size: 14px;
+}
+
+/* Interview ID - Right Side */
+.history-interview-id {
+  margin-left: auto;
+  text-align: right;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.history-interview-id span {
+  font-size: 11px;
+  color: #777;
+  font-weight: 500;
+}
+
+.history-interview-id strong {
+  font-family: monospace;
+  color: #555;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .history-score {

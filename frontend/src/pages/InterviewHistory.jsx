@@ -477,13 +477,11 @@ function InterviewHistory() {
                                 >
                                     {/* TOP */}
                                     <div className="history-role">
-
                                         <div className="history-role-icon">
                                             💼
                                         </div>
 
-                                        <div>
-
+                                        <div className="history-role-info">
                                             <h2>
                                                 {interview.job_role || "Unknown Role"}
                                             </h2>
@@ -491,16 +489,17 @@ function InterviewHistory() {
                                             <p>
                                                 {interview.interview_type || "Interview"}
                                             </p>
-
-                                            <p className="history-interview-id">
-                                                Interview ID:{" "}
-                                                <span>
-                                                    {interview.interview_code || "N/A"}
-                                                </span>
-                                            </p>
-
                                         </div>
 
+                                        <div className="history-interview-id">
+                                            <span>
+                                                Interview ID =
+                                            </span>
+
+                                            <strong>
+                                                {interview.interview_code || "N/A"}
+                                            </strong>
+                                        </div>
                                     </div>
 
                                     {/* DETAILS */}
