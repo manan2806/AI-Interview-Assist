@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
 from flask_bcrypt import Bcrypt
 import uuid
-import os , resend
+import os 
+# import resend
 import secrets
 import hashlib
-# import smtplib
+import smtplib
 from datetime import datetime, timedelta
-# from email.message import EmailMessage
+from email.message import EmailMessage
 import database
 from utils.auth_utils import generate_token
 
@@ -229,27 +230,39 @@ def send_otp_email(
     otp
 ):
     """
-    Send Forgot Password OTP through Resend API.
+    Send Forgot Password OTP through Gmail SMTP.
     """
-    # RESEND CONFIGURATION
-    resend_api_key = os.getenv(
-        "RESEND_API_KEY"
+    # GMAIL SMTP CONFIGURATION
+    sender_email = os.getenv(
+        "MAIL_EMAIL"
     )
 
-    sender_email = os.getenv(
-        "RESEND_FROM_EMAIL"
+    sender_password = os.getenv(
+        "MAIL_PASSWORD"
+    )
+
+    smtp_server = os.getenv(
+        "MAIL_SERVER",
+        "smtp.gmail.com"
+    )
+
+    smtp_port = int(
+        os.getenv(
+            "MAIL_PORT",
+            "587"
+        )
     )
 
     # VALIDATION
-    if not resend_api_key:
+    if not sender_email:
         print(
-            "❌ RESEND_API_KEY is missing"
+            "❌ MAIL_EMAIL is missing"
         )
         return False
 
-    if not sender_email:
+    if not sender_password:
         print(
-            "❌ RESEND_FROM_EMAIL is missing"
+            "❌ MAIL_PASSWORD is missing"
         )
         return False
 
@@ -264,9 +277,6 @@ def send_otp_email(
             "❌ OTP is missing"
         )
         return False
-
-    # RESEND API KEY
-    resend.api_key = resend_api_key
 
     # EMAIL SUBJECT
     subject = (
@@ -379,9 +389,49 @@ def send_otp_email(
     </html>
     """
 
+    # CREATE EMAIL
+    message = EmailMessage()
+
+    message["Subject"] = subject
+
+    message["From"] = sender_email
+
+    message["To"] = recipient_email
+
+    message.set_content(
+        f"""
+Hello,
+
+We received a request to reset the password
+for your AI Interview Assist account.
+
+Your One-Time Password (OTP) is:
+
+{otp}
+
+This OTP is valid for 10 minutes.
+
+If you did not request a password reset,
+you can safely ignore this email.
+
+Best Regards,
+AI Interview Assist
+"""
+    )
+
+    # HTML VERSION
+    message.add_alternative(
+        html_content,
+        subtype="html"
+    )
+
     # SEND EMAIL
     print(
-        "📧 Sending OTP email using Resend API..."
+        "=========================================="
+    )
+
+    print(
+        "📧 Sending OTP email using Gmail SMTP..."
     )
 
     print(
@@ -392,20 +442,42 @@ def send_otp_email(
         f"SENDER EMAIL: {sender_email}"
     )
 
+    print(
+        f"SMTP SERVER: {smtp_server}"
+    )
+
+    print(
+        f"SMTP PORT: {smtp_port}"
+    )
+
+    print(
+        "=========================================="
+    )
+
     try:
 
-        response = resend.Emails.send(
-            {
-                "from": sender_email,
+        with smtplib.SMTP(
+            smtp_server,
+            smtp_port
+        ) as server:
 
-                "to": [
-                    recipient_email
-                ],
+            server.ehlo()
 
-                "subject": subject,
+            server.starttls()
 
-                "html": html_content
-            }
+            server.ehlo()
+
+            server.login(
+                sender_email,
+                sender_password
+            )
+
+            server.send_message(
+                message
+            )
+
+        print(
+            "=========================================="
         )
 
         print(
@@ -413,8 +485,7 @@ def send_otp_email(
         )
 
         print(
-            "RESEND RESPONSE:",
-            response
+            "=========================================="
         )
 
         return True
@@ -422,11 +493,20 @@ def send_otp_email(
     except Exception as error:
 
         print(
-            "❌ RESEND OTP EMAIL ERROR:",
+            "=========================================="
+        )
+
+        print(
+            "❌ GMAIL SMTP OTP ERROR:",
             str(error)
         )
-        return False
 
+        print(
+            "=========================================="
+        )
+
+        return False
+    
 # ==========================================
 # FORGOT PASSWORD API
 # ==========================================
