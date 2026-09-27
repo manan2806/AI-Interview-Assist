@@ -568,7 +568,7 @@ def forgot_password():
             }
         )
 
-        print("🚀 FORGOT PASSWORD: Calling NEW Resend send_otp_email()")
+        print("🚀 FORGOT PASSWORD: Calling Gmail SMTP send_otp_email()")
         email_sent = send_otp_email(email, otp)
         print("🚀 FORGOT PASSWORD: send_otp_email returned:",email_sent)
 
