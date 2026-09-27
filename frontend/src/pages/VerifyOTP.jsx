@@ -229,7 +229,7 @@ function VerifyOTP() {
                     <div className="form-group">
 
                         <label htmlFor="otp">
-                            OTP
+                            OTP :
                         </label>
 
                         <input
