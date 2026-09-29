@@ -36,10 +36,7 @@ html {
 }
 
 
-/* =========================================================
-   NAVBAR
-========================================================= */
-
+/* NAVBAR */
 .home-navbar {
   height: 72px;
   padding: 0 7%;
@@ -59,7 +56,6 @@ html {
 
 
 /* LOGO */
-
 .home-logo {
   display: flex;
   align-items: center;
@@ -96,7 +92,6 @@ html {
 
 
 /* NAVIGATION */
-
 .home-nav-links {
   display: flex;
   align-items: center;
@@ -122,7 +117,6 @@ html {
 
 
 /* REGISTER BUTTON */
-
 .home-nav-links .home-register-btn {
   padding: 11px 21px;
 
@@ -150,7 +144,6 @@ html {
 
 
 /* MOBILE MENU BUTTON */
-
 .home-menu-btn {
   display: none;
 
@@ -185,10 +178,7 @@ html {
 }
 
 
-/* =========================================================
-   HERO SECTION
-========================================================= */
-
+/* HERO SECTION */
 .home-hero {
   min-height: calc(100vh - 72px);
 
@@ -224,7 +214,6 @@ html {
 
 
 /* HERO TEXT */
-
 .hero-text {
   max-width: 680px;
 }
@@ -261,7 +250,6 @@ html {
 
 
 /* HERO BUTTONS */
-
 .hero-buttons {
   display: flex;
   align-items: center;
@@ -326,10 +314,7 @@ html {
 }
 
 
-/* =========================================================
-   HERO CARD
-========================================================= */
-
+/* HERO CARD */
 .hero-card {
   min-height: 350px;
 
@@ -438,10 +423,7 @@ html {
 }
 
 
-/* =========================================================
-   COMMON SECTION
-========================================================= */
-
+/* COMMON SECTION */
 .home-about,
 .home-contact {
   padding: 95px 7%;
@@ -457,7 +439,6 @@ html {
 
 
 /* SECTION HEADING */
-
 .section-heading {
   max-width: 850px;
 
@@ -491,10 +472,7 @@ html {
 }
 
 
-/* =========================================================
-   FEATURE CONTAINER
-========================================================= */
-
+/* FEATURE CONTAINER */
 .feature-container {
   width: 100%;
   max-width: 1200px;
@@ -510,10 +488,7 @@ html {
 }
 
 
-/* =========================================================
-   FEATURE CARD
-========================================================= */
-
+/* FEATURE CARD */
 .feature-card {
   padding: 32px 27px;
 
@@ -549,7 +524,6 @@ html {
 
 
 /* FEATURE ICON */
-
 .feature-icon {
   width: 58px;
   height: 58px;
@@ -591,10 +565,7 @@ html {
 }
 
 
-/* =========================================================
-   HOW IT WORKS NUMBER ICON
-========================================================= */
-
+/* HOW IT WORKS NUMBER ICON */
 #how-it-works .feature-icon {
   border-radius: 50%;
 
@@ -609,28 +580,19 @@ html {
 }
 
 
-/* =========================================================
-   INTERVIEW TYPES
-========================================================= */
-
+/* INTERVIEW TYPES */
 .home-about:nth-of-type(even) {
   background: #faf9fc;
 }
 
 
-/* =========================================================
-   FAQ
-========================================================= */
-
+/* FAQ */
 .home-about .feature-card h3 {
   color: #333;
 }
 
 
-/* =========================================================
-   CONTACT SECTION
-========================================================= */
-
+/* CONTACT SECTION */
 .contact-content {
   width: 100%;
   max-width: 900px;
@@ -671,7 +633,6 @@ html {
 
 
 /* CONTACT DETAILS */
-
 .contact-details {
   display: grid;
 
@@ -753,10 +714,7 @@ html {
 }
 
 
-/* =========================================================
-   FOOTER
-========================================================= */
-
+/* FOOTER */
 .home-footer {
   padding: 45px 7%;
 
@@ -792,7 +750,6 @@ html {
 
 
 /* FOOTER LINKS */
-
 .footer-links {
   display: flex;
 
@@ -822,10 +779,7 @@ html {
 }
 
 
-/* =========================================================
-   TABLET
-========================================================= */
-
+/* TABLET */
 @media (max-width: 1000px) {
 
   .home-navbar {
@@ -868,10 +822,7 @@ html {
 }
 
 
-/* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
-
+/* MOBILE NAVIGATION */
 @media (max-width: 768px) {
 
   .home-navbar {
@@ -895,14 +846,12 @@ html {
 
 
   /* SHOW HAMBURGER */
-
   .home-menu-btn {
     display: flex;
   }
 
 
   /* MOBILE NAV */
-
   .home-nav-links {
     position: absolute;
 
@@ -960,7 +909,6 @@ html {
 
 
   /* HERO */
-
   .home-hero {
     min-height: auto;
 
@@ -1007,7 +955,6 @@ html {
 
 
   /* SECTIONS */
-
   .home-about,
   .home-contact {
     padding: 70px 5%;
@@ -1040,7 +987,6 @@ html {
 
 
   /* CONTACT */
-
   .contact-info {
     padding: 28px 22px;
   }
@@ -1051,7 +997,6 @@ html {
 
 
   /* FOOTER */
-
   .home-footer {
     padding: 40px 5%;
 
@@ -1072,10 +1017,7 @@ html {
 }
 
 
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
+/* SMALL MOBILE */
 @media (max-width: 480px) {
 
   .home-navbar {
@@ -1103,7 +1045,6 @@ html {
 
 
   /* HERO */
-
   .home-hero {
     padding: 55px 4% 65px;
   }
@@ -1154,7 +1095,6 @@ html {
 
 
   /* SECTIONS */
-
   .home-about,
   .home-contact {
     padding: 60px 4%;
@@ -1170,7 +1110,6 @@ html {
 
 
   /* CARDS */
-
   .feature-card {
     padding: 25px 20px;
   }
@@ -1185,7 +1124,6 @@ html {
 
 
   /* CONTACT */
-
   .contact-info {
     padding: 25px 18px;
   }
@@ -1200,7 +1138,6 @@ html {
 
 
   /* FOOTER */
-
   .home-footer {
     padding: 35px 4%;
   }
@@ -1219,10 +1156,7 @@ html {
 }
 
 
-/* =========================================================
-   EXTRA SMALL DEVICES
-========================================================= */
-
+/* EXTRA SMALL DEVICES */
 @media (max-width: 360px) {
 
   .home-logo {
@@ -1247,29 +1181,24 @@ html {
 }
 
 /* ==========================================
-   AUTH PAGE
+   AUTH PAGE - LOGIN + REGISTER
 ========================================== */
 
 .auth-page {
   min-height: 100vh;
   display: flex;
+  background: #f8f7fc;
 }
 
 /* LEFT SECTION */
 .auth-left {
   width: 50%;
   min-height: 100vh;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
-
   padding: 60px;
-
-  background: linear-gradient(135deg,
-      #111827,
-      #1e3a8a);
-
+  background: linear-gradient(135deg, #2e0759, #4a148c, #7b1fa2);
   color: white;
 }
 
@@ -1278,124 +1207,149 @@ html {
   margin: 0 auto;
 }
 
+/* BRAND ICON */
 .brand-icon {
-  width: 65px;
-  height: 65px;
-
+  width: 68px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  border-radius: 16px;
-
-  background: rgba(255, 255, 255, 0.15);
-
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   font-size: 22px;
-  font-weight: bold;
-
+  font-weight: 700;
   margin-bottom: 25px;
+  backdrop-filter: blur(8px);
 }
 
+/* BRAND TITLE */
 .brand h1 {
   font-size: 42px;
   line-height: 1.15;
-  margin-bottom: 20px;
+  margin: 0 0 20px;
+  font-weight: 700;
 }
 
 .brand>p {
   font-size: 17px;
   line-height: 1.7;
-  color: #dbeafe;
+  color: #ede9fe;
+  margin: 0;
 }
 
 /* FEATURES */
 .feature-list {
   max-width: 520px;
-  margin: 50px auto 0;
+  margin: 45px auto 0;
   width: 100%;
 }
 
 .feature {
   display: flex;
   gap: 15px;
-
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 
 .feature>span {
-  width: 28px;
-  height: 28px;
-
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   background: rgba(255, 255, 255, 0.15);
-
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .feature strong {
   display: block;
   margin-bottom: 5px;
+  font-size: 15px;
 }
 
 .feature p {
-  color: #bfdbfe;
+  margin: 0;
+  color: #ddd6fe;
   font-size: 14px;
+  line-height: 1.5;
 }
 
 /* RIGHT SECTION */
 .auth-right {
   width: 50%;
   min-height: 100vh;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 40px;
+  background: #f8f7fc;
 }
 
 /* AUTH CARD */
 .auth-card {
   width: 100%;
   max-width: 450px;
-
-  background: white;
-
+  background: #ffffff;
   padding: 40px;
-
-  border-radius: 18px;
-
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  border: 1px solid #eee7f5;
+  box-shadow: 0 20px 50px rgba(74, 20, 140, 0.08);
+  animation: authCardFade 0.4s ease;
 }
 
 .register-card {
   max-width: 480px;
 }
 
-/* HEADER */
+@keyframes authCardFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* AUTH HEADER */
 .auth-header {
   text-align: center;
   margin-bottom: 30px;
 }
 
 .auth-header h2 {
+  margin: 0 0 10px;
+  color: #222;
   font-size: 30px;
-  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .auth-header p {
+  margin: 0;
   color: #6b7280;
   font-size: 14px;
+  line-height: 1.5;
 }
 
+/* MOBILE LOGO */
 .mobile-logo {
   display: none;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #4a148c, #7b1fa2);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(74, 20, 140, 0.20);
 }
 
 /* FORM */
@@ -1405,141 +1359,176 @@ html {
 
 .form-group label {
   display: block;
-
+  margin-bottom: 8px;
+  color: #374151;
   font-size: 14px;
   font-weight: 600;
-
-  margin-bottom: 8px;
 }
 
 .form-group input {
   width: 100%;
-
+  box-sizing: border-box;
   padding: 13px 14px;
-
-  border: 1px solid #d1d5db;
-
-  border-radius: 9px;
-
+  border: 1px solid #d8d3df;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #222;
   font-size: 14px;
-
   outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
 
-  transition: 0.2s;
+.form-group input:hover {
+  border-color: #b9a8c7;
 }
 
 .form-group input:focus {
-  border-color: #2563eb;
-
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #7b1fa2;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(123, 31, 162, 0.10);
 }
 
 .form-group input::placeholder {
   color: #9ca3af;
 }
 
-/* FORGOT PASSWORD */
-.forgot-password {
-  text-align: right;
-
-  margin-bottom: 22px;
-
-  font-size: 13px;
-
-  color: #2563eb;
-
-  cursor: pointer;
-}
-
-/* BUTTON */
-.auth-button {
-  width: 100%;
-
-  padding: 14px;
-
-  border: none;
-
-  border-radius: 9px;
-
-  background: #2563eb;
-
-  color: white;
-
-  font-size: 15px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: 0.2s;
-}
-
-.auth-button:hover {
-  background: #1d4ed8;
-}
-
-.auth-button:disabled {
-  background: #93c5fd;
+.form-group input:disabled {
+  background: #f3f4f6;
   cursor: not-allowed;
 }
 
-/* ERROR / SUCCESS */
+/* PASSWORD INPUT */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  padding-right: 70px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #4a148c;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: 0.2s ease;
+}
+
+.password-toggle:hover {
+  background: #f3e8ff;
+  color: #351064;
+}
+
+.password-toggle:disabled {
+  cursor: not-allowed;
+}
+
+/* FORGOT PASSWORD */
+.forgot-password {
+  text-align: right;
+  margin-bottom: 22px;
+  font-size: 13px;
+  color: #4a148c;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #351064;
+  text-decoration: underline;
+}
+
+/* AUTH BUTTON */
+.auth-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4a148c, #6a1b9a);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.auth-button:hover {
+  background: linear-gradient(135deg, #351064, #4a148c);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(74, 20, 140, 0.20);
+}
+
+.auth-button:active {
+  transform: translateY(0);
+}
+
+.auth-button:disabled {
+  background: #b9a8c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ERROR MESSAGE */
 .error-message {
   background: #fef2f2;
-
   color: #dc2626;
-
   border: 1px solid #fecaca;
-
   padding: 11px 13px;
-
   border-radius: 8px;
-
   font-size: 13px;
-
+  line-height: 1.5;
   margin-bottom: 20px;
 }
 
+/* SUCCESS MESSAGE */
 .success-message {
   background: #f0fdf4;
-
   color: #16a34a;
-
   border: 1px solid #bbf7d0;
-
   padding: 11px 13px;
-
   border-radius: 8px;
-
   font-size: 13px;
-
+  line-height: 1.5;
   margin-bottom: 20px;
 }
 
-/* FOOTER */
+/* AUTH FOOTER */
 .auth-footer {
   display: flex;
-
   justify-content: center;
-
+  align-items: center;
   gap: 5px;
-
   margin-top: 25px;
-
   font-size: 14px;
-
   color: #6b7280;
 }
 
 .auth-footer a {
-  color: #2563eb;
-
+  color: #4a148c;
   text-decoration: none;
-
   font-weight: 600;
+  transition: 0.2s ease;
 }
 
 .auth-footer a:hover {
+  color: #351064;
   text-decoration: underline;
 }
 
@@ -1554,7 +1543,7 @@ html {
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  transition: color 0.3s ease;
+  transition: 0.2s ease;
 }
 
 .auth-home-link:hover {
@@ -1562,8 +1551,28 @@ html {
   text-decoration: underline;
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE - TABLET */
+@media (max-width: 1100px) {
+  .auth-left {
+    padding: 45px;
+  }
+
+  .brand h1 {
+    font-size: 36px;
+  }
+
+  .auth-right {
+    padding: 30px;
+  }
+}
+
+/* RESPONSIVE - MOBILE */
 @media (max-width: 900px) {
+  .auth-page {
+    min-height: 100vh;
+    display: block;
+    background: #f8f7fc;
+  }
 
   .auth-left {
     display: none;
@@ -1571,31 +1580,76 @@ html {
 
   .auth-right {
     width: 100%;
+    min-height: 100vh;
     padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .auth-card {
+    max-width: 450px;
     padding: 30px 25px;
+    border-radius: 18px;
+  }
+
+  .register-card {
+    max-width: 480px;
   }
 
   .mobile-logo {
     display: flex;
+  }
 
-    width: 55px;
-    height: 55px;
+  .auth-header {
+    margin-bottom: 25px;
+  }
 
-    margin: 0 auto 15px;
+  .auth-header h2 {
+    font-size: 27px;
+  }
+}
 
-    align-items: center;
-    justify-content: center;
+/* SMALL MOBILE */
+@media (max-width: 480px) {
+  .auth-right {
+    padding: 15px;
+  }
 
-    border-radius: 14px;
+  .auth-card {
+    padding: 25px 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(74, 20, 140, 0.07);
+  }
 
-    background: #2563eb;
+  .auth-header h2 {
+    font-size: 25px;
+  }
 
-    color: white;
+  .auth-header p {
+    font-size: 13px;
+  }
 
-    font-weight: bold;
+  .form-group {
+    margin-bottom: 17px;
+  }
+
+  .form-group input {
+    padding: 12px 13px;
+  }
+
+  .auth-button {
+    padding: 13px;
+  }
+
+  .auth-footer {
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+
+  .auth-home-link {
+    font-size: 13px;
   }
 }
 

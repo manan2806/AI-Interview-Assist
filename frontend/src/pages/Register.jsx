@@ -1,10 +1,10 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import { registerUser } from "../services/authService";
 import AuthLayout from "../components/AuthLayout";
 
 function Register() {
-
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
@@ -12,26 +12,42 @@ function Register() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const [loading, setLoading] = useState(false);
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
     const handleRegister = async (e) => {
-
         e.preventDefault();
 
         setError("");
         setSuccess("");
 
-        if (!name || !email || !password || !confirmPassword) {
-            setError("Please fill all fields.");
+        if (!name.trim()) {
+            setError("Please enter your full name.");
+            return;
+        }
+
+        if (!email.trim()) {
+            setError("Please enter your email address.");
+            return;
+        }
+
+        if (!password) {
+            setError("Please enter a password.");
             return;
         }
 
         if (password.length < 6) {
-            setError(
-                "Password must be at least 6 characters."
-            );
+            setError("Password must be at least 6 characters.");
+            return;
+        }
+
+        if (!confirmPassword) {
+            setError("Please confirm your password.");
             return;
         }
 
@@ -41,66 +57,56 @@ function Register() {
         }
 
         try {
-
             setLoading(true);
 
             const data = await registerUser({
-                name,
-                email,
-                password
+                name: name.trim(),
+                email: email.trim(),
+                password: password
             });
 
             if (data.success) {
-
                 setSuccess(
-                    data.message ||
-                    "Registration successful."
+                    data.message || "Account created successfully."
                 );
+
+                setName("");
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
 
                 setTimeout(() => {
                     navigate("/login");
                 }, 1200);
-
             } else {
-
                 setError(
-                    data.message ||
-                    "Registration failed."
+                    data.message || "Unable to create account."
                 );
             }
-
         } catch (error) {
-
             console.error("Register Error:", error);
 
             setError(
                 error.response?.data?.message ||
                 "Unable to create account. Please try again."
             );
-
         } finally {
-
             setLoading(false);
         }
     };
 
     return (
         <AuthLayout>
-
             <div className="auth-card register-card">
+                <div className="mobile-logo">
+                    AI
+                </div>
 
                 <div className="auth-header">
-
-                    <div className="mobile-logo">
-                        AI
-                    </div>
-
                     <h2>Create Account</h2>
-
                     <p>
-                        Start your AI interview preparation journey
+                        Start your AI-powered interview preparation
                     </p>
-
                 </div>
 
                 {error && (
@@ -116,69 +122,100 @@ function Register() {
                 )}
 
                 <form onSubmit={handleRegister}>
-
                     <div className="form-group">
-
-                        <label>Full Name</label>
+                        <label htmlFor="name">
+                            Full Name
+                        </label>
 
                         <input
+                            id="name"
                             type="text"
                             placeholder="Enter your full name"
                             value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
+                            onChange={(e) => setName(e.target.value)}
                             autoComplete="name"
+                            disabled={loading}
                         />
-
                     </div>
 
                     <div className="form-group">
-
-                        <label>Email Address</label>
+                        <label htmlFor="email">
+                            Email Address
+                        </label>
 
                         <input
+                            id="email"
                             type="email"
                             placeholder="Enter your email"
                             value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
+                            onChange={(e) => setEmail(e.target.value)}
                             autoComplete="email"
+                            disabled={loading}
                         />
-
                     </div>
 
                     <div className="form-group">
+                        <label htmlFor="password">
+                            Password
+                        </label>
 
-                        <label>Password</label>
+                        <div className="password-input-wrapper">
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Create a password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="new-password"
+                                disabled={loading}
+                            />
 
-                        <input
-                            type="password"
-                            placeholder="Create a password"
-                            value={password}
-                            onChange={(e) =>
-                                setPassword(e.target.value)
-                            }
-                            autoComplete="new-password"
-                        />
-
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() =>
+                                    setShowPassword(!showPassword)
+                                }
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="form-group">
+                        <label htmlFor="confirmPassword">
+                            Confirm Password
+                        </label>
 
-                        <label>Confirm Password</label>
+                        <div className="password-input-wrapper">
+                            <input
+                                id="confirmPassword"
+                                type={
+                                    showConfirmPassword
+                                        ? "text"
+                                        : "password"
+                                }
+                                placeholder="Confirm your password"
+                                value={confirmPassword}
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                                autoComplete="new-password"
+                                disabled={loading}
+                            />
 
-                        <input
-                            type="password"
-                            placeholder="Confirm your password"
-                            value={confirmPassword}
-                            onChange={(e) =>
-                                setConfirmPassword(e.target.value)
-                            }
-                            autoComplete="new-password"
-                        />
-
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() =>
+                                    setShowConfirmPassword(
+                                        !showConfirmPassword
+                                    )
+                                }
+                            >
+                                {showConfirmPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
                     </div>
 
                     <button
@@ -188,36 +225,27 @@ function Register() {
                     >
                         {loading
                             ? "Creating Account..."
-                            : "Create Account"
-                        }
+                            : "Create Account"}
                     </button>
-
                 </form>
 
                 <div className="auth-footer">
-
                     <span>Already have an account?</span>
 
                     <Link to="/login">
                         Sign In
                     </Link>
-
                 </div>
 
-                {/* HOME LINK */}
                 <div className="auth-home-link-container">
-
                     <Link
                         to="/"
                         className="auth-home-link"
                     >
                         ← Back to Home
                     </Link>
-
                 </div>
-
             </div>
-
         </AuthLayout>
     );
 }
