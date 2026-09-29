@@ -1046,11 +1046,8 @@ def generate_overall_result(interview_id):
         # STEP 7 PDF + EMAIL
         # ==========================================
         report_email_sent = False
-
         report_email_error = None
-
         pdf_generated = False
-
         pdf_path = None
 
         try:
@@ -1115,46 +1112,25 @@ def generate_overall_result(interview_id):
                 exist_ok=True
             )
 
-            # CREATE PDF PATH
-            pdf_file_name = (
-                f"interview_report_"
-                f"{interview_id}.pdf"
-            )
-
-            pdf_path = os.path.join(
-                reports_folder,
-                pdf_file_name
-            )
-
             # GET UPDATED INTERVIEW
-            updated_interview = interviews.find_one({
-
-                "_id":
-                    object_id,
-
-                "user_id":
-                    user_id
-            })
+            updated_interview = interviews.find_one({"_id": object_id,"user_id": user_id})
 
             if not updated_interview:
-
                 raise Exception(
                     "Interview could not be loaded "
                     "after generating result."
                 )
 
+            # CREATE PDF FILE NAME USING INTERVIEW CODE
+            interview_code = updated_interview.get("interview_code",interview_id)
+            pdf_file_name = (f"Result_{interview_code}.pdf")
+            pdf_path = os.path.join(reports_folder,pdf_file_name)
+
             # GENERATE PDF
-            generate_interview_pdf(
-                updated_interview,
-                pdf_path
-            )
-
+            generate_interview_pdf(updated_interview,pdf_path)
             pdf_generated = True
-
-            print(
-                "✅ PDF generated:",
-                pdf_path
-            )
+            
+            print("✅ PDF generated:",pdf_path)
 
             # SEND EMAIL
             send_interview_report_email(
@@ -3155,7 +3131,15 @@ def interview_history():
 
         interview_cursor = interviews.find(
             {
-                "user_id": user_id
+                "user_id": user_id,
+                "status": {
+                    "$in": [
+                        "ready",
+                        "in_progress",
+                        "evaluation_pending",
+                        "completed"
+                    ]
+                }
             }
         ).sort(
             "created_at",

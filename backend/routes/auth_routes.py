@@ -1005,7 +1005,6 @@ def reset_password():
 # ==========================================
 # GMAIL OAUTH AUTHORIZATION
 # ==========================================
-
 @auth_bp.route("/gmail-authorize", methods=["GET"])
 def gmail_authorize():
 
