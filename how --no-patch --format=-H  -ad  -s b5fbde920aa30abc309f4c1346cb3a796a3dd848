@@ -1,0 +1,92 @@
+[33mc605665[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m refs/remotes/origin/main@{Sun Sep 27 18:52:19 2026}: update by push
+[33mc605665[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m refs/heads/main@{Sun Sep 27 18:52:04 2026}: commit: Replace Gmail SMTP with Gmail API
+[33mc605665[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{Sun Sep 27 18:52:04 2026}: commit: Replace Gmail SMTP with Gmail API
+[33mc50b05c[m refs/remotes/origin/main@{Sun Sep 27 17:46:32 2026}: update by push
+[33mc50b05c[m refs/heads/main@{Sun Sep 27 17:46:26 2026}: commit: change in backend
+[33mc50b05c[m HEAD@{Sun Sep 27 17:46:26 2026}: commit: change in backend
+[33m763562c[m refs/remotes/origin/main@{Sun Sep 27 17:35:46 2026}: update by push
+[33m763562c[m refs/heads/main@{Sun Sep 27 17:35:31 2026}: commit: Use Gmail SMTP for OTP and interview reports
+[33m763562c[m HEAD@{Sun Sep 27 17:35:31 2026}: commit: Use Gmail SMTP for OTP and interview reports
+[33mec5deec[m refs/remotes/origin/main@{Sun Sep 27 17:03:48 2026}: update by push
+[33mec5deec[m refs/heads/main@{Sun Sep 27 17:03:45 2026}: commit: add roles.txt
+[33mec5deec[m HEAD@{Sun Sep 27 17:03:45 2026}: commit: add roles.txt
+[33mbfa863d[m refs/remotes/origin/main@{Sun Sep 27 12:11:26 2026}: update by push
+[33mbfa863d[m refs/heads/main@{Sun Sep 27 12:11:22 2026}: commit: Update forgot password OTP email to Resend
+[33mbfa863d[m HEAD@{Sun Sep 27 12:11:22 2026}: commit: Update forgot password OTP email to Resend
+[33m7ad32de[m refs/remotes/origin/main@{Sun Sep 27 12:06:48 2026}: update by push
+[33m7ad32de[m refs/heads/main@{Sun Sep 27 12:06:44 2026}: commit: Update forgot password OTP email to Resend
+[33m7ad32de[m HEAD@{Sun Sep 27 12:06:44 2026}: commit: Update forgot password OTP email to Resend
+[33m51fa96e[m refs/remotes/origin/main@{Sun Sep 27 11:55:26 2026}: update by push
+[33m51fa96e[m refs/heads/main@{Sun Sep 27 11:55:19 2026}: commit: update send otp
+[33m51fa96e[m HEAD@{Sun Sep 27 11:55:19 2026}: commit: update send otp
+[33m5fabe3d[m refs/remotes/origin/main@{Sun Sep 27 11:37:51 2026}: update by push
+[33m5fabe3d[m refs/heads/main@{Sun Sep 27 11:37:47 2026}: commit: change Interview id left to right
+[33m5fabe3d[m HEAD@{Sun Sep 27 11:37:47 2026}: commit: change Interview id left to right
+[33mf4b7f71[m refs/remotes/origin/main@{Sun Sep 27 11:31:45 2026}: update by push
+[33mf4b7f71[m refs/heads/main@{Sun Sep 27 11:31:41 2026}: commit: update steps.txt
+[33mf4b7f71[m HEAD@{Sun Sep 27 11:31:41 2026}: commit: update steps.txt
+[33m8e3d2dd[m refs/remotes/origin/main@{Sat Sep 26 19:28:56 2026}: update by push
+[33m8e3d2dd[m refs/heads/main@{Sat Sep 26 19:28:53 2026}: commit: Fix Resend PDF attachment encoding
+[33m8e3d2dd[m HEAD@{Sat Sep 26 19:28:53 2026}: commit: Fix Resend PDF attachment encoding
+[33m5406dcc[m refs/remotes/origin/main@{Sat Sep 26 19:21:35 2026}: update by push
+[33m5406dcc[m refs/heads/main@{Sat Sep 26 19:21:29 2026}: commit: update backend
+[33m5406dcc[m HEAD@{Sat Sep 26 19:21:29 2026}: commit: update backend
+[33md92c360[m refs/remotes/origin/main@{Sat Sep 26 19:14:55 2026}: update by push
+[33md92c360[m refs/heads/main@{Sat Sep 26 19:14:46 2026}: commit: update frontend and backend
+[33md92c360[m HEAD@{Sat Sep 26 19:14:46 2026}: commit: update frontend and backend
+[33m7f1aed8[m refs/remotes/origin/main@{Sat Sep 26 18:50:05 2026}: update by push
+[33m7f1aed8[m refs/heads/main@{Sat Sep 26 18:49:56 2026}: commit: update Interview_history
+[33m7f1aed8[m HEAD@{Sat Sep 26 18:49:56 2026}: commit: update Interview_history
+[33m53f144f[m refs/remotes/origin/main@{Sat Sep 26 17:58:23 2026}: update by push
+[33m53f144f[m refs/heads/main@{Sat Sep 26 17:57:59 2026}: commit: Replace Gmail SMTP with Resend API
+[33m53f144f[m HEAD@{Sat Sep 26 17:57:59 2026}: commit: Replace Gmail SMTP with Resend API
+[33m6c30612[m refs/remotes/origin/main@{Sat Sep 26 17:28:39 2026}: update by push
+[33m6c30612[m refs/heads/main@{Sat Sep 26 17:28:36 2026}: commit: update AI analysis
+[33m6c30612[m HEAD@{Sat Sep 26 17:28:36 2026}: commit: update AI analysis
+[33m6be6fc0[m refs/remotes/origin/main@{Sat Sep 26 17:12:16 2026}: update by push
+[33m6be6fc0[m refs/heads/main@{Sat Sep 26 17:12:09 2026}: commit: update email_service
+[33m6be6fc0[m HEAD@{Sat Sep 26 17:12:09 2026}: commit: update email_service
+[33mf08a8ee[m refs/remotes/origin/main@{Thu Sep 24 17:32:05 2026}: update by push
+[33mf08a8ee[m refs/heads/main@{Thu Sep 24 17:32:02 2026}: commit: update backend
+[33mf08a8ee[m HEAD@{Thu Sep 24 17:32:02 2026}: commit: update backend
+[33m5c7f4d5[m refs/remotes/origin/main@{Thu Sep 24 17:12:10 2026}: update by push
+[33m5c7f4d5[m refs/heads/main@{Thu Sep 24 17:12:07 2026}: commit: update backend
+[33m5c7f4d5[m HEAD@{Thu Sep 24 17:12:07 2026}: commit: update backend
+[33m22a01ac[m refs/remotes/origin/main@{Thu Sep 24 16:57:12 2026}: update by push
+[33m22a01ac[m refs/heads/main@{Thu Sep 24 16:57:07 2026}: commit: change backend
+[33m22a01ac[m HEAD@{Thu Sep 24 16:57:07 2026}: commit: change backend
+[33m338b93e[m refs/remotes/origin/main@{Thu Sep 24 12:58:55 2026}: update by push
+[33m338b93e[m refs/heads/main@{Thu Sep 24 12:58:52 2026}: commit: change steps.txt
+[33m338b93e[m HEAD@{Thu Sep 24 12:58:52 2026}: commit: change steps.txt
+[33m77bf8dd[m refs/remotes/origin/main@{Thu Sep 24 12:36:46 2026}: update by push
+[33m77bf8dd[m refs/heads/main@{Thu Sep 24 12:36:42 2026}: commit: Fix overall AI analysis model
+[33m77bf8dd[m HEAD@{Thu Sep 24 12:36:42 2026}: commit: Fix overall AI analysis model
+[33mdb0983f[m refs/remotes/origin/main@{Thu Sep 24 12:18:34 2026}: update by push
+[33mdb0983f[m refs/heads/main@{Thu Sep 24 12:18:27 2026}: commit: Added Gemini evaluation fallback
+[33mdb0983f[m HEAD@{Thu Sep 24 12:18:27 2026}: commit: Added Gemini evaluation fallback
+[33m9254238[m refs/remotes/origin/main@{Thu Sep 24 12:08:22 2026}: update by push
+[33m9254238[m refs/heads/main@{Thu Sep 24 12:08:15 2026}: commit: Added Gemini evaluation fallback
+[33m9254238[m HEAD@{Thu Sep 24 12:08:15 2026}: commit: Added Gemini evaluation fallback
+[33meae1176[m refs/remotes/origin/main@{Thu Sep 24 12:02:00 2026}: update by push
+[33meae1176[m refs/heads/main@{Thu Sep 24 12:01:50 2026}: commit: Updated Gemini evaluation model
+[33meae1176[m HEAD@{Thu Sep 24 12:01:50 2026}: commit: Updated Gemini evaluation model
+[33ma96b0ce[m refs/remotes/origin/main@{Wed Sep 23 19:39:35 2026}: update by push
+[33ma96b0ce[m refs/heads/main@{Wed Sep 23 19:39:22 2026}: commit: Updated frontend and backend
+[33ma96b0ce[m HEAD@{Wed Sep 23 19:39:22 2026}: commit: Updated frontend and backend
+[33maea373e[m refs/remotes/origin/main@{Wed Sep 23 17:48:26 2026}: update by push
+[33maea373e[m refs/heads/main@{Wed Sep 23 17:48:17 2026}: commit: Updated frontend
+[33maea373e[m HEAD@{Wed Sep 23 17:48:17 2026}: commit: Updated frontend
+[33m3d84184[m refs/remotes/origin/main@{Wed Sep 23 17:43:17 2026}: update by push
+[33m3d84184[m refs/heads/main@{Wed Sep 23 17:43:09 2026}: commit: Updated frontend
+[33m3d84184[m HEAD@{Wed Sep 23 17:43:09 2026}: commit: Updated frontend
+[33m57f84df[m refs/remotes/origin/main@{Wed Sep 23 17:40:39 2026}: update by push
+[33m57f84df[m refs/heads/main@{Wed Sep 23 17:40:32 2026}: commit: Updated frontend
+[33m57f84df[m HEAD@{Wed Sep 23 17:40:32 2026}: commit: Updated frontend
+[33m3b1a9cf[m refs/remotes/origin/main@{Wed Sep 23 17:37:49 2026}: update by push
+[33m3b1a9cf[m refs/heads/main@{Wed Sep 23 17:37:37 2026}: commit: Updated frontend
+[33m3b1a9cf[m HEAD@{Wed Sep 23 17:37:37 2026}: commit: Updated frontend
+[33md6aaf19[m refs/remotes/origin/main@{Wed Sep 23 12:37:45 2026}: update by push
+[33md6aaf19[m refs/heads/main@{Wed Sep 23 12:37:34 2026}: commit: Updated frontend
+[33md6aaf19[m HEAD@{Wed Sep 23 12:37:34 2026}: commit: Updated frontend
+[33mac4b977[m refs/remotes/origin/main@{Wed Sep 23 12:05:23 2026}: update by push
+[33mac4b977[m refs/heads/main@{Wed Sep 23 12:05:10 2026}: commit: Updated 

@@ -1508,7 +1508,7 @@ Return exactly:
         # GEMINI REQUEST WITH RETRY + FALLBACK
         models_to_try = [
             "gemini-3.6-flash",
-            "gemini-2.5-flash"
+            "gemini-3.5-flash-lite"
         ]
 
         response = None
@@ -1516,7 +1516,7 @@ Return exactly:
 
         for model_name in models_to_try:
 
-            max_retries = 4
+            max_retries = 2
 
             for attempt in range(max_retries):
 
@@ -1608,6 +1608,8 @@ Return exactly:
         # No model worked
         if not response or not response.text:
 
+            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+
             return jsonify({
 
                 "success": False,
@@ -1631,7 +1633,10 @@ Return exactly:
 
         try:
             ai_data = json.loads(response.text.strip())
+
         except json.JSONDecodeError:
+            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+
             return jsonify({
                 "success": False,
                 "message": "Gemini returned invalid JSON.",
@@ -1641,12 +1646,16 @@ Return exactly:
         questions = ai_data.get("questions", [])
 
         if not questions:
+            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+
             return jsonify({
                 "success": False,
                 "message": "Gemini did not generate questions."
             }), 500
 
         if len(questions) != number_of_questions:
+            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+
             return jsonify({
                 "success": False,
                 "message": "Gemini generated an unexpected number of questions.",
@@ -1684,6 +1693,9 @@ Return exactly:
         }), 200
 
     except Exception as e:
+        if 'interview_object_id' in locals() and interview_object_id:
+            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+
         return jsonify({
             "success": False,
             "message": str(e)
