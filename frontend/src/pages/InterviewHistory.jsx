@@ -1165,6 +1165,28 @@ function InterviewHistory() {
                                                     </button>
                                                 )}
 
+                                            {(
+                                                interview.status === "in_progress" ||
+                                                interview.status === "evaluation_pending" ||
+                                                interview.status === "ready" ||
+                                                interview.status === "created"
+                                            ) && (
+                                                    <button
+                                                        type="button"
+                                                        className="history-resume-button"
+                                                        onClick={() => {
+                                                            localStorage.setItem(
+                                                                "interview_id",
+                                                                interview.interview_id
+                                                            );
+
+                                                            navigate("/interview/start");
+                                                        }}
+                                                    >
+                                                        ▶ Resume Interview
+                                                    </button>
+                                                )}
+
                                             <button
                                                 type="button"
                                                 className="history-delete-button"

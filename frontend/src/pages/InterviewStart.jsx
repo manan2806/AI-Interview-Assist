@@ -24,6 +24,7 @@ function InterviewStart() {
     const [answer, setAnswer] = useState("");
     const [remainingTime, setRemainingTime] = useState(null);
     const [interviewDeadline, setInterviewDeadline] = useState(null);
+    const [timeExpired, setTimeExpired] = useState(false);
 
     // ==========================================
     // LOADING STATES
@@ -76,7 +77,7 @@ function InterviewStart() {
                             if (!isNaN(durationMinutes)) {
 
                                 const deadlineKey =
-                                    `interview_deadline_${parsedSetup.interview_id}`;
+                                    `interview_deadline_${savedInterviewId}`;
 
                                 let savedDeadline =
                                     localStorage.getItem(deadlineKey);
@@ -240,11 +241,14 @@ function InterviewStart() {
                     localStorage.removeItem("interview_id");
                     localStorage.removeItem("interview_setup");
 
-                    navigate(
-                        `/interview/result?id=${savedInterviewId}`,
-                        { replace: true }
+                    localStorage.removeItem(
+                        `interview_deadline_${interviewId}`
                     );
 
+                    navigate(
+                        `/interview/result?id=${interviewId}`,
+                        { replace: true }
+                    );
                     return;
                 }
 
@@ -364,6 +368,12 @@ function InterviewStart() {
                 setInterviewDeadline(null);
                 setRemainingTime(0);
 
+                // MARK INTERVIEW AS TIME EXPIRED
+                setTimeExpired(true);
+
+                // HIDE CURRENT QUESTION
+                setQuestion(null);
+
                 try {
                     setSubmitting(true);
                     setLoadingStep("Time is up. Submitting your interview...");
@@ -379,7 +389,7 @@ function InterviewStart() {
                         localStorage.removeItem("interview_id");
                         localStorage.removeItem("interview_setup");
 
-                        navigate(`/interview-result/${interviewId}`);
+                        navigate(`/interview/result?id=${interviewId}`, { replace: true });
                     }
 
                 } catch (error) {
@@ -419,9 +429,6 @@ function InterviewStart() {
     // ==========================================
 
     const handleSubmitAnswer = async () => {
-
-        setInterviewDeadline(null);
-        setRemainingTime(null);
 
         if (!answer.trim()) {
 
@@ -626,6 +633,31 @@ function InterviewStart() {
                         {loadingStep ||
                             "Please wait while we start your interview."}
                     </p>
+                </div>
+            </div>
+        );
+    }
+
+    // ==========================================
+    // TIME EXPIRED
+    // ==========================================
+    if (timeExpired) {
+        return (
+            <div className="interview-start-page">
+                <div className="interview-loading">
+
+                    <div className="loading-spinner">
+                        <span></span>
+                    </div>
+
+                    <h2>
+                        Time is Up
+                    </h2>
+
+                    <p>
+                        {loadingStep || "Your interview is being submitted..."}
+                    </p>
+
                 </div>
             </div>
         );

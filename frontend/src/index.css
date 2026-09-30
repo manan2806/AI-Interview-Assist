@@ -5281,7 +5281,6 @@ html {
 /* ==========================================
    INTERVIEW HISTORY
 ========================================== */
-
 .history-page {
   min-height: 100vh;
   background: #f6f8fc;
@@ -5626,6 +5625,45 @@ html {
 .history-result-button {
   background: #4f46e5;
   color: white;
+}
+
+/* RESUME INTERVIEW BUTTON */
+.history-resume-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #7c3aed;
+  padding: 10px 16px;
+  min-height: 42px;
+  border-radius: 9px;
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.history-resume-button:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(124, 58, 237, 0.25);
+}
+
+.history-resume-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.history-resume-button:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.25);
+  outline-offset: 2px;
 }
 
 /* EMPTY STATE */
