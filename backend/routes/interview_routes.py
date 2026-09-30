@@ -1287,6 +1287,7 @@ def setup_interview():
         interview_type = data.get("interview_type")
         difficulty = data.get("difficulty")
         number_of_questions = data.get("number_of_questions")
+        duration = data.get("duration", "No Limit")
 
         if not job_role:
             return jsonify({
@@ -1338,6 +1339,14 @@ def setup_interview():
                 "message": "Maximum 20 questions are allowed."
             }), 400
 
+        allowed_durations = ["No Limit","10 Minutes","20 Minutes","30 Minutes"]
+
+        if duration not in allowed_durations:
+            return jsonify({
+                "success": False,
+                "message": "Invalid interview duration."
+            }), 400
+
         if interviews is None:
             return jsonify({
                 "success": False,
@@ -1354,6 +1363,7 @@ def setup_interview():
             "interview_type": interview_type.strip(),
             "difficulty": difficulty.strip(),
             "number_of_questions": number_of_questions,
+            "duration": duration,
             "questions": [],
             "answers": [],
             "evaluations": [],
@@ -1368,7 +1378,8 @@ def setup_interview():
             "success": True,
             "message": "Interview setup created successfully.",
             "interview_id": str(result.inserted_id),
-            "interview_code": interview_code
+            "interview_code": interview_code,
+            "duration": duration
         }), 201
 
     except Exception as e:
@@ -2172,7 +2183,6 @@ def get_current_question(interview_id):
 # ==========================================
 # SUBMIT ANSWER , SAVE ANSWER ONLY , GEMINI IS NOT CALLED HERE
 # ==========================================
-
 @interview_bp.route(
     "/<interview_id>/answer",
     methods=["POST"]
@@ -2484,10 +2494,227 @@ def submit_answer(interview_id):
             "error":
                 str(e)
         }), 500
+
+# ==========================================
+# INTERVIEW TIMEOUT
+# ==========================================
+@interview_bp.route(
+    "/<interview_id>/timeout",
+    methods=["POST"]
+)
+@jwt_required()
+def timeout_interview(interview_id):
+
+    try:
+
+        user_id = get_jwt_identity()
+
+        object_id = get_interview_object_id(
+            interview_id
+        )
+
+        if object_id is None:
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid interview ID."
+            }), 400
+
+        # GET INTERVIEW
+        interview = interviews.find_one({
+            "_id": object_id,
+            "user_id": user_id
+        })
+
+        if not interview:
+
+            return jsonify({
+                "success": False,
+                "message": "Interview not found."
+            }), 404
+
+        # CHECK STATUS
+        if interview.get("status") != "in_progress":
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Interview is not currently "
+                    "in progress."
+                ),
+                "status": interview.get("status")
+            }), 400
+
+        # GET QUESTIONS
+        questions = interview.get(
+            "questions",
+            []
+        )
+
+        if not questions:
+
+            return jsonify({
+                "success": False,
+                "message": "Interview questions not found."
+            }), 400
+
+        # CURRENT QUESTION INDEX
+        current_index = interview.get(
+            "current_question",
+            0
+        )
+
+        try:
+
+            current_index = int(
+                current_index
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            current_index = 0
+
+        # GET EXISTING ANSWERS
+        existing_answers = interview.get(
+            "answers",
+            []
+        )
+
+        # SAVE CURRENT QUESTION AS SKIPPED
+        if (
+            0 <= current_index
+            < len(questions)
+        ):
+
+            current_question = questions[
+                current_index
+            ]
+
+            question_number = current_question.get(
+                "question_number",
+                current_index + 1
+            )
+
+            question_text = current_question.get(
+                "question",
+                ""
+            )
+
+            already_answered = any(
+                answer.get("question_number")
+                == question_number
+                for answer in existing_answers
+            )
+
+            if not already_answered:
+
+                skipped_answer = {
+
+                    "question_number":
+                        question_number,
+
+                    "question":
+                        question_text,
+
+                    "answer":
+                        "",
+
+                    "status":
+                        "skipped",
+
+                    "answered_at":
+                        datetime.utcnow()
+                }
+
+                interviews.update_one(
+
+                    {
+                        "_id": object_id,
+                        "user_id": user_id
+                    },
+
+                    {
+                        "$push": {
+                            "answers":
+                                skipped_answer
+                        }
+                    }
+                )
+
+        # MARK INTERVIEW FOR EVALUATION
+        interviews.update_one(
+
+            {
+                "_id": object_id,
+                "user_id": user_id
+            },
+
+            {
+                "$set": {
+
+                    "current_question":
+                        len(questions),
+
+                    "status":
+                        "evaluation_pending",
+
+                    "completed_at":
+                        datetime.utcnow(),
+
+                    "timeout":
+                        True
+                }
+            }
+        )
+
+        print(
+            "⏰ Interview time expired."
+        )
+
+        print(
+            "⏳ Interview waiting for "
+            "complete Gemini evaluation."
+        )
+
+        return jsonify({
+
+            "success": True,
+
+            "message":
+                "Interview time expired.",
+
+            "status":
+                "evaluation_pending",
+
+            "total_questions":
+                len(questions)
+
+        }), 200
+
+    except Exception as e:
+
+        print(
+            "❌ Interview Timeout Error:",
+            str(e)
+        )
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Unable to complete interview timeout.",
+
+            "error":
+                str(e)
+
+        }), 500
     
 # ==========================================
-# EVALUATE COMPLETE INTERVIEW
-# ONE GEMINI REQUEST FOR ALL ANSWERS
+# EVALUATE COMPLETE INTERVIEW (ONE GEMINI REQUEST FOR ALL ANSWERS)
 # ==========================================
 
 @interview_bp.route(

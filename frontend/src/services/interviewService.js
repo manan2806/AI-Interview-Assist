@@ -53,6 +53,15 @@ export const submitAnswer = async (interviewId, answer) => {
     return response.data;
 };
 
+export const submitTimeout = async (interviewId) => {
+
+    const response = await api.post(
+        `/api/interview/${interviewId}/timeout`
+    );
+
+    return response.data;
+};
+
 export const evaluateInterview = async (interviewId) => {
     const response = await api.post(
         `/api/interview/${interviewId}/evaluate`

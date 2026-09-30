@@ -5,6 +5,7 @@ import {
     startInterview,
     resumeInterview,
     submitAnswer,
+    submitTimeout,
     evaluateInterview,
     generateOverallResult
 } from "../services/interviewService";
@@ -21,6 +22,8 @@ function InterviewStart() {
     const [currentQuestion, setCurrentQuestion] = useState(1);
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [answer, setAnswer] = useState("");
+    const [remainingTime, setRemainingTime] = useState(null);
+    const [interviewDeadline, setInterviewDeadline] = useState(null);
 
     // ==========================================
     // LOADING STATES
@@ -62,6 +65,58 @@ function InterviewStart() {
                     try {
                         const parsedSetup = JSON.parse(savedSetup);
                         setSetup(parsedSetup);
+
+                        if (parsedSetup?.duration !== "No Limit") {
+
+                            const durationMinutes = parseInt(
+                                parsedSetup?.duration,
+                                10
+                            );
+
+                            if (!isNaN(durationMinutes)) {
+
+                                const deadlineKey =
+                                    `interview_deadline_${parsedSetup.interview_id}`;
+
+                                let savedDeadline =
+                                    localStorage.getItem(deadlineKey);
+
+                                if (!savedDeadline) {
+
+                                    const deadline =
+                                        Date.now() +
+                                        durationMinutes * 60 * 1000;
+
+                                    savedDeadline =
+                                        String(deadline);
+
+                                    localStorage.setItem(
+                                        deadlineKey,
+                                        savedDeadline
+                                    );
+                                }
+
+                                const deadlineTime =
+                                    Number(savedDeadline);
+
+                                setInterviewDeadline(deadlineTime);
+
+                                const remainingSeconds =
+                                    Math.max(
+                                        0,
+                                        Math.floor(
+                                            (deadlineTime - Date.now()) / 1000
+                                        )
+                                    );
+
+                                setRemainingTime(remainingSeconds);
+                            }
+
+                        } else {
+
+                            setInterviewDeadline(null);
+                            setRemainingTime(null);
+                        }
                     } catch (parseError) {
                         console.error("Setup Parse Error:", parseError);
                         setSetup(null);
@@ -288,10 +343,85 @@ function InterviewStart() {
     }, [navigate]);
 
     // ==========================================
+    // INTERVIEW COUNTDOWN TIMER
+    // ==========================================
+    useEffect(() => {
+
+        if (interviewDeadline === null) { return; }
+        let timeoutHandled = false;
+
+        const timer = setInterval(async () => {
+            const remainingSeconds = Math.max(0, Math.floor((interviewDeadline - Date.now()) / 1000));
+
+            setRemainingTime(remainingSeconds);
+
+            // TIME EXPIRED
+            if (remainingSeconds <= 0 && !timeoutHandled) {
+                timeoutHandled = true;
+                clearInterval(timer);
+
+                // STOP TIMER
+                setInterviewDeadline(null);
+                setRemainingTime(0);
+
+                try {
+                    setSubmitting(true);
+                    setLoadingStep("Time is up. Submitting your interview...");
+
+                    const timeoutResponse = await submitTimeout(interviewId);
+
+                    if (timeoutResponse?.status === "evaluation_pending") {
+                        setLoadingStep("Evaluating your interview...");
+                        await evaluateInterview(interviewId);
+                        setLoadingStep("Generating your overall result...");
+                        await generateOverallResult(interviewId);
+
+                        localStorage.removeItem("interview_id");
+                        localStorage.removeItem("interview_setup");
+
+                        navigate(`/interview-result/${interviewId}`);
+                    }
+
+                } catch (error) {
+
+                    console.error("Interview Timeout Error:", error);
+                    setError(
+                        error?.response?.data?.message ||
+                        "Unable to complete the interview."
+                    );
+
+                    setSubmitting(false);
+                }
+            }
+        }, 1000);
+        return () => { clearInterval(timer); };
+
+    }, [interviewDeadline, interviewId, navigate]);
+
+    // ==========================================
+    // FORMAT INTERVIEW TIMER
+    // ==========================================
+    const formatTime = (seconds) => {
+        if (seconds === null) {
+            return "No Limit";
+        }
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+
+        return `${String(minutes).padStart(2, "0")}:${String(
+            remainingSeconds
+        ).padStart(2, "0")}`;
+    };
+
+    // ==========================================
     // SUBMIT ANSWER , SAVE → NEXT QUESTION , FINAL → EVALUATE ALL → OVERALL RESULT
     // ==========================================
 
     const handleSubmitAnswer = async () => {
+
+        setInterviewDeadline(null);
+        setRemainingTime(null);
 
         if (!answer.trim()) {
 
@@ -572,6 +702,16 @@ function InterviewStart() {
                             {setup?.experience_level ||
                                 "Fresher"}
                         </span>
+
+                        <div className="interview-timer">
+                            <span>⏱️</span>
+
+                            <strong>
+                                {remainingTime === null
+                                    ? "No Limit"
+                                    : formatTime(remainingTime)}
+                            </strong>
+                        </div>
                     </div>
                 </div>
 

@@ -31,6 +31,8 @@ function InterviewSetup() {
 
     const [questionCount, setQuestionCount] = useState(10);
 
+    const [duration, setDuration] = useState("No Limit");
+
     // ==========================================
     // LOADING / ERROR STATES
     // ==========================================
@@ -82,7 +84,9 @@ function InterviewSetup() {
 
                 difficulty: difficulty,
 
-                number_of_questions: Number(questionCount)
+                number_of_questions: Number(questionCount),
+
+                duration: duration
 
             };
 
@@ -133,6 +137,8 @@ function InterviewSetup() {
                 difficulty,
 
                 question_count: Number(questionCount),
+
+                duration,
 
                 interview_id: interviewId
 
@@ -550,6 +556,46 @@ function InterviewSetup() {
 
                     </div>
 
+                    {/* INTERVIEW DURATION */}
+                    <div className="setup-section">
+
+                        <label>
+                            Interview Duration
+                        </label>
+
+                        <p className="setup-help">
+                            Choose how much time you want for this interview.
+                        </p>
+
+                        <div className="option-grid">
+
+                            {[
+                                "No Limit",
+                                "10 Minutes",
+                                "20 Minutes",
+                                "30 Minutes"
+                            ].map((time) => (
+
+                                <button
+                                    type="button"
+                                    key={time}
+                                    disabled={loading}
+                                    className={
+                                        duration === time
+                                            ? "option-button active"
+                                            : "option-button"
+                                    }
+                                    onClick={() => setDuration(time)}
+                                >
+                                    {time}
+                                </button>
+
+                            ))}
+
+                        </div>
+
+                    </div>
+
                     {/* SUMMARY */}
                     <div className="setup-summary">
 
@@ -604,6 +650,14 @@ function InterviewSetup() {
 
                                 <strong>
                                     {questionCount}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Duration</span>
+
+                                <strong>
+                                    {duration}
                                 </strong>
                             </div>
 
