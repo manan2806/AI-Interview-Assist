@@ -263,7 +263,7 @@ AI Interview Assist
             pdf_data,
             maintype="application",
             subtype="pdf",
-            filename="AI_Interview_Report.pdf"
+            filename=os.path.basename(pdf_path)
         )
 
     except Exception as error:
@@ -281,29 +281,12 @@ AI Interview Assist
     # GMAIL API SEND
     # ==========================================
 
-    print(
-        "=========================================="
-    )
-
-    print(
-        "📧 Sending interview report using Gmail API..."
-    )
-
-    print(
-        f"RECIPIENT EMAIL: {recipient_email}"
-    )
-
-    print(
-        "PDF FILE: AI_Interview_Report.pdf"
-    )
-
-    print(
-        f"PDF SIZE: {len(pdf_data)} bytes"
-    )
-
-    print(
-        "=========================================="
-    )
+    print("==========================================")
+    print("📧 Sending interview report using Gmail API...")
+    print(f"RECIPIENT EMAIL: {recipient_email}")
+    print("PDF FILE:",os.path.basename(pdf_path))
+    print(f"PDF SIZE: {len(pdf_data)} bytes")
+    print("==========================================")
 
     try:
 
