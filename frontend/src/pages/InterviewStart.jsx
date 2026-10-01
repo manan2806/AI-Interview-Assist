@@ -7,7 +7,9 @@ import {
     submitAnswer,
     submitTimeout,
     evaluateInterview,
-    generateOverallResult
+    generateOverallResult,
+    getInterviewQuestion,
+    updateInterviewAnswer
 } from "../services/interviewService";
 
 function InterviewStart() {
@@ -22,6 +24,9 @@ function InterviewStart() {
     const [currentQuestion, setCurrentQuestion] = useState(1);
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [answer, setAnswer] = useState("");
+    const [editingQuestion, setEditingQuestion] = useState(null);
+    const [updatingAnswer, setUpdatingAnswer] = useState(false);
+    const [returnQuestion, setReturnQuestion] = useState(null);
     const [remainingTime, setRemainingTime] = useState(null);
     const [interviewDeadline, setInterviewDeadline] = useState(null);
     const [timeExpired, setTimeExpired] = useState(false);
@@ -422,6 +427,121 @@ function InterviewStart() {
         return `${String(minutes).padStart(2, "0")}:${String(
             remainingSeconds
         ).padStart(2, "0")}`;
+    };
+
+    // ==========================================
+    // LOAD PREVIOUS QUESTION FOR EDITING
+    // ==========================================
+
+    const handlePreviousQuestion = async () => {
+
+        if (!interviewId) {
+            setError("Interview session not found.");
+            return;
+        }
+
+        if (currentQuestion <= 1) {
+            return;
+        }
+
+        try {
+            setUpdatingAnswer(true);
+            setError("");
+
+            // Remember where user originally started editing
+            if (editingQuestion === null) {
+                setReturnQuestion(currentQuestion);
+            }
+
+            const previousQuestionNumber = currentQuestion - 1;
+
+            const data = await getInterviewQuestion(interviewId, previousQuestionNumber);
+
+            if (!data?.success) {
+                setError(data?.message || "Unable to load previous question.");
+                return;
+            }
+
+            // Load previous question
+            setQuestion(data.question);
+            setCurrentQuestion(data.question_number);
+
+            // Load existing answer
+            setAnswer(data.existing_answer || "");
+
+            // Mark this question as editable
+            setEditingQuestion(data.question_number);
+
+        } catch (error) {
+
+            console.error("Previous Question Error:", error);
+            const apiMessage = error?.response?.data?.message || error?.response?.data?.error;
+            setError(apiMessage || "Unable to load previous question.");
+
+        } finally {
+            setUpdatingAnswer(false);
+        }
+    };
+
+    // ==========================================
+    // UPDATE PREVIOUS ANSWER
+    // ==========================================
+    const handleUpdateAnswer = async () => {
+
+        if (!answer.trim()) {
+            setError("Please enter your answer before continuing.");
+            return;
+        }
+
+        if (!interviewId || !editingQuestion) {
+            setError("Unable to update this answer.");
+            return;
+        }
+
+        try {
+            setUpdatingAnswer(true);
+            setError("");
+
+            const data =
+                await updateInterviewAnswer(
+                    interviewId,
+                    editingQuestion,
+                    answer.trim()
+                );
+
+            if (!data?.success) {
+
+                setError(data?.message || "Unable to update answer.");
+                return;
+            }
+
+            // Return to the question that
+            // user was editing from.
+            const returnQuestionNumber = returnQuestion || editingQuestion + 1;
+
+            if (returnQuestionNumber <= totalQuestions) {
+
+                const nextData = await getInterviewQuestion(interviewId, returnQuestionNumber);
+
+                if (nextData?.success) {
+                    setQuestion(nextData.question);
+                    setCurrentQuestion(nextData.question_number);
+                    setAnswer(nextData.existing_answer || "");
+                }
+            }
+
+            setEditingQuestion(null);
+            setReturnQuestion(null);
+
+        } catch (error) {
+
+            console.error("Update Answer Error:", error);
+            const apiMessage = error?.response?.data?.message || error?.response?.data?.error;
+            setError(apiMessage || "Unable to update answer.");
+
+        } finally {
+            setUpdatingAnswer(false);
+        }
     };
 
     // ==========================================
@@ -830,28 +950,56 @@ function InterviewStart() {
 
                     {/* SUBMIT / NEXT BUTTON */}
                     <div className="question-actions">
-                        <div />
+
+                        <div className="previous-question-wrapper">
+                            {currentQuestion > 1 && (
+                                <button
+                                    type="button"
+                                    className="previous-question-button"
+                                    onClick={
+                                        handlePreviousQuestion
+                                    }
+                                    disabled={
+                                        submitting ||
+                                        updatingAnswer
+                                    }
+                                >
+                                    ← Previous Question
+                                </button>
+                            )}
+                        </div>
 
                         <button
                             type="button"
                             className="next-question-button"
                             onClick={
-                                handleSubmitAnswer
+                                editingQuestion
+                                    ? handleUpdateAnswer
+                                    : handleSubmitAnswer
                             }
                             disabled={
                                 !answer.trim() ||
-                                submitting
+                                submitting ||
+                                updatingAnswer
                             }
                         >
-                            {submitting
-                                ? currentQuestion ===
-                                    totalQuestions
-                                    ? "Generating Result..."
-                                    : "Submitting..."
-                                : currentQuestion ===
-                                    totalQuestions
-                                    ? "Finish Interview"
-                                    : "Submit & Next →"}
+                            {updatingAnswer
+                                ? "Updating..."
+                                : submitting
+                                    ? currentQuestion ===
+                                        totalQuestions
+                                        ? "Generating Result..."
+                                        : "Submitting..."
+
+                                    : editingQuestion
+                                        ? "Update & Next →"
+
+                                        : currentQuestion ===
+                                            totalQuestions
+                                            ? "Finish Interview"
+                                            : "Submit & Next →"
+                            }
+
                         </button>
                     </div>
                 </div>

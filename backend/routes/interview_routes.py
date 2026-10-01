@@ -2181,6 +2181,241 @@ def get_current_question(interview_id):
         }), 500
 
 # ==========================================
+# GET QUESTION + EXISTING ANSWER
+# ==========================================
+@interview_bp.route(
+    "/<interview_id>/question/<int:question_number>",
+    methods=["GET"]
+)
+@jwt_required()
+def get_interview_question(
+    interview_id,
+    question_number
+):
+
+    try:
+        user_id = get_jwt_identity()
+
+        # GET OBJECT ID
+        object_id = get_interview_object_id(interview_id)
+
+        if object_id is None:
+            return jsonify({
+                "success": False,
+                "message": "Invalid interview ID."
+            }), 400
+
+        # GET INTERVIEW
+        interview = interviews.find_one({
+            "_id": object_id,
+            "user_id": user_id
+        })
+
+        if not interview:
+            return jsonify({
+                "success": False,
+                "message": "Interview not found."
+            }), 404
+
+        # GET QUESTIONS
+        questions = interview.get("questions",[])
+
+        if not questions:
+            return jsonify({
+                "success": False,
+                "message": "Interview questions not found."
+            }), 400
+
+        # VALIDATE QUESTION NUMBER
+        if (question_number < 1 or question_number > len(questions)):
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid question number."
+            }), 400
+
+        # GET QUESTION
+        question_index = question_number - 1
+        question = questions[question_index]
+
+        # GET EXISTING ANSWERS
+        answers = interview.get("answers",[])
+        existing_answer = ""
+
+        for answer_data in answers:
+
+            if (answer_data.get("question_number")==question_number):
+                existing_answer = answer_data.get("answer","")
+                break
+
+        # RETURN QUESTION
+        return jsonify({
+            "success": True,
+            "question": question,
+            "question_number":question_number,
+            "total_questions":len(questions),
+            "existing_answer":existing_answer,
+            "has_answer":bool(existing_answer.strip())
+        }), 200
+
+    except Exception as e:
+
+        print("❌ Get Interview Question Error:",str(e))
+
+        return jsonify({
+            "success": False,
+            "message":"Unable to load interview question.",
+            "error":str(e)
+        }), 500
+
+# ==========================================
+# UPDATE EXISTING ANSWER
+# ==========================================
+@interview_bp.route(
+    "/<interview_id>/answer/<int:question_number>",
+    methods=["PUT"]
+)
+@jwt_required()
+def update_interview_answer(
+    interview_id,
+    question_number
+):
+
+    try:
+        user_id = get_jwt_identity()
+
+        # GET OBJECT ID
+        object_id = get_interview_object_id(interview_id)
+
+        if object_id is None:
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid interview ID."
+            }), 400
+
+        # GET INTERVIEW
+        interview = interviews.find_one({
+            "_id": object_id,
+            "user_id": user_id
+        })
+
+        if not interview:
+
+            return jsonify({
+                "success": False,
+                "message": "Interview not found."
+            }), 404
+
+        # ONLY IN-PROGRESS INTERVIEW
+        if interview.get("status") != "in_progress":
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "This interview is not currently "
+                    "accepting answer updates."
+                ),
+                "status": interview.get("status")
+            }), 400
+
+        # REQUEST DATA
+        data = request.get_json(silent=True) or {}
+
+        answer = str(data.get("answer", "")).strip()
+
+        if not answer:
+
+            return jsonify({
+                "success": False,
+                "message": "Answer cannot be empty."
+            }), 400
+
+        # GET QUESTIONS
+        questions = interview.get("questions",[])
+
+        if not questions:
+
+            return jsonify({
+                "success": False,
+                "message": "Interview questions not found."
+            }), 400
+
+        # VALIDATE QUESTION NUMBER
+        if (question_number < 1 or question_number > len(questions)):
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid question number."
+            }), 400
+
+        # GET QUESTION
+        question_index = question_number - 1
+        question = questions[question_index]
+        question_text = question.get("question","")
+
+        # FIND EXISTING ANSWER
+        existing_answers = interview.get("answers",[])
+        answer_found = False
+
+        for existing_answer in existing_answers:
+
+            if (existing_answer.get("question_number")==question_number):
+
+                existing_answer["answer"] = answer
+                existing_answer["answered_at"] = (datetime.utcnow())
+                answer_found = True
+                break
+
+        # QUESTION MUST ALREADY HAVE AN ANSWER
+        if not answer_found:
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "No existing answer found "
+                    "for this question."
+                )
+            }), 404
+
+        # UPDATE ANSWERS ARRAY
+        interviews.update_one(
+
+            {
+                "_id": object_id,
+                "user_id": user_id
+            },
+
+            {
+                "$set": {
+                    "answers": existing_answers
+                }
+            }
+        )
+
+        print(
+            f"✅ Answer updated for "
+            f"Question {question_number}"
+        )
+
+        # RESPONSE
+        return jsonify({
+            "success": True,
+            "message":"Answer updated successfully.",
+            "question_number":question_number,
+            "question":question_text,
+            "answer":answer
+        }), 200
+
+    except Exception as e:
+        print("❌ Update Answer Error:",str(e))
+        return jsonify({
+            "success": False,
+            "message":"Unable to update answer.",
+            "error":str(e)
+        }), 500
+
+# ==========================================
 # SUBMIT ANSWER , SAVE ANSWER ONLY , GEMINI IS NOT CALLED HERE
 # ==========================================
 @interview_bp.route(
@@ -2716,7 +2951,6 @@ def timeout_interview(interview_id):
 # ==========================================
 # EVALUATE COMPLETE INTERVIEW (ONE GEMINI REQUEST FOR ALL ANSWERS)
 # ==========================================
-
 @interview_bp.route(
     "/<interview_id>/evaluate",
     methods=["POST"]
@@ -2912,33 +3146,40 @@ def evaluate_interview(interview_id):
 
         # VALIDATE GEMINI RESULT
         if not evaluations:
-
+            interviews.update_one(
+                {
+                    "_id": object_id,
+                    "user_id": user_id
+                },
+                {
+                    "$set": {
+                        "evaluating": False
+                    }
+                }
+            )
             return jsonify({
-
                 "success": False,
-
-                "message":
-                    "Gemini did not return "
-                    "any evaluations."
-
+                "message":"Gemini did not return " "any evaluations."
             }), 500
 
         if len(evaluations) != len(questions):
+            interviews.update_one(
+                {
+                    "_id": object_id,
+                    "user_id": user_id
+                },
+                {
+                    "$set": {
+                    "evaluating": False
+                    }
+                }
+                )
 
             return jsonify({
-
                 "success": False,
-
-                "message":
-                    "Gemini did not evaluate "
-                    "all questions.",
-
-                "expected":
-                    len(questions),
-
-                "received":
-                    len(evaluations)
-
+                "message":"Gemini did not evaluate " "all questions.",
+                "expected":len(questions),
+                "received":len(evaluations)
             }), 500
 
         # SAVE EVALUATIONS

@@ -32,6 +32,14 @@ def create_app():
         url_prefix="/api/interview"
     )
 
+    print("\n========== REGISTERED INTERVIEW ROUTES ==========")
+
+    for rule in app.url_map.iter_rules():
+        if str(rule).startswith("/api/interview"):
+            print(rule)
+
+    print("=================================================\n")
+
     @app.route("/", methods=["GET"])
     def home():
         return jsonify({
@@ -51,3 +59,4 @@ app.secret_key = os.getenv(
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",debug=True, port=5000)
+

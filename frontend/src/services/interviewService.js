@@ -26,7 +26,6 @@ export const startInterview = async (interviewId) => {
 };
 
 export const resumeInterview = async (interviewId) => {
-
     const response = await api.get(
         `/api/interview/${interviewId}/resume`
     );
@@ -54,7 +53,6 @@ export const submitAnswer = async (interviewId, answer) => {
 };
 
 export const submitTimeout = async (interviewId) => {
-
     const response = await api.post(
         `/api/interview/${interviewId}/timeout`
     );
@@ -95,7 +93,6 @@ export const getInterviewHistory = async () => {
 };
 
 export const deleteInterview = async (interviewId) => {
-
     const response = await api.delete(
         `/api/interview/${interviewId}`
     );
@@ -106,6 +103,25 @@ export const deleteInterview = async (interviewId) => {
 export const getInterviewDetails = async (interviewId) => {
     const response = await api.get(
         `/api/interview/${interviewId}/details`
+    );
+
+    return response.data;
+};
+
+export const getInterviewQuestion = async (interviewId, questionNumber) => {
+    const response = await api.get(
+        `/api/interview/${interviewId}/question/${questionNumber}`
+    );
+
+    return response.data;
+};
+
+export const updateInterviewAnswer = async (interviewId, questionNumber, answer) => {
+    const response = await api.put(
+        `/api/interview/${interviewId}/answer/${questionNumber}`,
+        {
+            answer
+        }
     );
 
     return response.data;
