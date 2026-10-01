@@ -752,12 +752,16 @@ function InterviewHistory() {
                                                     Fresher
                                                 </option>
 
+                                                <option value="junior">
+                                                    Junior
+                                                </option>
+
                                                 <option value="mid level">
                                                     Mid Level
                                                 </option>
 
-                                                <option value="senior level">
-                                                    Senior Level
+                                                <option value="senior">
+                                                    Senior
                                                 </option>
                                             </select>
                                         </div>
