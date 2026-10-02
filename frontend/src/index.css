@@ -5337,6 +5337,24 @@ html {
   font-weight: 600;
 }
 
+/* PERFORMANCE CHART BUTTON */
+.history-performance-button {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #6c63ff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-performance-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
 /* SUMMARY */
 .history-summary {
   display: grid;

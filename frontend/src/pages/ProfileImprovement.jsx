@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getProfile } from "../services/authService";
 
 function ProfileImprovement() {
-
+    const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
-
     const [loading, setLoading] = useState(true);
-
     const [error, setError] = useState("");
 
     // ==========================================
@@ -264,9 +262,14 @@ function ProfileImprovement() {
 
                     </div>
 
-                    <Link to="/dashboard">
-                        ← Dashboard
-                    </Link>
+                    <button
+                        className="result-back-btn"
+                        onClick={() =>
+                            navigate("/dashboard")
+                        }
+                    >
+                        Dashboard
+                    </button>
 
                 </div>
 

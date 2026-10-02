@@ -248,9 +248,14 @@ function InterviewSetup() {
 
                     </div>
 
-                    <Link to="/dashboard">
-                        ← Dashboard
-                    </Link>
+                    <button
+                        className="result-back-btn"
+                        onClick={() =>
+                            navigate("/dashboard")
+                        }
+                    >
+                        Dashboard
+                    </button>
 
                 </div>
 

@@ -19,6 +19,7 @@ import InterviewStart from "./pages/InterviewStart";
 import InterviewResult from "./pages/InterviewResult";
 import InterviewHistory from "./pages/InterviewHistory";
 import InterviewDetails from "./pages/InterviewDetails";
+import PerformanceChart from "./pages/PerformanceChart";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -28,11 +29,9 @@ function App() {
         <BrowserRouter>
 
             <Routes>
-
                 {/* ==================================
                     PUBLIC ROUTES
                 ================================== */}
-
                 {/* Main Home Page */}
                 <Route
                     path="/"
@@ -45,13 +44,11 @@ function App() {
                     element={<Home />}
                 />
 
-
                 {/* Login */}
                 <Route
                     path="/login"
                     element={<Login />}
                 />
-
 
                 {/* Register */}
                 <Route
@@ -59,13 +56,11 @@ function App() {
                     element={<Register />}
                 />
 
-
                 {/* Forgot Password */}
                 <Route
                     path="/forgot-password"
                     element={<ForgotPassword />}
                 />
-
 
                 {/* Verify OTP */}
                 <Route
@@ -73,18 +68,15 @@ function App() {
                     element={<VerifyOTP />}
                 />
 
-
                 {/* Reset Password */}
                 <Route
                     path="/reset-password"
                     element={<ResetPassword />}
                 />
 
-
                 {/* ==================================
                     PROTECTED ROUTES
                 ================================== */}
-
                 <Route element={<ProtectedRoute />}>
 
                     {/* Dashboard */}
@@ -93,13 +85,11 @@ function App() {
                         element={<Dashboard />}
                     />
 
-
                     {/* Profile */}
                     <Route
                         path="/profile"
                         element={<Profile />}
                     />
-
 
                     {/* Profile Improvement */}
                     <Route
@@ -107,13 +97,11 @@ function App() {
                         element={<ProfileImprovement />}
                     />
 
-
                     {/* Interview Setup */}
                     <Route
                         path="/interview/setup"
                         element={<InterviewSetup />}
                     />
-
 
                     {/* Interview Start */}
                     <Route
@@ -121,13 +109,11 @@ function App() {
                         element={<InterviewStart />}
                     />
 
-
                     {/* Interview Result */}
                     <Route
                         path="/interview/result"
                         element={<InterviewResult />}
                     />
-
 
                     {/* Interview History */}
                     <Route
@@ -135,6 +121,11 @@ function App() {
                         element={<InterviewHistory />}
                     />
 
+                    {/* Performance Chart */}
+                    <Route
+                        path="/interview/performance"
+                        element={<PerformanceChart />}
+                    />
 
                     {/* Interview Details */}
                     <Route
@@ -144,11 +135,9 @@ function App() {
 
                 </Route>
 
-
                 {/* ==================================
                     INVALID URL
                 ================================== */}
-
                 <Route
                     path="*"
                     element={

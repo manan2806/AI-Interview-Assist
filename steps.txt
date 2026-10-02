@@ -47,3 +47,5 @@
 3 — Support Diff. Language
 4 — Performance Chart
 5 — Live Coding Interview (Technical roles ke liye)
+    5.1 Current Interview Performance
+    5.2 Performance History / Progress

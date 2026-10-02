@@ -525,12 +525,24 @@ function InterviewHistory() {
                             + Start New Interview
                         </Link>
 
-                        <Link
-                            to="/dashboard"
-                            className="history-back-link"
+                        <button
+                            type="button"
+                            className="history-performance-button"
+                            onClick={() =>
+                                navigate("/interview/performance")
+                            }
+                        >
+                            📊 Performance Chart
+                        </button>
+
+                        <button
+                            className="result-back-btn"
+                            onClick={() =>
+                                navigate("/dashboard")
+                            }
                         >
                             Dashboard
-                        </Link>
+                        </button>
                     </div>
                 </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
     getProfile,
@@ -7,23 +7,17 @@ import {
 } from "../services/authService";
 
 function Profile() {
-
+    const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
-
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-
     const [editing, setEditing] = useState(false);
-
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [targetRole, setTargetRole] = useState("");
-    const [experienceLevel, setExperienceLevel] =
-        useState("Fresher");
-
+    const [experienceLevel, setExperienceLevel] = useState("Fresher");
     const [skills, setSkills] = useState("");
 
     // ==========================================
@@ -264,9 +258,12 @@ function Profile() {
 
                     </div>
 
-                    <Link to="/dashboard">
-                        ← Dashboard
-                    </Link>
+                    <button
+                        className="result-back-btn"
+                        onClick={() => navigate("/dashboard")}
+                    >
+                        Dashboard
+                    </button>
 
                 </div>
 

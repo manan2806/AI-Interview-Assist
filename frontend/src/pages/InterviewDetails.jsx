@@ -334,12 +334,14 @@ function InterviewDetails() {
 
                             )}
 
-                        <Link
-                            to="/interview/history"
-                            className="details-back-link"
+                        <button
+                            className="result-back-btn"
+                            onClick={() =>
+                                navigate("/interview/history")
+                            }
                         >
-                            ← History
-                        </Link>
+                            Interview History
+                        </button>
 
                     </div>
 
