@@ -1,18 +1,6 @@
-import {
-    useEffect,
-    useState
-} from "react";
-
-import {
-    Link,
-    useNavigate
-} from "react-router-dom";
-
-import {
-    getUser,
-    logout
-} from "../utils/auth";
-
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { getUser, logout } from "../utils/auth";
 
 function Dashboard() {
 
