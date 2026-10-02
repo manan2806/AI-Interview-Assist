@@ -5340,10 +5340,10 @@ html {
 /* PERFORMANCE CHART BUTTON */
 .history-performance-button {
   padding: 11px 18px;
-  border: none;
+  border: 1px solid #6c63ff;
   border-radius: 8px;
-  background: #6c63ff;
-  color: #ffffff;
+  background: #ffffff;
+  color: #6c63ff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -5351,8 +5351,10 @@ html {
 }
 
 .history-performance-button:hover {
+  background: #6c63ff;
+  color: #ffffff;
   transform: translateY(-1px);
-  opacity: 0.92;
+  box-shadow: 0 4px 10px rgba(108, 99, 255, 0.20);
 }
 
 /* SUMMARY */
@@ -5715,11 +5717,18 @@ html {
   display: inline-block;
   text-decoration: none;
   background: #4f46e5;
-  color: white;
+  color: #ffffff;
   padding: 13px 22px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.history-start-button:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.25);
 }
 
 .history-bottom-action {

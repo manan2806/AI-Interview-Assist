@@ -329,7 +329,7 @@ function InterviewDetails() {
                                         )
                                     }
                                 >
-                                    View Result
+                                    View Interview Result
                                 </button>
 
                             )}
@@ -340,7 +340,7 @@ function InterviewDetails() {
                                 navigate("/interview/history")
                             }
                         >
-                            Interview History
+                            Back to History
                         </button>
 
                     </div>
@@ -738,39 +738,6 @@ function InterviewDetails() {
                     )}
 
                 </div>
-
-                {/* ======================================
-                    BOTTOM ACTIONS
-                ====================================== */}
-                <div className="details-bottom-actions">
-
-                    <Link
-                        to="/interview/history"
-                        className="details-history-button"
-                    >
-                        ← Back to History
-                    </Link>
-
-
-                    {interview.status ===
-                        "completed" && (
-
-                            <button
-                                type="button"
-                                className="details-result-button"
-                                onClick={() =>
-                                    navigate(
-                                        `/interview/result?id=${id}`
-                                    )
-                                }
-                            >
-                                View Interview Result →
-                            </button>
-
-                        )}
-
-                </div>
-
 
             </div>
 

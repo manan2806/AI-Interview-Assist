@@ -412,16 +412,6 @@ function InterviewResult() {
 
                 <div className="result-header-actions">
 
-                    {/* Interview History Button */}
-                    <button
-                        className="result-back-btn"
-                        onClick={() =>
-                            navigate("/interview/history")
-                        }
-                    >
-                        Interview History
-                    </button>
-
                     {/* Download PDF Button */}
                     <button
                         className="download-pdf-btn"
@@ -434,6 +424,16 @@ function InterviewResult() {
                             : "📄 Download PDF Report"
                         }
 
+                    </button>
+
+                    {/* Interview History Button */}
+                    <button
+                        className="result-back-btn"
+                        onClick={() =>
+                            navigate("/interview/history")
+                        }
+                    >
+                        Back to History
                     </button>
 
                 </div>
@@ -992,34 +992,6 @@ function InterviewResult() {
 
                         </div>
                 }
-
-            </div>
-
-            {/* ======================================
-                BOTTOM ACTIONS
-            ====================================== */}
-            <div className="result-actions">
-
-                <button
-                    className="download-pdf-btn"
-                    onClick={handleDownloadPDF}
-                    disabled={downloading}
-                >
-
-                    {
-                        downloading
-                            ? "Downloading..."
-                            : "📄 Download PDF Report"
-                    }
-
-                </button>
-
-                <button
-                    className="result-back-btn"
-                    onClick={() => navigate("/interview/history")}
-                >
-                    Interview History
-                </button>
 
             </div>
 
