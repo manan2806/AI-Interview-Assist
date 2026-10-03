@@ -108,6 +108,14 @@ export const getInterviewDetails = async (interviewId) => {
     return response.data;
 };
 
+export const retakeInterview = async (interviewId) => {
+    const response = await api.post(
+        `/api/interview/${interviewId}/retake`
+    );
+
+    return response.data;
+};
+
 export const getInterviewQuestion = async (interviewId, questionNumber) => {
     const response = await api.get(
         `/api/interview/${interviewId}/question/${questionNumber}`

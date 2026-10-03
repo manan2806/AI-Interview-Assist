@@ -3979,6 +3979,7 @@ def retake_interview(interview_id):
             "interview_type": original_interview.get("interview_type","Technical"),
             "difficulty": original_interview.get("difficulty","Medium"),
             "number_of_questions": original_interview.get("number_of_questions",5),
+            "duration": original_interview.get("duration", "No Limit"),
 
             # New attempt starts with empty questions
             "questions": [],

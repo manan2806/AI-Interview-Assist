@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
-import { getInterviewDetails } from "../services/interviewService";
+import { getInterviewDetails, retakeInterview } from "../services/interviewService";
 
 function InterviewDetails() {
 
@@ -77,6 +77,43 @@ function InterviewDetails() {
 
             setLoading(false);
 
+        }
+    };
+
+    // ==========================================
+    // RETAKE INTERVIEW
+    // ==========================================
+    const handleRetake = async () => {
+
+        try {
+            setError("");
+            const data = await retakeInterview(id);
+            console.log("Retake Interview:", data);
+
+            if (!data?.success) {
+                setError(data?.message || "Unable to retake interview.");
+                return;
+            }
+
+            // New interview ID
+            const newInterviewId = data.interview_id;
+
+            if (!newInterviewId) {
+                setError("New interview ID was not received.");
+                return;
+            }
+
+            // Go to interview start page
+            navigate(`/interview/start?id=${newInterviewId}`);
+
+        } catch (err) {
+
+            console.error("Retake Interview Error:", err);
+            setError(
+                err?.response?.data?.message ||
+                err?.message ||
+                "Unable to retake interview. Please try again."
+            );
         }
     };
 
@@ -317,22 +354,33 @@ function InterviewDetails() {
 
                     <div className="details-header-actions">
 
-                        {interview.status ===
-                            "completed" && (
+                        {interview.status === "completed" && (
 
-                                <button
-                                    type="button"
-                                    className="details-result-button"
-                                    onClick={() =>
-                                        navigate(
-                                            `/interview/result?id=${id}`
-                                        )
-                                    }
-                                >
-                                    View Interview Result
-                                </button>
+                            <button
+                                type="button"
+                                className="details-result-button"
+                                onClick={() =>
+                                    navigate(
+                                        `/interview/result?id=${id}`
+                                    )
+                                }
+                            >
+                                View Interview Result
+                            </button>
 
-                            )}
+                        )}
+
+                        {interview.status === "completed" && (
+
+                            <button
+                                type="button"
+                                className="details-retake-button"
+                                onClick={handleRetake}
+                            >
+                                🔄 Retake Interview
+                            </button>
+
+                        )}
 
                         <button
                             className="result-back-btn"

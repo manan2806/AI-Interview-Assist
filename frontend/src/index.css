@@ -6193,6 +6193,26 @@ html {
   cursor: pointer;
 }
 
+/* RETAKE BUTTON */
+.details-retake-button {
+  padding: 11px 18px;
+  border: 1px solid #6c63ff;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6c63ff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.details-retake-button:hover {
+  background: #6c63ff;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(108, 99, 255, 0.2);
+}
+
 /* INFORMATION CARD */
 .details-info-card {
   background: white;

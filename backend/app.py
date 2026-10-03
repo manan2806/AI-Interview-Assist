@@ -32,13 +32,13 @@ def create_app():
         url_prefix="/api/interview"
     )
 
-    print("\n========== REGISTERED INTERVIEW ROUTES ==========")
+    # print("\n========== REGISTERED INTERVIEW ROUTES ==========")
 
-    for rule in app.url_map.iter_rules():
-        if str(rule).startswith("/api/interview"):
-            print(rule)
+    # for rule in app.url_map.iter_rules():
+    #     if str(rule).startswith("/api/interview"):
+    #         print(rule)
 
-    print("=================================================\n")
+    # print("=================================================\n")
 
     @app.route("/", methods=["GET"])
     def home():

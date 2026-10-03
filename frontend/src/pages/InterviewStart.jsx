@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
     startInterview,
     resumeInterview,
+    generateQuestions,
     submitAnswer,
     submitTimeout,
     evaluateInterview,
@@ -14,6 +15,7 @@ import {
 
 function InterviewStart() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // ==========================================
     // INTERVIEW STATES
@@ -55,13 +57,12 @@ function InterviewStart() {
                 setError("");
                 setLoadingStep("Loading your interview...");
 
-                const savedInterviewId = localStorage.getItem("interview_id");
+                const urlInterviewId = searchParams.get("id");
+                const savedInterviewId = urlInterviewId || localStorage.getItem("interview_id");
                 const savedSetup = localStorage.getItem("interview_setup");
 
                 if (!savedInterviewId) {
-                    setError(
-                        "Interview ID not found. Please setup the interview again."
-                    );
+                    setError("Interview ID not found. Please setup the interview again.");
                     return;
                 }
 
@@ -257,42 +258,40 @@ function InterviewStart() {
                     return;
                 }
 
-                if (
-                    resumeData.status === "ready" ||
-                    resumeData.status === "created"
-                ) {
+                if (resumeData.status === "ready" || resumeData.status === "created") {
                     console.log("Interview has not started yet.");
 
-                    setLoadingStep(
-                        "Getting your first interview question..."
-                    );
+                    // GENERATE QUESTIONS FOR NEW / RETAKE INTERVIEW
+                    if (resumeData.status === "created") {
+                        setLoadingStep("Generating your interview questions...");
 
+                        const questionData = await generateQuestions(savedInterviewId);
+                        console.log("Generate Questions Response:", questionData);
+
+                        if (!questionData?.success) {
+                            setError(questionData?.message || "Unable to generate interview questions.");
+                            return;
+                        }
+                    }
+
+                    // START INTERVIEW
+                    setLoadingStep("Getting your first interview question...");
                     const startData = await startInterview(savedInterviewId);
-
                     console.log("Start Response:", startData);
 
                     if (!startData?.success) {
-                        setError(
-                            startData?.message ||
-                            "Unable to start interview. Please try again."
-                        );
+                        setError(startData?.message || "Unable to start interview. Please try again.");
                         return;
                     }
 
                     if (!startData?.question) {
-                        setError(
-                            "Interview started, but no question was received."
-                        );
+                        setError("Interview started, but no question was received.");
                         return;
                     }
 
                     setQuestion(startData.question);
-                    setCurrentQuestion(
-                        startData.current_question || 1
-                    );
-                    setTotalQuestions(
-                        startData.total_questions || 0
-                    );
+                    setCurrentQuestion(startData.current_question || 1);
+                    setTotalQuestions(startData.total_questions || 0);
                     setAnswer("");
 
                     return;
