@@ -3364,10 +3364,15 @@ def interview_dashboard(interview_id):
         evaluations = interview.get("evaluations", [])
         answers = interview.get("answers", [])
         questions = interview.get("questions", [])
+        overall_result = interview.get("overall_result")
 
-        overall_result = interview.get(
-            "overall_result"
-        )
+        print("========== DASHBOARD DEBUG ==========", flush=True)
+        print("INTERVIEW ID:", interview_id, flush=True)
+        print("OVERALL RESULT:", overall_result, flush=True)
+        print("STRENGTHS:", overall_result.get("strengths"), flush=True)
+        print("WEAKNESSES:", overall_result.get("weaknesses"), flush=True)
+        print("RECOMMENDATIONS:", overall_result.get("recommendations"), flush=True)
+        print("======================================", flush=True)
 
         # Overall result is required
         if not overall_result:
