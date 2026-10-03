@@ -7596,3 +7596,196 @@ html {
     width: 100%;
   }
 }
+
+/* ==========================================
+   PREMIUM PERFORMANCE CHART
+========================================== */
+.performance-chart-container {
+  width: 100%;
+  margin-top: 10px;
+  padding: 26px;
+  border-radius: 18px;
+  background: linear-gradient(145deg,
+      #ffffff 0%,
+      #f8f9ff 100%);
+  border: 1px solid #e8e9f3;
+  box-shadow:
+    0 10px 30px rgba(31, 41, 55, 0.06),
+    0 2px 8px rgba(31, 41, 55, 0.03);
+}
+
+.performance-chart-container::before {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 4px;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  background: #6c63ff;
+}
+
+.performance-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.performance-chart-header h3 {
+  margin: 0 0 7px;
+  font-size: 21px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.3px;
+}
+
+.performance-chart-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.performance-chart-scale {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eeecff;
+  color: #5b52d6;
+  border: 1px solid #ddd9ff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.performance-chart-header-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.performance-latest-score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eefbf3;
+  color: #16803c;
+  border: 1px solid #ccefd9;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.performance-chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 430px;
+  padding: 10px 4px 4px;
+}
+
+.performance-latest-interview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid #ececf3;
+}
+
+.performance-latest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.performance-latest-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.performance-latest-info strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .performance-latest-interview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-latest-interview {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 12px;
+  }
+
+  .performance-latest-info strong {
+    font-size: 13px;
+  }
+}
+
+/* PERFORMANCE CHART - TABLET */
+@media (max-width: 768px) {
+
+  .performance-chart-container {
+    padding: 20px;
+    border-radius: 15px;
+  }
+
+  .performance-chart-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .performance-chart-header h3 {
+    font-size: 19px;
+  }
+
+  .performance-chart-wrapper {
+    height: 340px;
+    padding: 5px 0;
+  }
+}
+
+/* PERFORMANCE CHART - MOBILE */
+@media (max-width: 480px) {
+
+  .performance-chart-container {
+    padding: 16px;
+    border-radius: 13px;
+  }
+
+  .performance-chart-header h3 {
+    font-size: 18px;
+  }
+
+  .performance-chart-header p {
+    font-size: 13px;
+  }
+
+  .performance-chart-scale {
+    padding: 7px 11px;
+    font-size: 11px;
+  }
+
+  .performance-chart-wrapper {
+    height: 290px;
+  }
+}

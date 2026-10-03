@@ -2,8 +2,29 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-    getInterviewHistory
-} from "../services/interviewService";
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+} from "chart.js";
+
+import { Line } from "react-chartjs-2";
+
+import { getInterviewHistory } from "../services/interviewService";
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 function PerformanceChart() {
     const navigate = useNavigate();
@@ -69,6 +90,139 @@ function PerformanceChart() {
     }, []);
 
     // ==========================================
+    // CHART DATA
+    // ==========================================
+    const chartInterviews = [...interviews].sort(
+        (a, b) =>
+            new Date(a.created_at || 0) -
+            new Date(b.created_at || 0)
+    );
+
+    const chartData = {
+        labels: chartInterviews.map(
+            (_, index) => `Interview ${index + 1}`
+        ),
+
+        datasets: [
+            {
+                label: "Overall Score",
+                data: chartInterviews.map(
+                    (interview) =>
+                        Number(interview.overall_score || 0)
+                ),
+                borderColor: "#6c63ff",
+                backgroundColor: "rgba(108, 99, 255, 0.12)",
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBorderWidth: 3,
+                pointBackgroundColor: "#ffffff",
+                pointBorderColor: "#6c63ff",
+                pointHoverBackgroundColor: "#6c63ff",
+                pointHoverBorderColor: "#ffffff"
+            }
+        ]
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: "index" },
+        animation: { duration: 1000, easing: "easeOutQuart" },
+        scales: {
+            y: {
+                min: 0,
+                max: 100,
+                beginAtZero: true,
+                grid: { color: "rgba(107, 114, 128, 0.12)", drawBorder: false },
+                border: { display: false },
+                ticks: {
+                    stepSize: 10,
+                    color: "#6b7280",
+                    font: { size: 12 },
+                    callback: (value) =>
+                        `${value}%`
+                },
+
+                title: {
+                    display: true,
+                    text: "Score (%)",
+                    color: "#4b5563",
+                    font: { size: 13, weight: "600" }
+                }
+            },
+
+            x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: {
+                    color: "#6b7280",
+                    font: { size: 12 }
+                },
+                title: {
+                    display: true,
+                    text: "Interviews",
+                    color: "#4b5563",
+                    font: { size: 13, weight: "600" }
+                }
+            }
+        },
+
+        plugins: {
+            legend: {
+                display: true,
+                position: "top",
+                align: "end",
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: "circle",
+                    padding: 18,
+                    color: "#374151",
+                    font: { size: 13, weight: "600" }
+                }
+            },
+
+            tooltip: {
+                backgroundColor: "#1f2937",
+                titleColor: "#ffffff",
+                bodyColor: "#e5e7eb",
+                borderColor: "rgba(255, 255, 255, 0.1)",
+                borderWidth: 1,
+                padding: 12,
+                displayColors: false,
+                titleFont: { size: 13, weight: "700" },
+                bodyFont: { size: 13, weight: "500" },
+                callbacks: {
+                    title: (tooltipItems) => {
+                        const index = tooltipItems[0].dataIndex;
+                        const interview = chartInterviews[index];
+                        return (interview?.interview_code || `Interview ${index + 1}`);
+                    },
+
+                    label: (context) => `Score: ${context.parsed.y}%`,
+
+                    afterLabel: (context) => {
+                        const interview =
+                            chartInterviews[context.dataIndex];
+                        const details = [];
+                        if (interview?.job_role) {
+                            details.push(`Role: ${interview.job_role}`);
+                        }
+
+                        if (interview?.created_at) {
+                            details.push(`Date: ${new Date(interview.created_at).toLocaleDateString()}`
+                            );
+                        }
+                        return details;
+                    }
+                }
+            }
+        }
+    };
+
+    // ==========================================
     // LOADING
     // ==========================================
     if (loading) {
@@ -115,15 +269,14 @@ function PerformanceChart() {
                         </p>
 
                         <button
-                            type="button"
-                            className="history-back-link"
+                            className="result-back-btn"
                             onClick={() =>
                                 navigate(
-                                    "/interview/history"
+                                    "/interview-history"
                                 )
                             }
                         >
-                            ← Back to Interview History
+                            Back to Interview History
                         </button>
                     </div>
                 </div>
@@ -257,13 +410,9 @@ function PerformanceChart() {
                 {/* ======================================
                     CHART PLACEHOLDER
                 ====================================== */}
-                <div className="result-card">
-                    <h2>
-                        Interview Performance
-                    </h2>
-
-                    {
-                        interviews.length === 0 ? (
+                {
+                    interviews.length === 0 ? (
+                        <div className="result-card">
                             <div className="history-empty">
                                 <div className="history-empty-icon">
                                     📊
@@ -282,39 +431,117 @@ function PerformanceChart() {
                                     type="button"
                                     className="history-start-button"
                                     onClick={() =>
-                                        navigate(
-                                            "/interview/setup"
-                                        )
+                                        navigate("/interview/setup")
                                     }
                                 >
                                     Start New Interview →
                                 </button>
                             </div>
-                        ) : (
-                            <div className="performance-chart-placeholder">
-                                <div className="performance-chart-icon">
-                                    📈
+                        </div>
+                    ) : (
+                        <div className="performance-chart-container">
+
+                            {/* Chart Header */}
+                            <div className="performance-chart-header">
+                                <div>
+                                    <h3>
+                                        Performance Progress
+                                    </h3>
+
+                                    <p>
+                                        Your overall interview scores
+                                        over time.
+                                    </p>
                                 </div>
 
-                                <h3>
-                                    Performance Chart
-                                </h3>
+                                <div className="performance-chart-header-stats">
+                                    <span className="performance-chart-scale">
+                                        0–100%
+                                    </span>
 
-                                <p>
-                                    Your interview performance
-                                    chart will appear here.
-                                </p>
-
-                                <p>
-                                    Completed Interviews:{" "}
-                                    <strong>
-                                        {interviews.length}
-                                    </strong>
-                                </p>
+                                    <span className="performance-latest-score">
+                                        Latest:{" "}
+                                        {Number(
+                                            chartInterviews[
+                                                chartInterviews.length - 1
+                                            ]?.overall_score || 0
+                                        ).toFixed(1)}
+                                        %
+                                    </span>
+                                </div>
                             </div>
-                        )
-                    }
-                </div>
+
+
+                            {/* Chart */}
+                            <div className="performance-chart-wrapper">
+                                <Line
+                                    data={chartData}
+                                    options={chartOptions}
+                                />
+                            </div>
+
+
+                            {/* Latest Interview Details */}
+                            <div className="performance-latest-interview">
+
+                                <div className="performance-latest-info">
+                                    <span className="performance-latest-label">
+                                        Latest Interview
+                                    </span>
+                                    <strong>
+                                        Interview {chartInterviews.length}
+                                    </strong>
+                                </div>
+
+                                <div className="performance-latest-info">
+                                    <span className="performance-latest-label">
+                                        Role
+                                    </span>
+                                    <strong>
+                                        {
+                                            chartInterviews[
+                                                chartInterviews.length - 1
+                                            ]?.job_role || "N/A"
+                                        }
+                                    </strong>
+                                </div>
+
+                                <div className="performance-latest-info">
+                                    <span className="performance-latest-label">
+                                        Score
+                                    </span>
+                                    <strong>
+                                        {Number(
+                                            chartInterviews[
+                                                chartInterviews.length - 1
+                                            ]?.overall_score || 0
+                                        ).toFixed(1)}
+                                        %
+                                    </strong>
+                                </div>
+
+                                <div className="performance-latest-info">
+                                    <span className="performance-latest-label">
+                                        Date
+                                    </span>
+                                    <strong>
+                                        {
+                                            chartInterviews[
+                                                chartInterviews.length - 1
+                                            ]?.created_at
+                                                ? new Date(
+                                                    chartInterviews[
+                                                        chartInterviews.length - 1
+                                                    ].created_at
+                                                ).toLocaleDateString()
+                                                : "N/A"
+                                        }
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
             </div>
         </div>
     );

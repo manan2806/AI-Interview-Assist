@@ -4024,6 +4024,7 @@ def retake_interview(interview_id):
         # Create new interview
         new_interview = {
             "user_id": user_id,
+            "interview_code": f"INT{random.randint(100000, 999999)}",
             "job_role": original_interview.get("job_role",""),
             "experience_level": original_interview.get("experience_level","Fresher"),
             "interview_type": original_interview.get("interview_type","Technical"),
@@ -4052,6 +4053,7 @@ def retake_interview(interview_id):
             "interview_id": new_interview_id,
             "retake_of": str(original_interview["_id"]),
             "interview": {
+                "interview_code": new_interview["interview_code"],
                 "job_role": new_interview["job_role"],
                 "experience_level": new_interview["experience_level"],
                 "interview_type": new_interview["interview_type"],
