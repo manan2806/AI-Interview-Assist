@@ -687,26 +687,16 @@ IMPORTANT RULES:
 # ==========================================
 # GENERATE OVERALL RESULT
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/overall-result",
-    methods=["POST"]
-)
+@interview_bp.route("/<interview_id>/overall-result", methods=["POST"])
 @jwt_required()
 def generate_overall_result(interview_id):
-
     try:
-
         user_id = get_jwt_identity()
 
         # VALIDATE INTERVIEW ID
         try:
-
-            object_id = ObjectId(
-                interview_id
-            )
-
+            object_id = ObjectId(interview_id)
         except Exception:
-
             return jsonify({
                 "success": False,
                 "message": "Invalid interview ID"
@@ -719,30 +709,18 @@ def generate_overall_result(interview_id):
         })
 
         if not interview:
-
             return jsonify({
                 "success": False,
                 "message": "Interview not found"
             }), 404
 
         # CHECK COMPLETED
-        current_status = interview.get(
-            "status"
-        )
+        current_status = interview.get("status")
 
-        print("================================")
-        print(
-            "INTERVIEW STATUS:",
-            current_status
-        )
-        print(
-            "INTERVIEW ID:",
-            interview_id
-        )
-        print("================================")
+        print("INTERVIEW STATUS:", current_status, flush=True)
+        print("INTERVIEW ID:", interview_id, flush=True)
 
         if current_status != "completed":
-
             return jsonify({
                 "success": False,
                 "message": "Interview is not completed yet",
@@ -750,301 +728,468 @@ def generate_overall_result(interview_id):
             }), 400
 
         # GET EVALUATIONS
-        evaluations = interview.get(
-            "evaluations",
-            []
-        )
+        evaluations = interview.get("evaluations", [])
 
         if not evaluations:
-
             return jsonify({
                 "success": False,
                 "message": "No answer evaluations found"
             }), 400
 
-        # IF OVERALL RESULT ALREADY EXISTS
-        existing_overall_result = interview.get(
-            "overall_result"
-        )
+        # CHECK EXISTING OVERALL RESULT
+        existing_overall_result = interview.get("overall_result")
+        needs_ai_regeneration = False
 
         if existing_overall_result:
+            existing_strengths = existing_overall_result.get("strengths", [])
+            existing_weaknesses = existing_overall_result.get("weaknesses", [])
+            existing_recommendations = existing_overall_result.get(
+                "recommendations",
+                []
+            )
 
-            return jsonify({
-                "success": True,
-                "message": "Overall result already generated",
-                "interview_id": interview_id,
-                "overall_result": existing_overall_result,
-                "report": {
-                    "pdf_generated": False,
-                    "email_sent": interview.get(
-                        "report_email_sent",
-                        False
-                    ),
-                    "email_error": interview.get(
-                        "report_email_error",
-                        None
+            needs_ai_regeneration = (
+                not isinstance(existing_strengths, list)
+                or not existing_strengths
+                or not isinstance(existing_weaknesses, list)
+                or not existing_weaknesses
+                or not isinstance(existing_recommendations, list)
+                or not existing_recommendations
+            )
+
+            print("Existing overall result found.", flush=True)
+            print("Existing strengths:", existing_strengths, flush=True)
+            print("Existing weaknesses:", existing_weaknesses, flush=True)
+            print(
+                "Existing recommendations:",
+                existing_recommendations,
+                flush=True
+            )
+            print(
+                "AI regeneration required:",
+                needs_ai_regeneration,
+                flush=True
+            )
+
+            if not needs_ai_regeneration:
+                print(
+                    "AI analysis already exists. Returning existing result.",
+                    flush=True
+                )
+
+                return jsonify({
+                    "success": True,
+                    "message": "Overall result already generated",
+                    "interview_id": interview_id,
+                    "overall_result": existing_overall_result,
+                    "report": {
+                        "pdf_generated": False,
+                        "email_sent": interview.get(
+                            "report_email_sent",
+                            False
+                        ),
+                        "email_error": interview.get(
+                            "report_email_error",
+                            None
+                        )
+                    }
+                }), 200
+
+        # REGENERATE OLD / INCOMPLETE AI ANALYSIS
+        if existing_overall_result and needs_ai_regeneration:
+            print(
+                "REGENERATING INCOMPLETE AI ANALYSIS",
+                flush=True
+            )
+            print("INTERVIEW ID:", interview_id, flush=True)
+
+            try:
+                if gemini_client is None:
+                    raise Exception(
+                        "Gemini AI client is not available."
                     )
-                }
-            }), 200
 
-        # ==========================================
-        # STEP 1 CALCULATE NUMERIC SCORE
-        # ==========================================
+                ai_result = generate_overall_analysis(
+                    interview.get("job_role", ""),
+                    interview.get("experience_level", ""),
+                    interview.get("difficulty", ""),
+                    evaluations
+                )
+
+                print("REGENERATED AI RESULT:", ai_result, flush=True)
+
+                if not isinstance(ai_result, dict):
+                    raise Exception(
+                        "Invalid AI analysis response."
+                    )
+
+                strengths = ai_result.get("strengths", [])
+                weaknesses = ai_result.get("weaknesses", [])
+                recommendations = ai_result.get("recommendations", [])
+
+                if not isinstance(strengths, list):
+                    strengths = []
+
+                if not isinstance(weaknesses, list):
+                    weaknesses = []
+
+                if not isinstance(recommendations, list):
+                    recommendations = []
+
+                if (
+                    not strengths
+                    or not weaknesses
+                    or not recommendations
+                ):
+                    raise Exception(
+                        "AI returned incomplete analysis."
+                    )
+
+                ai_update_result = interviews.update_one(
+                    {
+                        "_id": object_id,
+                        "user_id": user_id
+                    },
+                    {
+                        "$set": {
+                            "overall_result.summary": ai_result.get(
+                                "summary",
+                                existing_overall_result.get(
+                                    "summary",
+                                    ""
+                                )
+                            ),
+                            "overall_result.strengths": strengths,
+                            "overall_result.weaknesses": weaknesses,
+                            "overall_result.recommendations": recommendations,
+                            "overall_result.technical_skill_assessment":
+                                ai_result.get(
+                                    "technical_skill_assessment",
+                                    existing_overall_result.get(
+                                        "technical_skill_assessment",
+                                        ""
+                                    )
+                                ),
+                            "overall_result.readiness_assessment":
+                                ai_result.get(
+                                    "readiness_assessment",
+                                    existing_overall_result.get(
+                                        "readiness_assessment",
+                                        ""
+                                    )
+                                ),
+                            "overall_result.ai_regenerated_at":
+                                datetime.utcnow()
+                        }
+                    }
+                )
+
+                print(
+                    "AI update matched:",
+                    ai_update_result.matched_count,
+                    flush=True
+                )
+                print(
+                    "AI update modified:",
+                    ai_update_result.modified_count,
+                    flush=True
+                )
+
+                updated_interview = interviews.find_one({
+                    "_id": object_id,
+                    "user_id": user_id
+                })
+
+                if not updated_interview:
+                    raise Exception(
+                        "Interview could not be loaded after AI regeneration."
+                    )
+
+                updated_overall_result = updated_interview.get(
+                    "overall_result",
+                    existing_overall_result
+                )
+
+                print(
+                    "AI analysis regenerated successfully.",
+                    flush=True
+                )
+                print(
+                    "Updated strengths:",
+                    updated_overall_result.get("strengths", []),
+                    flush=True
+                )
+                print(
+                    "Updated weaknesses:",
+                    updated_overall_result.get("weaknesses", []),
+                    flush=True
+                )
+                print(
+                    "Updated recommendations:",
+                    updated_overall_result.get("recommendations", []),
+                    flush=True
+                )
+
+                return jsonify({
+                    "success": True,
+                    "message": "AI analysis regenerated successfully",
+                    "interview_id": interview_id,
+                    "overall_result": updated_overall_result,
+                    "report": {
+                        "pdf_generated": False,
+                        "email_sent": updated_interview.get(
+                            "report_email_sent",
+                            False
+                        ),
+                        "email_error": updated_interview.get(
+                            "report_email_error",
+                            None
+                        )
+                    }
+                }), 200
+
+            except Exception as ai_error:
+                print(
+                    "AI analysis regeneration failed:",
+                    str(ai_error),
+                    flush=True
+                )
+
+                return jsonify({
+                    "success": False,
+                    "message": "AI analysis regeneration failed",
+                    "error": str(ai_error)
+                }), 500
+
+        # CALCULATE NUMERIC SCORE
         total_score = 0
-
         valid_evaluations = 0
 
         for evaluation in evaluations:
-
-            score = evaluation.get(
-                "score",
-                0
-            )
+            score = evaluation.get("score", 0)
 
             try:
-
-                score = float(
-                    score
-                )
-
-            except (
-                ValueError,
-                TypeError
-            ):
-
+                score = float(score)
+            except (ValueError, TypeError):
                 score = 0
 
-            # Keep score between 0 and 10
-            score = max(
-                0,
-                min(
-                    10,
-                    score
-                )
-            )
+            score = max(0, min(10, score))
 
             total_score += score
-
             valid_evaluations += 1
 
-        # CHECK SCORE
         if valid_evaluations == 0:
-
             return jsonify({
                 "success": False,
                 "message": "Unable to calculate overall score"
             }), 400
 
-        max_score = (
-            valid_evaluations * 10
-        )
+        max_score = valid_evaluations * 10
 
         overall_score = round(
-            (
-                total_score /
-                max_score
-            ) * 100,
+            (total_score / max_score) * 100,
             2
         )
 
         average_score = round(
-            total_score /
-            valid_evaluations,
+            total_score / valid_evaluations,
             2
         )
 
-        # ==========================================
-        # STEP 2 PERFORMANCE LEVEL
-        # ==========================================
+        # PERFORMANCE LEVEL
         if overall_score >= 90:
-
             performance_level = "Excellent"
-
         elif overall_score >= 75:
-
             performance_level = "Very Good"
-
         elif overall_score >= 60:
-
             performance_level = "Good"
-
         elif overall_score >= 40:
-
             performance_level = "Needs Improvement"
-
         else:
-
             performance_level = "Poor"
 
-        # ==========================================
-        # STEP 3 DEFAULT AI ANALYSIS
-        # ==========================================
+        # DEFAULT AI ANALYSIS
         ai_analysis = {
-
-            "summary":
+            "summary": (
                 "Interview completed successfully. "
                 "The overall score is calculated from "
-                "your evaluated answers.",
-
+                "your evaluated answers."
+            ),
             "strengths": [],
-
             "weaknesses": [],
-
             "recommendations": [],
-
-            "technical_skill_assessment":
+            "technical_skill_assessment": (
                 "Assessment is based on the scores "
-                "received for the evaluated answers.",
-
-            "readiness_assessment":
+                "received for the evaluated answers."
+            ),
+            "readiness_assessment": (
                 "Continue practicing the areas where "
                 "your score was lower."
+            )
         }
 
-        # ==========================================
-        # STEP 4 TRY GEMINI OVERALL ANALYSIS
-        # ==========================================
+        # TRY GEMINI OVERALL ANALYSIS
         if gemini_client is not None:
-
             try:
-
                 ai_result = generate_overall_analysis(
-
-                    interview.get(
-                        "job_role",
-                        ""
-                    ),
-
-                    interview.get(
-                        "experience_level",
-                        ""
-                    ),
-
-                    interview.get(
-                        "difficulty",
-                        ""
-                    ),
-
+                    interview.get("job_role", ""),
+                    interview.get("experience_level", ""),
+                    interview.get("difficulty", ""),
                     evaluations
                 )
 
-                if isinstance(
-                    ai_result,
-                    dict
-                ):
+                if isinstance(ai_result, dict):
+                    ai_analysis.update(ai_result)
 
-                    ai_analysis.update(
-                        ai_result
+                    print(
+                        "Gemini overall analysis generated successfully.",
+                        flush=True
+                    )
+                    print(
+                        "AI ANALYSIS:",
+                        ai_result,
+                        flush=True
                     )
 
             except Exception as e:
+                print("Overall AI analysis failed:", str(e),flush=True)
+                print("Using fallback analysis.",flush=True)
+        else:
+            print("Gemini client is not available.",flush=True)
 
-                print(
-                    "Overall AI analysis failed:",
-                    str(e)
-                )
+        # ENSURE AI ARRAYS ARE NOT EMPTY
+        if not isinstance(ai_analysis.get("strengths"), list):
+            ai_analysis["strengths"] = []
 
-                print(
-                    "Numeric interview result "
-                    "will still be generated."
-                )
+        if not isinstance(ai_analysis.get("weaknesses"), list):
+            ai_analysis["weaknesses"] = []
 
-        # ==========================================
-        # STEP 5 CREATE OVERALL RESULT
-        # ==========================================
+        if not isinstance(ai_analysis.get("recommendations"), list):
+            ai_analysis["recommendations"] = []
+
+        # FALLBACK STRENGTHS
+        if not ai_analysis["strengths"]:
+            if average_score >= 8:
+                ai_analysis["strengths"] = [
+                    "Demonstrated strong overall interview performance.",
+                    "Provided answers with good understanding of the evaluated topics."
+                ]
+            elif average_score >= 6:
+                ai_analysis["strengths"] = [
+                    "Demonstrated a reasonable understanding of the interview topics.",
+                    "Provided answers that addressed several important aspects of the questions."
+                ]
+            else:
+                ai_analysis["strengths"] = [
+                    "Attempted the interview questions and demonstrated understanding of some basic concepts.",
+                    "Completed the interview and provided responses for evaluation."
+                ]
+
+        # FALLBACK WEAKNESSES
+        if not ai_analysis["weaknesses"]:
+            if average_score >= 8:
+                ai_analysis["weaknesses"] = [
+                    "Some answers may require more detailed technical explanation.",
+                    "Further practice can improve consistency across different questions."
+                ]
+            elif average_score >= 6:
+                ai_analysis["weaknesses"] = [
+                    "Some answers lacked sufficient depth or technical detail.",
+                    "Certain concepts require additional practice and clarification."
+                ]
+            else:
+                ai_analysis["weaknesses"] = [
+                    "Several answers require stronger technical understanding.",
+                    "More practice is needed to provide complete and accurate responses."
+                ]
+
+        # FALLBACK RECOMMENDATIONS
+        if not ai_analysis["recommendations"]:
+            ai_analysis["recommendations"] = [
+                "Review the concepts related to questions where the score was lower.",
+                "Practice explaining technical concepts clearly using practical examples.",
+                "Complete additional mock interviews to improve answer quality and confidence."
+            ]
+
+        # FALLBACK SUMMARY
+        if (
+            not isinstance(ai_analysis.get("summary"), str)
+            or not ai_analysis.get("summary").strip()
+        ):
+            ai_analysis["summary"] = (
+                f"The interview was completed with an "
+                f"overall score of {overall_score}%. "
+                f"The results are based on the evaluation "
+                f"of the submitted answers."
+            )
+
+        # FALLBACK TECHNICAL ASSESSMENT
+        if (
+            not isinstance(
+                ai_analysis.get("technical_skill_assessment"),
+                str
+            )
+            or not ai_analysis.get("technical_skill_assessment").strip()
+        ):
+            ai_analysis["technical_skill_assessment"] = (
+                "Technical skill assessment is based "
+                "on the scores and feedback received "
+                "for the evaluated answers."
+            )
+
+        # FALLBACK READINESS ASSESSMENT
+        if (
+            not isinstance(
+                ai_analysis.get("readiness_assessment"),
+                str
+            )
+            or not ai_analysis.get("readiness_assessment").strip()
+        ):
+            ai_analysis["readiness_assessment"] = (
+                "Continue practicing weaker areas "
+                "and complete additional mock interviews "
+                "to improve overall interview readiness."
+            )
+
+        # CREATE OVERALL RESULT
         overall_result = {
-
-            "overall_score":
-                overall_score,
-
-            "average_score":
-                average_score,
-
-            "total_score":
-                total_score,
-
-            "max_score":
-                max_score,
-
-            "performance_level":
-                performance_level,
-
-            "summary":
-                ai_analysis.get(
-                    "summary",
-                    ""
-                ),
-
-            "strengths":
-                ai_analysis.get(
-                    "strengths",
-                    []
-                ),
-
-            "weaknesses":
-                ai_analysis.get(
-                    "weaknesses",
-                    []
-                ),
-
-            "recommendations":
-                ai_analysis.get(
-                    "recommendations",
-                    []
-                ),
-
-            "technical_skill_assessment":
-                ai_analysis.get(
-                    "technical_skill_assessment",
-                    ""
-                ),
-
-            "readiness_assessment":
-                ai_analysis.get(
-                    "readiness_assessment",
-                    ""
-                ),
-
-            "generated_at":
-                datetime.utcnow()
+            "overall_score": overall_score,
+            "average_score": average_score,
+            "total_score": total_score,
+            "max_score": max_score,
+            "performance_level": performance_level,
+            "summary": ai_analysis.get("summary", ""),
+            "strengths": ai_analysis.get("strengths", []),
+            "weaknesses": ai_analysis.get("weaknesses", []),
+            "recommendations": ai_analysis.get("recommendations",[]),
+            "technical_skill_assessment": ai_analysis.get("technical_skill_assessment",""),
+            "readiness_assessment": ai_analysis.get("readiness_assessment",""),
+            "generated_at": datetime.utcnow()
         }
 
-        # ==========================================
-        # STEP 6 SAVE OVERALL RESULT
-        # ==========================================
+        # SAVE OVERALL RESULT
         update_result = interviews.update_one(
             {
-                "_id":
-                    object_id,
-
-                "user_id":
-                    user_id
+                "_id": object_id,
+                "user_id": user_id
             },
-
             {
                 "$set": {
-
-                    "overall_result":
-                        overall_result,
-
-                    "status":
-                        "completed"
+                    "overall_result": overall_result,
+                    "status": "completed"
                 }
             }
         )
 
-        # CHECK DATABASE UPDATE
         if update_result.matched_count == 0:
-
             return jsonify({
                 "success": False,
-                "message":
-                    "Interview could not be updated"
+                "message": "Interview could not be updated"
             }), 500
 
-        # ==========================================
-        # STEP 7 PDF + EMAIL
-        # ==========================================
+        print("Overall result saved successfully.",flush=True)
+
+        # PDF + EMAIL
         report_email_sent = False
         report_email_error = None
         pdf_generated = False
@@ -1054,33 +1199,17 @@ def generate_overall_result(interview_id):
             # GET REGISTERED USER
             user = None
 
-            # Try MongoDB ObjectId
             try:
-
-                user_object_id = ObjectId(
-                    user_id
-                )
-
-                user = users.find_one({
-                    "_id": user_object_id
-                })
-
+                user_object_id = ObjectId(user_id)
+                user = users.find_one({"_id": user_object_id})
             except Exception:
-
                 pass
 
-            # Try string user_id if ObjectId lookup did not find user
             if not user:
-
-                user = users.find_one({
-                    "user_id": user_id
-                })
+                user = users.find_one({"user_id": user_id})
 
             if not user:
-
-                raise Exception(
-                    "Registered user not found."
-                )
+                raise Exception("Registered user not found.")
 
             # GET USER NAME
             recipient_name = (
@@ -1090,27 +1219,16 @@ def generate_overall_result(interview_id):
             )
 
             # GET USER EMAIL
-            recipient_email = (
-                user.get("email")
-                or ""
-            )
+            recipient_email = user.get("email") or ""
 
             if not recipient_email:
-
                 raise Exception(
                     "Registered user email not found."
                 )
 
             # CREATE REPORT DIRECTORY
-            reports_folder = os.path.join(
-                os.getcwd(),
-                "generated_reports"
-            )
-
-            os.makedirs(
-                reports_folder,
-                exist_ok=True
-            )
+            reports_folder = os.path.join(os.getcwd(),"generated_reports")
+            os.makedirs(reports_folder,exist_ok=True)
 
             # GET UPDATED INTERVIEW
             updated_interview = interviews.find_one({"_id": object_id,"user_id": user_id})
@@ -1121,148 +1239,83 @@ def generate_overall_result(interview_id):
                     "after generating result."
                 )
 
-            # CREATE PDF FILE NAME USING INTERVIEW CODE
-            interview_code = updated_interview.get("interview_code",interview_id)
-            pdf_file_name = (f"Result_{interview_code}.pdf")
+            # CREATE PDF FILE NAME
+            interview_code = updated_interview.get( "interview_code", interview_id)
+            pdf_file_name = f"Result_{interview_code}.pdf"
             pdf_path = os.path.join(reports_folder,pdf_file_name)
 
             # GENERATE PDF
             generate_interview_pdf(updated_interview,pdf_path)
+
             pdf_generated = True
-            
-            print("✅ PDF generated:",pdf_path)
+            print("PDF generated:",pdf_path,flush=True)
 
             # SEND EMAIL
             send_interview_report_email(
-
-                recipient_email=
-                    recipient_email,
-
-                recipient_name=
-                    recipient_name,
-
-                pdf_path=
-                    pdf_path,
-
-                job_role=
-                    updated_interview.get(
-                        "job_role",
-                        "Interview"
-                    )
+                recipient_email=recipient_email,
+                recipient_name=recipient_name,
+                pdf_path=pdf_path,
+                job_role=updated_interview.get(
+                    "job_role",
+                    "Interview"
+                )
             )
 
             report_email_sent = True
-
-            print(
-                "✅ Email sent to:",
-                recipient_email
-            )
+            print("Email sent to:",recipient_email,flush=True)
 
             # SAVE EMAIL STATUS
             interviews.update_one(
                 {
-                    "_id":
-                        object_id,
-
-                    "user_id":
-                        user_id
+                    "_id": object_id,
+                    "user_id": user_id
                 },
-
                 {
                     "$set": {
-
-                        "report_email_sent":
-                            True,
-
-                        "report_email_sent_at":
-                            datetime.utcnow(),
-
-                        "report_email":
-                            recipient_email
+                        "report_email_sent": True,
+                        "report_email_sent_at": datetime.utcnow(),
+                        "report_email": recipient_email
                     }
                 }
             )
 
         except Exception as report_error:
+            report_email_error = str(report_error)
+            print("PDF/Email Error:", report_email_error, flush=True)
 
-            report_email_error = str(
-                report_error
-            )
-
-            print(
-                "⚠️ PDF/Email Error:",
-                report_email_error
-            )
-
-            # Save failure status
+            # SAVE REPORT FAILURE STATUS
             interviews.update_one(
-
                 {
-                    "_id":
-                        object_id,
-
-                    "user_id":
-                        user_id
+                    "_id": object_id,
+                    "user_id": user_id
                 },
-
                 {
                     "$set": {
-
-                        "report_email_sent":
-                            False,
-
-                        "report_email_error":
-                            report_email_error
+                        "report_email_sent": False,
+                        "report_email_error": report_email_error
                     }
                 }
             )
 
-        # ==========================================
-        # STEP 8 FINAL RESPONSE
-        # ==========================================
+        # FINAL RESPONSE
         return jsonify({
-
-            "success":
-                True,
-
-            "message":
-                "Overall interview result generated successfully",
-
-            "interview_id":
-                interview_id,
-
-            "overall_result":
-                overall_result,
-
+            "success": True,
+            "message": "Overall interview result generated successfully",
+            "interview_id": interview_id,
+            "overall_result": overall_result,
             "report": {
-
-                "pdf_generated":
-                    pdf_generated,
-
-                "email_sent":
-                    report_email_sent,
-
-                "email_error":
-                    report_email_error
+                "pdf_generated": pdf_generated,
+                "email_sent": report_email_sent,
+                "email_error": report_email_error
             }
-
         }), 200
 
     except Exception as e:
-
-        print(
-            "Overall Result Error:",
-            str(e)
-        )
+        print("Overall Result Error:",str(e),flush=True)
 
         return jsonify({
-
-            "success":
-                False,
-
-            "message":
-                str(e)
-
+            "success": False,
+            "message": str(e)
         }), 500
 
 # ==========================================

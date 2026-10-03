@@ -4,7 +4,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 
 import {
-    getInterviewDashboard
+    getInterviewDashboard,
+    generateOverallResult
 } from "../services/interviewService";
 
 
@@ -33,66 +34,55 @@ function InterviewResult() {
     useEffect(() => {
 
         const loadResult = async () => {
-
             try {
-
                 setLoading(true);
                 setError("");
 
                 if (!id) {
-
-                    setError(
-                        "Interview ID is missing."
-                    );
-
+                    setError("Interview ID is missing.");
                     return;
                 }
 
-                console.log(
-                    "Loading Interview Result:",
-                    id
-                );
+                console.log("Loading Interview Result:", id);
 
-                const dashboardResponse =
-                    await getInterviewDashboard(id);
+                // GENERATE / REGENERATE OVERALL RESULT
+                console.log("Generating / Regenerating Overall Result:", id);
 
-                console.log(
-                    "Interview Dashboard:",
-                    dashboardResponse
-                );
+                const overallResultResponse = await generateOverallResult(id);
+
+                console.log("Overall Result Response:", overallResultResponse);
+
+                if (!overallResultResponse?.success) {
+                    setError(
+                        overallResultResponse?.message ||
+                        overallResultResponse?.error ||
+                        "Unable to generate interview result."
+                    );
+                    return;
+                }
+
+                // LOAD UPDATED DASHBOARD
+                const dashboardResponse = await getInterviewDashboard(id);
+
+                console.log("Interview Dashboard:", dashboardResponse);
 
                 if (!dashboardResponse?.success) {
-
                     setError(
                         dashboardResponse?.message ||
                         dashboardResponse?.error ||
                         "Unable to load interview result."
                     );
-
                     return;
                 }
 
                 if (!dashboardResponse?.data) {
-
-                    setError(
-                        "Interview result data was not found."
-                    );
-
+                    setError("Interview result data was not found.");
                     return;
                 }
 
-                setData(
-                    dashboardResponse.data
-                );
-
-            }
-
-            catch (err) {
-
-                console.error(
-                    "Interview Result Error:",
-                    err
-                );
+                setData(dashboardResponse.data);
+            } catch (err) {
+                console.error("Interview Result Error:", err);
 
                 setError(
                     err.response?.data?.message ||
@@ -100,13 +90,9 @@ function InterviewResult() {
                     err.message ||
                     "Unable to load interview result. Please try again."
                 );
-
-            }
-
-            finally {
+            } finally {
                 setLoading(false);
             }
-
         };
 
         loadResult();
