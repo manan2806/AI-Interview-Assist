@@ -3421,7 +3421,7 @@ def interview_dashboard(interview_id):
 
         print("========== DASHBOARD DEBUG ==========", flush=True)
         print("INTERVIEW ID:", interview_id, flush=True)
-        print("OVERALL RESULT:", overall_result, flush=True)
+        # print("OVERALL RESULT:", overall_result, flush=True)
         print("STRENGTHS:", overall_result.get("strengths"), flush=True)
         print("WEAKNESSES:", overall_result.get("weaknesses"), flush=True)
         print("RECOMMENDATIONS:", overall_result.get("recommendations"), flush=True)
