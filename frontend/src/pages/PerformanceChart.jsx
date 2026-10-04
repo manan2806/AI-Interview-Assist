@@ -37,6 +37,8 @@ function PerformanceChart() {
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [comparisonInterview1, setComparisonInterview1] = useState("");
+    const [comparisonInterview2, setComparisonInterview2] = useState("");
 
     // ==========================================
     // LOAD INTERVIEW HISTORY
@@ -99,6 +101,32 @@ function PerformanceChart() {
             new Date(a.created_at || 0) -
             new Date(b.created_at || 0)
     );
+
+    // ==========================================
+    // INTERVIEW COMPARISON
+    // ==========================================
+    const selectedInterview1 = chartInterviews.find(
+        (interview) =>
+            String(
+                interview.interview_code ||
+                interview._id ||
+                interview.id
+            ) === String(comparisonInterview1)
+    );
+
+    const selectedInterview2 = chartInterviews.find(
+        (interview) =>
+            String(
+                interview.interview_code ||
+                interview._id ||
+                interview.id
+            ) === String(comparisonInterview2)
+    );
+
+    // console.log("Comparison Interview 1:", selectedInterview1);
+    // console.log("Comparison Interview 2:", selectedInterview2);
+    // console.log("Selected Interview 1 ID:", comparisonInterview1);
+    // console.log("Selected Interview 2 ID:", comparisonInterview2);
 
     const chartData = {
         labels: chartInterviews.map(
@@ -668,6 +696,243 @@ function PerformanceChart() {
                                     />
                                 </div>
 
+                            </div>
+
+                            {/* ======================================
+                                INTERVIEW COMPARISON
+                            ====================================== */}
+                            <div className="interview-comparison-container">
+                                <div className="interview-comparison-header">
+                                    <div>
+                                        <h3>Interview Comparison</h3>
+                                        <p>Compare the performance of two completed interviews.</p>
+                                    </div>
+
+                                    {(comparisonInterview1 || comparisonInterview2) && (
+                                        <div className="interview-comparison-clear-wrapper">
+                                            {(comparisonInterview1 || comparisonInterview2) && (
+                                                <button
+                                                    type="button"
+                                                    className="interview-comparison-clear-button"
+                                                    onClick={() => {
+                                                        setComparisonInterview1("");
+                                                        setComparisonInterview2("");
+                                                    }}
+                                                >
+                                                    ✕ Clear
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="interview-comparison-selectors">
+                                    <div className="interview-comparison-select-group">
+                                        <label>First Interview</label>
+
+                                        <select
+                                            value={comparisonInterview1}
+                                            onChange={(e) => {
+                                                setComparisonInterview1(e.target.value);
+                                                console.log(
+                                                    "First Interview Selected:",
+                                                    e.target.value
+                                                );
+                                            }}
+                                        >
+                                            <option value="">Select interview</option>
+
+                                            {chartInterviews.map((interview, index) => {
+                                                const interviewValue =
+                                                    interview.interview_code ||
+                                                    interview._id ||
+                                                    interview.id ||
+                                                    String(index);
+
+                                                return (
+                                                    <option
+                                                        key={interviewValue}
+                                                        value={String(interviewValue)}
+                                                    >
+                                                        Interview {index + 1}
+                                                        {interview.interview_code
+                                                            ? ` — ${interview.interview_code}`
+                                                            : ""}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                    </div>
+
+                                    <div className="interview-comparison-vs">
+                                        VS
+                                    </div>
+
+                                    <div className="interview-comparison-select-group">
+                                        <label>Second Interview</label>
+
+                                        <select
+                                            value={comparisonInterview2}
+                                            onChange={(e) => {
+                                                setComparisonInterview2(e.target.value);
+                                                console.log(
+                                                    "Second Interview Selected:",
+                                                    e.target.value
+                                                );
+                                            }}
+                                        >
+                                            <option value="">Select interview</option>
+
+                                            {chartInterviews.map((interview, index) => {
+                                                const interviewValue =
+                                                    interview.interview_code ||
+                                                    interview._id ||
+                                                    interview.id ||
+                                                    String(index);
+
+                                                return (
+                                                    <option
+                                                        key={interviewValue}
+                                                        value={String(interviewValue)}
+                                                    >
+                                                        Interview {index + 1}
+                                                        {interview.interview_code
+                                                            ? ` — ${interview.interview_code}`
+                                                            : ""}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {selectedInterview1 && selectedInterview2 ? (
+                                    <div className="interview-comparison-result">
+                                        <div className="interview-comparison-card">
+                                            <span className="interview-comparison-card-label">
+                                                Interview 1
+                                            </span>
+
+                                            <h4>
+                                                {selectedInterview1.interview_code ||
+                                                    "Interview 1"}
+                                            </h4>
+
+                                            <div className="interview-comparison-score">
+                                                {Number(
+                                                    selectedInterview1.overall_score || 0
+                                                ).toFixed(1)}
+                                                %
+                                            </div>
+
+                                            <div className="interview-comparison-details">
+                                                <div>
+                                                    <span>Role</span>
+                                                    <strong>
+                                                        {selectedInterview1.job_role || "N/A"}
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <span>Experience</span>
+                                                    <strong>
+                                                        {selectedInterview1.experience_level ||
+                                                            "N/A"}
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <span>Date</span>
+                                                    <strong>
+                                                        {selectedInterview1.created_at
+                                                            ? new Date(
+                                                                selectedInterview1.created_at
+                                                            ).toLocaleDateString()
+                                                            : "N/A"}
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="interview-comparison-middle">
+                                            <span>VS</span>
+
+                                            {(() => {
+                                                const score1 = Number(selectedInterview1.overall_score || 0);
+                                                const score2 = Number(selectedInterview2.overall_score || 0);
+                                                const difference = score2 - score1;
+
+                                                return (
+                                                    <strong
+                                                        className={
+                                                            difference > 0
+                                                                ? "comparison-positive"
+                                                                : difference < 0
+                                                                    ? "comparison-negative"
+                                                                    : "comparison-neutral"
+                                                        }
+                                                    >
+                                                        {difference > 0 ? "+" : ""}
+                                                        {difference.toFixed(1)}%
+                                                    </strong>
+                                                );
+                                            })()}
+                                        </div>
+
+                                        <div className="interview-comparison-card">
+                                            <span className="interview-comparison-card-label">
+                                                Interview 2
+                                            </span>
+
+                                            <h4>
+                                                {selectedInterview2.interview_code ||
+                                                    "Interview 2"}
+                                            </h4>
+
+                                            <div className="interview-comparison-score">
+                                                {Number(
+                                                    selectedInterview2.overall_score || 0
+                                                ).toFixed(1)}
+                                                %
+                                            </div>
+
+                                            <div className="interview-comparison-details">
+                                                <div>
+                                                    <span>Role</span>
+                                                    <strong>
+                                                        {selectedInterview2.job_role || "N/A"}
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <span>Experience</span>
+                                                    <strong>
+                                                        {selectedInterview2.experience_level ||
+                                                            "N/A"}
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <span>Date</span>
+                                                    <strong>
+                                                        {selectedInterview2.created_at
+                                                            ? new Date(
+                                                                selectedInterview2.created_at
+                                                            ).toLocaleDateString()
+                                                            : "N/A"}
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="interview-comparison-empty">
+                                        <span>📊</span>
+                                        <p>
+                                            Select two interviews to compare their performance.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )
