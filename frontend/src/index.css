@@ -7874,6 +7874,99 @@ html {
 }
 
 /* ==========================================
+   PERFORMANCE OVERVIEW 
+========================================== */
+.score-distribution-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 24px;
+}
+
+.score-distribution-chart {
+  min-width: 0;
+  padding: 0 24px;
+}
+
+.score-distribution-chart:first-child {
+  border-right: 1px solid #e5e7eb;
+  padding-left: 0;
+}
+
+.score-distribution-chart:last-child {
+  padding-right: 0;
+}
+
+.score-distribution-chart-header {
+  margin-bottom: 16px;
+}
+
+.score-distribution-chart-header h4 {
+  margin: 0 0 5px;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.score-distribution-chart-header span {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.score-distribution-chart .score-distribution-wrapper {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* PERFORMANCE OVERVIEW MOBILE= */
+@media (max-width: 768px) {
+
+  .score-distribution-charts {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .score-distribution-chart {
+    padding: 0;
+  }
+
+  .score-distribution-chart:first-child {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 28px;
+  }
+
+  .score-distribution-chart:last-child {
+    padding-top: 0;
+  }
+
+  .score-distribution-chart .score-distribution-wrapper {
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .score-distribution-charts {
+    margin-top: 20px;
+  }
+
+  .score-distribution-chart .score-distribution-wrapper {
+    height: 250px;
+  }
+
+  .score-distribution-chart-header h4 {
+    font-size: 14px;
+  }
+}
+
+/* ==========================================
    INTERVIEW COMPARISON
 ========================================== */
 .interview-comparison-container {

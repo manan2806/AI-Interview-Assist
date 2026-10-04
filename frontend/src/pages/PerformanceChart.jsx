@@ -8,12 +8,13 @@ import {
     PointElement,
     LineElement,
     BarElement,
+    ArcElement,
     Title,
     Tooltip,
     Legend
 } from "chart.js";
 
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
 
 import { getInterviewHistory } from "../services/interviewService";
 
@@ -23,6 +24,7 @@ ChartJS.register(
     PointElement,
     LineElement,
     BarElement,
+    ArcElement,
     Title,
     Tooltip,
     Legend
@@ -202,8 +204,111 @@ function PerformanceChart() {
                         }
                     ).length
                 ],
+                backgroundColor: [
+                    "#ef4444",
+                    "#f97316",
+                    "#f59e0b",
+                    "#3b82f6",
+                    "#22c55e"
+                ],
+
+                borderColor: [
+                    "#dc2626",
+                    "#ea580c",
+                    "#d97706",
+                    "#2563eb",
+                    "#16a34a"
+                ],
+
+                borderWidth: 2,
                 borderRadius: 8,
                 borderSkipped: false
+            }
+        ]
+    };
+
+    const performanceRatingDistribution = {
+        labels: [
+            "Excellent",
+            "Very Good",
+            "Good",
+            "Needs Improvement",
+            "Poor"
+        ],
+
+        datasets: [
+            {
+                label: "Interviews",
+                data: [
+                    chartInterviews.filter(
+                        (interview) => {
+                            const score = Number(
+                                interview.overall_score || 0
+                            );
+
+                            return score >= 90 && score <= 100;
+                        }
+                    ).length,
+
+                    chartInterviews.filter(
+                        (interview) => {
+                            const score = Number(
+                                interview.overall_score || 0
+                            );
+
+                            return score >= 75 && score < 90;
+                        }
+                    ).length,
+
+                    chartInterviews.filter(
+                        (interview) => {
+                            const score = Number(
+                                interview.overall_score || 0
+                            );
+
+                            return score >= 60 && score < 75;
+                        }
+                    ).length,
+
+                    chartInterviews.filter(
+                        (interview) => {
+                            const score = Number(
+                                interview.overall_score || 0
+                            );
+
+                            return score >= 40 && score < 60;
+                        }
+                    ).length,
+
+                    chartInterviews.filter(
+                        (interview) => {
+                            const score = Number(
+                                interview.overall_score || 0
+                            );
+
+                            return score < 40;
+                        }
+                    ).length
+                ],
+
+                backgroundColor: [
+                    "#22c55e",
+                    "#3b82f6",
+                    "#f59e0b",
+                    "#f97316",
+                    "#ef4444"
+                ],
+
+                borderColor: [
+                    "#16a34a",
+                    "#2563eb",
+                    "#d97706",
+                    "#ea580c",
+                    "#dc2626"
+                ],
+
+                borderWidth: 2,
+                hoverOffset: 8
             }
         ]
     };
@@ -258,6 +363,52 @@ function PerformanceChart() {
                 callbacks: {
                     label: (context) =>
                         `${context.parsed.y} interview${context.parsed.y === 1 ? "" : "s"}`
+                }
+            }
+        }
+    };
+
+    const performanceRatingDistributionOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        cutout: "68%",
+
+        animation: {
+            duration: 1000,
+            easing: "easeOutQuart"
+        },
+
+        plugins: {
+            legend: {
+                display: true,
+                position: "right",
+
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: "circle",
+                    padding: 16,
+                    color: "#4b5563",
+                    font: {
+                        size: 12,
+                        weight: "600"
+                    }
+                }
+            },
+
+            tooltip: {
+                backgroundColor: "#1f2937",
+                titleColor: "#ffffff",
+                bodyColor: "#e5e7eb",
+                padding: 12,
+
+                callbacks: {
+                    label: (context) => {
+                        const value = context.parsed;
+
+                        return ` ${context.label}: ${value} interview${value === 1 ? "" : "s"
+                            }`;
+                    }
                 }
             }
         }
@@ -652,7 +803,6 @@ function PerformanceChart() {
                                         <span className="performance-latest-label">
                                             Date
                                         </span>
-
                                         <strong>
                                             {
                                                 chartInterviews[
@@ -667,35 +817,50 @@ function PerformanceChart() {
                                             }
                                         </strong>
                                     </div>
-
                                 </div>
-
                             </div>
 
-
-                            {/* SCORE DISTRIBUTION - SEPARATE CARD */}
+                            {/* SCORE DISTRIBUTION */}
                             <div className="score-distribution-container">
-
                                 <div className="score-distribution-header">
                                     <div>
-                                        <h3>
-                                            Score Distribution
-                                        </h3>
-
+                                        <h3>Performance Overview</h3>
                                         <p>
-                                            Number of interviews completed
-                                            within each score range.
+                                            Analyze your score distribution and interview performance.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="score-distribution-wrapper">
-                                    <Bar
-                                        data={scoreDistribution}
-                                        options={scoreDistributionOptions}
-                                    />
-                                </div>
+                                <div className="score-distribution-charts">
+                                    {/* LEFT — SCORE DISTRIBUTION */}
+                                    <div className="score-distribution-chart">
+                                        <div className="score-distribution-chart-header">
+                                            <h4>Score Distribution</h4>
+                                            <span>Interview Count</span>
+                                        </div>
+                                        <div className="score-distribution-wrapper">
+                                            <Bar
+                                                data={scoreDistribution}
+                                                options={scoreDistributionOptions}
+                                            />
+                                        </div>
+                                    </div>
 
+                                    {/* RIGHT — PERFORMANCE RATING DISTRIBUTION */}
+                                    <div className="score-distribution-chart">
+                                        <div className="score-distribution-chart-header">
+                                            <h4>Performance Rating Distribution</h4>
+                                            <span>Interview Count</span>
+                                        </div>
+
+                                        <div className="score-distribution-wrapper">
+                                            <Doughnut
+                                                data={performanceRatingDistribution}
+                                                options={performanceRatingDistributionOptions}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* ======================================
