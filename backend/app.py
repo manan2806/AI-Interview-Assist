@@ -8,6 +8,7 @@ from datetime import timedelta
 from routes.auth_routes import auth_bp, bcrypt
 from routes.profile_routes import user_bp
 from routes.interview_routes import interview_bp
+from routes.support_routes import support_bp
 
 def create_app():
 
@@ -27,10 +28,8 @@ def create_app():
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
-    app.register_blueprint(
-        interview_bp,
-        url_prefix="/api/interview"
-    )
+    app.register_blueprint(interview_bp,url_prefix="/api/interview")
+    app.register_blueprint(support_bp)
 
     # print("\n========== REGISTERED INTERVIEW ROUTES ==========")
 

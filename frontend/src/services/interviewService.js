@@ -134,3 +134,16 @@ export const updateInterviewAnswer = async (interviewId, questionNumber, answer)
 
     return response.data;
 };
+
+export const submitProblemReport = async (problemType, subject, description) => {
+    const response = await api.post(
+        "/api/support/problem-report",
+        {
+            problem_type: problemType,
+            subject: subject,
+            description: description
+        }
+    );
+
+    return response.data;
+};

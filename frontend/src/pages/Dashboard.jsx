@@ -213,12 +213,11 @@ function Dashboard() {
                 </div>
 
                 <div className="dashboard-nav-right">
+                    <Link to="/support">Help & Support</Link>
+
                     <Link to="/profile">Profile</Link>
 
-                    <button
-                        onClick={handleLogout}
-                        className="logout-button"
-                    >
+                    <button onClick={handleLogout} className="logout-button">
                         Logout
                     </button>
                 </div>

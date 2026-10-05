@@ -10,14 +10,8 @@ def send_interview_report_email(
     pdf_path,
     job_role
 ):
-    """
-    Send interview report PDF through Gmail API.
-    """
 
-    # ==========================================
     # VALIDATION
-    # ==========================================
-
     if not recipient_email:
         raise Exception(
             "Recipient email is missing."
@@ -33,10 +27,7 @@ def send_interview_report_email(
             "PDF file was not found."
         )
 
-    # ==========================================
     # EMAIL DETAILS
-    # ==========================================
-
     name = recipient_name or "Candidate"
 
     subject = (
@@ -46,7 +37,6 @@ def send_interview_report_email(
     # ==========================================
     # HTML EMAIL
     # ==========================================
-
     html_content = f"""
 <!DOCTYPE html>
 
@@ -352,3 +342,244 @@ AI Interview Assist
         raise Exception(
             f"Gmail API email sending failed: {str(error)}"
         )
+
+def send_problem_report_email(
+    sender_name,
+    sender_email,
+    problem_type,
+    subject,
+    description
+):
+    # VALIDATION
+    if not sender_email:
+        raise Exception("User email is missing.")
+
+    if not subject:
+        raise Exception("Problem report subject is missing.")
+
+    if not description:
+        raise Exception("Problem report description is missing.")
+
+    # USER DETAILS
+    name = sender_name or "User"
+    problem = problem_type or "Other"
+
+    # EMAIL DETAILS
+    email_subject = (f"AI Interview Assist - Problem Report: {subject}")
+
+    # ==========================================
+    # HTML EMAIL
+    # ==========================================
+
+    html_content = f"""
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Problem Report
+    </title>
+
+</head>
+
+<body
+    style="
+        margin:0;
+        padding:0;
+        background:#f5f5f5;
+        font-family:Arial,Helvetica,sans-serif;
+    "
+>
+
+    <div
+        style="
+            max-width:650px;
+            margin:30px auto;
+            background:#ffffff;
+            padding:35px;
+            border-radius:12px;
+            box-sizing:border-box;
+        "
+    >
+
+        <h2
+            style="
+                margin-top:0;
+                color:#4a148c;
+            "
+        >
+            AI Interview Assist
+        </h2>
+
+        <h3>
+            New Problem Report
+        </h3>
+
+        <p>
+            A user has reported a problem from the
+            AI Interview Assist application.
+        </p>
+
+        <div
+            style="
+                margin:25px 0;
+                padding:20px;
+                background:#f7f3fa;
+                border-radius:8px;
+            "
+        >
+
+            <p>
+                <strong>User Name:</strong>
+                {name}
+            </p>
+
+            <p>
+                <strong>User Email:</strong>
+                {sender_email}
+            </p>
+
+            <p>
+                <strong>Problem Type:</strong>
+                {problem}
+            </p>
+
+            <p>
+                <strong>Subject:</strong>
+                {subject}
+            </p>
+
+        </div>
+
+        <h4>
+            Problem Description
+        </h4>
+
+        <div
+            style="
+                padding:18px;
+                background:#f8f9fc;
+                border-left:4px solid #6366f1;
+                border-radius:6px;
+                line-height:1.6;
+                white-space:pre-wrap;
+            "
+        >
+            {description}
+        </div>
+
+        <p
+            style="
+                margin-top:30px;
+                color:#777777;
+                font-size:13px;
+            "
+        >
+            This Problem Report was submitted through
+            the Help & Support section of AI Interview Assist.
+        </p>
+
+        <p
+            style="
+                margin-top:20px;
+                color:#777777;
+                font-size:13px;
+            "
+        >
+            You can reply directly to this email to
+            contact the user.
+        </p>
+
+    </div>
+
+</body>
+
+</html>
+"""
+
+    # ==========================================
+    # CREATE EMAIL
+    # ==========================================
+
+    message = EmailMessage()
+
+    # User email for direct reply
+    message["Reply-To"] = sender_email
+
+    message["Subject"] = email_subject
+
+    # ==========================================
+    # PLAIN TEXT VERSION
+    # ==========================================
+
+    message.set_content(
+        f"""
+New Problem Report - AI Interview Assist
+
+User Name:
+{name}
+
+User Email:
+{sender_email}
+
+Problem Type:
+{problem}
+
+Subject:
+{subject}
+
+Problem Description:
+{description}
+
+------------------------------------------
+
+This Problem Report was submitted through
+the Help & Support section of AI Interview Assist.
+
+You can reply directly to this email to
+contact the user.
+"""
+    )
+
+    # ==========================================
+    # HTML VERSION
+    # ==========================================
+    message.add_alternative(html_content,subtype="html")
+
+    # GMAIL API SEND
+    print("==========================================")
+    print("📧 Sending Problem Report using Gmail API...")
+    print(f"USER EMAIL: {sender_email}")
+    print(f"PROBLEM TYPE: {problem}")
+    print(f"SUBJECT: {subject}")
+    print("==========================================")
+
+    try:
+        # Existing Gmail API service
+        gmail_service = get_gmail_service()
+
+        # Convert email to Gmail API format
+        encoded_message = (base64.urlsafe_b64encode(message.as_bytes()).decode())
+
+        # Send email
+        result = (
+            gmail_service
+            .users()
+            .messages()
+            .send(userId="me",body={"raw": encoded_message})
+            .execute()
+        )
+        print("==========================================")
+        print("✅ PROBLEM REPORT EMAIL SENT SUCCESSFULLY")
+        print("📨 Gmail Message ID:",result.get("id"))
+        print("==========================================")
+        return True
+
+    except Exception as error:
+        print("==========================================")
+        print("❌ GMAIL API PROBLEM REPORT ERROR:",str(error))
+        raise Exception(f"Gmail API Problem Report failed: {str(error)}")

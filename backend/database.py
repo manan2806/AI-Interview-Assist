@@ -2,31 +2,21 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
-# ==========================================
 # LOAD ENVIRONMENT VARIABLES
-# ==========================================
-
 load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
 
-# ==========================================
 # DEFAULT VALUES
-# ==========================================
-
 client = None
 db = None
 users = None
 interviews = None
+problem_reports = None
 
-
-# ==========================================
 # MONGODB CONNECTION
-# ==========================================
-
 try:
-
     if not MONGO_URI:
         raise Exception("MONGO_URI is missing")
 
@@ -47,6 +37,7 @@ try:
     # Collections
     users = db["users"]
     interviews = db["interviews"]
+    problem_reports = db["problem_reports"]
 
     print("✅ MongoDB Connected Successfully!")
 
@@ -58,3 +49,4 @@ except Exception as e:
     db = None
     users = None
     interviews = None
+    problem_reports = None

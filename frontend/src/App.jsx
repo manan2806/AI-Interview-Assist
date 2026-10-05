@@ -20,6 +20,7 @@ import InterviewResult from "./pages/InterviewResult";
 import InterviewHistory from "./pages/InterviewHistory";
 import InterviewDetails from "./pages/InterviewDetails";
 import PerformanceChart from "./pages/PerformanceChart";
+import Support from "./pages/Support";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -89,6 +90,12 @@ function App() {
                     <Route
                         path="/profile"
                         element={<Profile />}
+                    />
+
+                    {/* Help & Support */}
+                    <Route
+                        path="/support"
+                        element={<Support />}
                     />
 
                     {/* Profile Improvement */}
