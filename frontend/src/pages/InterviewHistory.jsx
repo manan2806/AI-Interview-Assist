@@ -1173,7 +1173,7 @@ function InterviewHistory() {
                                                         className="history-result-button"
                                                         onClick={() =>
                                                             navigate(
-                                                                `/interview/result?id=${interview.interview_id}`
+                                                                `/interview/result?id=${interview.interview_id}&from=history`
                                                             )
                                                         }
                                                     >

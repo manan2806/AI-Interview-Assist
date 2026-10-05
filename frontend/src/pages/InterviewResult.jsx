@@ -10,11 +10,9 @@ import {
 
 
 function InterviewResult() {
-
     const [searchParams] = useSearchParams();
-
     const id = searchParams.get("id");
-
+    const from = searchParams.get("from");
     const navigate = useNavigate();
 
     // ==========================================
@@ -299,11 +297,15 @@ function InterviewResult() {
                             className="result-back-btn"
                             onClick={() =>
                                 navigate(
-                                    "/interview-history"
+                                    from === "dashboard"
+                                        ? "/dashboard"
+                                        : "/interview/history"
                                 )
                             }
                         >
-                            Back to Interview History
+                            {from === "dashboard"
+                                ? "Back to Dashboard"
+                                : "Back to Interview History"}
                         </button>
 
                         <button
@@ -416,10 +418,16 @@ function InterviewResult() {
                     <button
                         className="result-back-btn"
                         onClick={() =>
-                            navigate("/interview/history")
+                            navigate(
+                                from === "dashboard"
+                                    ? "/dashboard"
+                                    : "/interview/history"
+                            )
                         }
                     >
-                        Back to History
+                        {from === "dashboard"
+                            ? "Back to Dashboard"
+                            : "Back to History"}
                     </button>
 
                 </div>
