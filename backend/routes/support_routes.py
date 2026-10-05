@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 import random
 from database import users, problem_reports
+from utils.email_service import send_problem_report_email
 
 support_bp = Blueprint("support",__name__,url_prefix="/api/support")
 
@@ -85,6 +86,24 @@ def create_problem_report():
         # SAVE TO MONGODB
         problem_reports.insert_one(report)
 
+        # SEND PROBLEM REPORT EMAIL
+        try:
+            send_problem_report_email(
+                sender_name=user_name,
+                sender_email=user_email,
+                problem_type=problem_type,
+                subject=subject,
+                description=description
+            )
+
+            email_sent = True
+            print("✅ Problem report email sent successfully")
+
+        except Exception as email_error:
+            
+            email_sent = False
+            print("❌ Problem report email error:",str(email_error))
+
         print("==========================================")
         print("✅ PROBLEM REPORT SAVED")
         print("Report ID:", report_id)
@@ -96,7 +115,8 @@ def create_problem_report():
         return jsonify({
             "success": True,
             "message": "Problem report submitted successfully.",
-            "report_id": report_id
+            "report_id": report_id,
+            "email_sent": email_sent
         }), 201
 
     except Exception as error:

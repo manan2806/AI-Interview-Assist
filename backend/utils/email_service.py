@@ -37,6 +37,7 @@ def send_interview_report_email(
     # ==========================================
     # HTML EMAIL
     # ==========================================
+
     html_content = f"""
 <!DOCTYPE html>
 
@@ -504,18 +505,18 @@ def send_problem_report_email(
     # ==========================================
     # CREATE EMAIL
     # ==========================================
-
     message = EmailMessage()
+
+    # Problem Report recipient
+    message["To"] = "my.project.service78@gmail.com"
 
     # User email for direct reply
     message["Reply-To"] = sender_email
-
     message["Subject"] = email_subject
 
     # ==========================================
     # PLAIN TEXT VERSION
     # ==========================================
-
     message.set_content(
         f"""
 New Problem Report - AI Interview Assist
