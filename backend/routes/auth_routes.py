@@ -1113,6 +1113,10 @@ def oauth2callback():
         flow.redirect_uri = (
             "http://localhost:5000/oauth2callback"
         )
+        # flow.redirect_uri = (
+        #     "https://ai-interview-assist-backend.onrender.com"
+        #     "/oauth2callback"
+        # )
 
         # Restore PKCE verifier
         flow.code_verifier = code_verifier

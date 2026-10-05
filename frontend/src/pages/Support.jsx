@@ -79,7 +79,7 @@ function Support() {
                 setTimeout(() => {
                     setShowProblemForm(false);
                     setSuccess("");
-                }, 1500);
+                }, 3000);
             } else {
                 setError(
                     response.message ||
