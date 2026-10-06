@@ -118,7 +118,7 @@ html {
 }
 
 .home-menu-btn {
-  display: none;
+  display: none !important;
 }
 
 /* MOBILE MENU BUTTON */
