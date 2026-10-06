@@ -8,7 +8,6 @@ import {
 } from "../services/interviewService";
 
 function InterviewSetup() {
-
     const navigate = useNavigate();
     const user = getUser();
 
@@ -16,37 +15,28 @@ function InterviewSetup() {
     // FORM STATES
     // ==========================================
     const [field, setField] = useState("");
-
     const [targetRole, setTargetRole] = useState(
         user?.target_role || ""
     );
-
     const [experienceLevel, setExperienceLevel] = useState(
         user?.experience_level || "Fresher"
     );
-
     const [interviewType, setInterviewType] = useState("Mixed");
-
     const [difficulty, setDifficulty] = useState("Medium");
-
     const [questionCount, setQuestionCount] = useState(10);
-
     const [duration, setDuration] = useState("No Limit");
 
     // ==========================================
     // LOADING / ERROR STATES
     // ==========================================
     const [loading, setLoading] = useState(false);
-
     const [loadingStep, setLoadingStep] = useState("");
-
     const [error, setError] = useState("");
 
     // ==========================================
     // START INTERVIEW
     // ==========================================
     const handleStartInterview = async (e) => {
-
         e.preventDefault();
 
         // Clear previous error
@@ -66,7 +56,6 @@ function InterviewSetup() {
         }
 
         try {
-
             setLoading(true);
 
             // ==========================================
@@ -75,19 +64,12 @@ function InterviewSetup() {
             setLoadingStep("Creating your interview...");
 
             const interviewData = {
-
                 job_role: targetRole.trim(),
-
                 experience_level: experienceLevel,
-
                 interview_type: interviewType,
-
                 difficulty: difficulty,
-
                 number_of_questions: Number(questionCount),
-
                 duration: duration
-
             };
 
             const createData = await createInterview(
@@ -96,12 +78,10 @@ function InterviewSetup() {
 
             // CREATE INTERVIEW ERROR
             if (!createData?.success) {
-
                 setError(
                     createData?.message ||
                     "Unable to create interview. Please try again."
                 );
-
                 return;
             }
 
@@ -109,11 +89,9 @@ function InterviewSetup() {
             const interviewId = createData?.interview_id;
 
             if (!interviewId) {
-
                 setError(
                     "Interview was created, but interview ID was not received."
                 );
-
                 return;
             }
 
@@ -125,23 +103,14 @@ function InterviewSetup() {
 
             // SAVE FRONTEND SETUP
             const interviewSetup = {
-
                 field,
-
                 target_role: targetRole.trim(),
-
                 experience_level: experienceLevel,
-
                 interview_type: interviewType,
-
                 difficulty,
-
                 question_count: Number(questionCount),
-
                 duration,
-
                 interview_id: interviewId
-
             };
 
             localStorage.setItem(
@@ -156,19 +125,16 @@ function InterviewSetup() {
                 "Generating AI interview questions..."
             );
 
-
             const questionData = await generateQuestions(
                 interviewId
             );
 
             // QUESTION GENERATION ERROR
             if (!questionData?.success) {
-
                 setError(
                     questionData?.message ||
                     "Unable to generate interview questions. Please try again."
                 );
-
                 return;
             }
 
@@ -179,16 +145,11 @@ function InterviewSetup() {
                 "Interview ready! Starting..."
             );
 
-
             // Small delay so user can see success message
             setTimeout(() => {
-
                 navigate("/interview/start");
-
             }, 500);
-
         } catch (error) {
-
             console.error(
                 "Interview Setup Error:",
                 error
@@ -200,39 +161,26 @@ function InterviewSetup() {
                 error?.response?.data?.error;
 
             if (apiMessage) {
-
                 setError(apiMessage);
-
             } else if (error?.message) {
-
                 setError(error.message);
-
             } else {
-
                 setError(
                     "Unable to prepare interview. Please try again."
                 );
             }
-
         } finally {
-
             setLoading(false);
             setLoadingStep("");
         }
-
     };
 
     return (
-
         <div className="interview-setup-page">
-
             <div className="interview-setup-container">
-
                 {/* HEADER */}
                 <div className="interview-setup-header">
-
                     <div>
-
                         <p className="interview-setup-label">
                             Interview Preparation
                         </p>
@@ -245,7 +193,6 @@ function InterviewSetup() {
                             Customize your interview according
                             to your field, role and experience.
                         </p>
-
                     </div>
 
                     <button
@@ -256,14 +203,11 @@ function InterviewSetup() {
                     >
                         Dashboard
                     </button>
-
                 </div>
 
                 {/* ERROR MESSAGE */}
                 {error && (
-
                     <div className="setup-error">
-
                         <strong>
                             Something went wrong
                         </strong>
@@ -271,22 +215,17 @@ function InterviewSetup() {
                         <p>
                             {error}
                         </p>
-
                     </div>
-
                 )}
 
                 {/* LOADING MESSAGE */}
                 {loading && (
-
                     <div className="setup-loading">
-
                         <div className="setup-loading-spinner">
                             <span></span>
                         </div>
 
                         <div>
-
                             <strong>
                                 Preparing Interview
                             </strong>
@@ -295,11 +234,8 @@ function InterviewSetup() {
                                 {loadingStep ||
                                     "Please wait..."}
                             </p>
-
                         </div>
-
                     </div>
-
                 )}
 
                 {/* FORM */}
@@ -307,10 +243,8 @@ function InterviewSetup() {
                     className="interview-setup-card"
                     onSubmit={handleStartInterview}
                 >
-
                     {/* FIELD */}
                     <div className="setup-section">
-
                         <label>
                             Interview Field
                         </label>
@@ -327,7 +261,6 @@ function InterviewSetup() {
                             }
                             disabled={loading}
                         >
-
                             <option value="">
                                 Select Interview Field
                             </option>
@@ -379,14 +312,11 @@ function InterviewSetup() {
                             <option value="Other">
                                 Other
                             </option>
-
                         </select>
-
                     </div>
 
                     {/* TARGET ROLE */}
                     <div className="setup-section">
-
                         <label>
                             Target Role
                         </label>
@@ -404,25 +334,21 @@ function InterviewSetup() {
                             }
                             disabled={loading}
                         />
-
                     </div>
 
                     {/* EXPERIENCE */}
                     <div className="setup-section">
-
                         <label>
                             Experience Level
                         </label>
 
                         <div className="option-grid">
-
                             {[
                                 "Fresher",
                                 "Junior",
                                 "Mid Level",
                                 "Senior"
                             ].map((level) => (
-
                                 <button
                                     type="button"
                                     key={level}
@@ -438,16 +364,12 @@ function InterviewSetup() {
                                 >
                                     {level}
                                 </button>
-
                             ))}
-
                         </div>
-
                     </div>
 
                     {/* INTERVIEW TYPE */}
                     <div className="setup-section">
-
                         <label>
                             Interview Type
                         </label>
@@ -457,13 +379,11 @@ function InterviewSetup() {
                         </p>
 
                         <div className="option-grid">
-
                             {[
                                 "Technical",
                                 "HR",
                                 "Mixed"
                             ].map((type) => (
-
                                 <button
                                     type="button"
                                     key={type}
@@ -479,28 +399,22 @@ function InterviewSetup() {
                                 >
                                     {type}
                                 </button>
-
                             ))}
-
                         </div>
-
                     </div>
 
                     {/* DIFFICULTY */}
                     <div className="setup-section">
-
                         <label>
                             Difficulty Level
                         </label>
 
                         <div className="option-grid">
-
                             {[
                                 "Easy",
                                 "Medium",
                                 "Hard"
                             ].map((level) => (
-
                                 <button
                                     type="button"
                                     key={level}
@@ -516,16 +430,12 @@ function InterviewSetup() {
                                 >
                                     {level}
                                 </button>
-
                             ))}
-
                         </div>
-
                     </div>
 
                     {/* QUESTION COUNT */}
                     <div className="setup-section">
-
                         <label>
                             Number of Questions
                         </label>
@@ -536,9 +446,7 @@ function InterviewSetup() {
                         </p>
 
                         <div className="option-grid">
-
                             {[5, 10, 15, 20].map((count) => (
-
                                 <button
                                     type="button"
                                     key={count}
@@ -554,16 +462,12 @@ function InterviewSetup() {
                                 >
                                     {count} Questions
                                 </button>
-
                             ))}
-
                         </div>
-
                     </div>
 
                     {/* INTERVIEW DURATION */}
                     <div className="setup-section">
-
                         <label>
                             Interview Duration
                         </label>
@@ -573,14 +477,12 @@ function InterviewSetup() {
                         </p>
 
                         <div className="option-grid">
-
                             {[
                                 "No Limit",
                                 "10 Minutes",
                                 "20 Minutes",
                                 "30 Minutes"
                             ].map((time) => (
-
                                 <button
                                     type="button"
                                     key={time}
@@ -590,26 +492,23 @@ function InterviewSetup() {
                                             ? "option-button active"
                                             : "option-button"
                                     }
-                                    onClick={() => setDuration(time)}
+                                    onClick={() =>
+                                        setDuration(time)
+                                    }
                                 >
                                     {time}
                                 </button>
-
                             ))}
-
                         </div>
-
                     </div>
 
                     {/* SUMMARY */}
                     <div className="setup-summary">
-
                         <h2>
                             Interview Summary
                         </h2>
 
                         <div className="summary-grid">
-
                             <div>
                                 <span>Field</span>
 
@@ -665,23 +564,18 @@ function InterviewSetup() {
                                     {duration}
                                 </strong>
                             </div>
-
                         </div>
-
                     </div>
 
                     {/* ACTIONS */}
                     <div className="setup-actions">
-
                         <Link
                             to="/dashboard"
                             className="setup-cancel-button"
                             onClick={(e) => {
-
                                 if (loading) {
                                     e.preventDefault();
                                 }
-
                             }}
                         >
                             Cancel
@@ -692,24 +586,16 @@ function InterviewSetup() {
                             className="setup-start-button"
                             disabled={loading}
                         >
-
                             {loading
                                 ? "Preparing Interview..."
                                 : "Start Interview →"
                             }
-
                         </button>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     );
-
 }
 
 export default InterviewSetup;
