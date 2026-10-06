@@ -1,211 +1,18 @@
-// import { useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { loginUser } from "../services/authService";
-// import AuthLayout from "../components/AuthLayout";
-
-// function Login() {
-
-//     const navigate = useNavigate();
-
-//     const [email, setEmail] = useState("");
-//     const [password, setPassword] = useState("");
-
-//     const [loading, setLoading] = useState(false);
-//     const [error, setError] = useState("");
-
-//     const handleLogin = async (e) => {
-
-//         e.preventDefault();
-
-//         setError("");
-
-//         if (!email || !password) {
-//             setError("Please enter email and password.");
-//             return;
-//         }
-
-//         try {
-
-//             setLoading(true);
-
-//             const data = await loginUser({
-//                 email,
-//                 password
-//             });
-
-//             if (data.success) {
-
-//                 // Save JWT token
-//                 localStorage.setItem(
-//                     "token",
-//                     data.token
-//                 );
-
-//                 // Save user information
-//                 if (data.user) {
-//                     localStorage.setItem(
-//                         "user",
-//                         JSON.stringify(data.user)
-//                     );
-//                 }
-
-//                 // Dashboard
-//                 navigate("/dashboard");
-
-//             } else {
-
-//                 setError(
-//                     data.message || "Invalid email or password."
-//                 );
-//             }
-
-//         } catch (error) {
-
-//             console.error("Login Error:", error);
-
-//             setError(
-//                 error.response?.data?.message ||
-//                 "Unable to login. Please try again."
-//             );
-
-//         } finally {
-
-//             setLoading(false);
-//         }
-//     };
-
-//     return (
-//         <AuthLayout>
-
-//             <div className="auth-card">
-
-//                 <div className="auth-header">
-
-//                     <div className="mobile-logo">
-//                         AI
-//                     </div>
-
-//                     <h2>Welcome Back</h2>
-
-//                     <p>
-//                         Sign in to continue to your account
-//                     </p>
-
-//                 </div>
-
-//                 {error && (
-//                     <div className="error-message">
-//                         {error}
-//                     </div>
-//                 )}
-
-//                 <form onSubmit={handleLogin}>
-
-//                     <div className="form-group">
-
-//                         <label>Email Address</label>
-
-//                         <input
-//                             type="email"
-//                             placeholder="Enter your email"
-//                             value={email}
-//                             onChange={(e) =>
-//                                 setEmail(e.target.value)
-//                             }
-//                             autoComplete="email"
-//                         />
-
-//                     </div>
-
-//                     <div className="form-group">
-
-//                         <label>Password</label>
-
-//                         <input
-//                             type="password"
-//                             placeholder="Enter your password"
-//                             value={password}
-//                             onChange={(e) =>
-//                                 setPassword(e.target.value)
-//                             }
-//                             autoComplete="current-password"
-//                         />
-
-//                     </div>
-
-//                     <div className="forgot-password">
-
-//                         <Link to="/forgot-password">
-//                             Forgot Password ?
-//                         </Link>
-
-//                     </div>
-
-//                     <button
-//                         type="submit"
-//                         className="auth-button"
-//                         disabled={loading}
-//                     >
-//                         {loading
-//                             ? "Signing in..."
-//                             : "Sign In"
-//                         }
-//                     </button>
-
-//                 </form>
-
-//                 <div className="auth-footer">
-
-//                     <span>Don't have an account?</span>
-
-//                     <Link to="/register">
-//                         Create Account
-//                     </Link>
-
-//                 </div>
-
-//                 {/* HOME LINK */}
-//                 <div className="auth-home-link-container">
-
-//                     <Link
-//                         to="/"
-//                         className="auth-home-link"
-//                     >
-//                         ← Back to Home
-//                     </Link>
-
-//                 </div>
-
-//             </div>
-
-//         </AuthLayout>
-//     );
-// }
-
-// export default Login;
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 import { loginUser } from "../services/authService";
 
-
 function Login() {
-
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
     const [showPassword, setShowPassword] = useState(false);
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-
     const handleLogin = async (e) => {
-
         e.preventDefault();
-
         setError("");
 
         if (!email.trim()) {
@@ -218,9 +25,7 @@ function Login() {
             return;
         }
 
-
         try {
-
             setLoading(true);
 
             const data = await loginUser({
@@ -228,18 +33,9 @@ function Login() {
                 password: password
             });
 
-
             if (data.success) {
-
-                /*
-                 * Store login data
-                 */
-
                 if (data.token) {
-                    localStorage.setItem(
-                        "token",
-                        data.token
-                    );
+                    localStorage.setItem("token", data.token);
                 }
 
                 if (data.user) {
@@ -249,47 +45,30 @@ function Login() {
                     );
                 }
 
-
                 navigate("/dashboard");
-
             } else {
-
                 setError(
                     data.message ||
                     "Invalid email or password."
                 );
             }
-
-
         } catch (err) {
-
-            console.error(
-                "Login Error:",
-                err
-            );
+            console.error("Login Error:", err);
 
             setError(
                 err.response?.data?.message ||
                 "Unable to login. Please try again."
             );
-
         } finally {
-
             setLoading(false);
         }
     };
 
-
     return (
         <div className="auth-page">
-
-
             {/* LEFT */}
-
             <div className="auth-left">
-
                 <div className="brand">
-
                     <div className="brand-icon">
                         AI
                     </div>
@@ -302,18 +81,13 @@ function Login() {
                         Prepare smarter and perform better
                         with AI-powered interview practice.
                     </p>
-
                 </div>
 
-
                 <div className="feature-list">
-
                     <div className="feature">
-
                         <span>✓</span>
 
                         <div>
-
                             <strong>
                                 AI-Powered Questions
                             </strong>
@@ -322,18 +96,13 @@ function Login() {
                                 Get interview questions based
                                 on your job role and experience.
                             </p>
-
                         </div>
-
                     </div>
 
-
                     <div className="feature">
-
                         <span>✓</span>
 
                         <div>
-
                             <strong>
                                 Smart Answer Evaluation
                             </strong>
@@ -342,18 +111,13 @@ function Login() {
                                 Receive AI-based feedback on
                                 your interview answers.
                             </p>
-
                         </div>
-
                     </div>
 
-
                     <div className="feature">
-
                         <span>✓</span>
 
                         <div>
-
                             <strong>
                                 Track Your Progress
                             </strong>
@@ -362,34 +126,21 @@ function Login() {
                                 Review your interview history,
                                 scores and improvements.
                             </p>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-
             {/* RIGHT */}
-
             <div className="auth-right">
-
                 <div className="auth-card">
-
-
                     {/* MOBILE LOGO */}
-
                     <div className="mobile-logo">
                         AI
                     </div>
 
-
                     {/* HEADER */}
-
                     <div className="auth-header">
-
                         <h2>
                             Welcome Back
                         </h2>
@@ -398,28 +149,19 @@ function Login() {
                             Sign in to continue your
                             interview preparation
                         </p>
-
                     </div>
 
-
                     {/* ERROR */}
-
                     {error && (
                         <div className="error-message">
                             {error}
                         </div>
                     )}
 
-
                     {/* FORM */}
-
                     <form onSubmit={handleLogin}>
-
-
                         {/* EMAIL */}
-
                         <div className="form-group">
-
                             <label htmlFor="login-email">
                                 Email Address
                             </label>
@@ -430,27 +172,20 @@ function Login() {
                                 placeholder="Enter your email"
                                 value={email}
                                 onChange={(e) =>
-                                    setEmail(
-                                        e.target.value
-                                    )
+                                    setEmail(e.target.value)
                                 }
                                 autoComplete="email"
                                 disabled={loading}
                             />
-
                         </div>
 
-
                         {/* PASSWORD */}
-
                         <div className="form-group">
-
                             <label htmlFor="login-password">
                                 Password
                             </label>
 
                             <div className="password-input-wrapper">
-
                                 <input
                                     id="login-password"
                                     type={
@@ -461,22 +196,17 @@ function Login() {
                                     placeholder="Enter your password"
                                     value={password}
                                     onChange={(e) =>
-                                        setPassword(
-                                            e.target.value
-                                        )
+                                        setPassword(e.target.value)
                                     }
                                     autoComplete="current-password"
                                     disabled={loading}
                                 />
 
-
                                 <button
                                     type="button"
                                     className="password-toggle"
                                     onClick={() =>
-                                        setShowPassword(
-                                            !showPassword
-                                        )
+                                        setShowPassword(!showPassword)
                                     }
                                     disabled={loading}
                                     aria-label={
@@ -487,28 +217,20 @@ function Login() {
                                 >
                                     {showPassword ? "🙈" : "👁️"}
                                 </button>
-
                             </div>
-
                         </div>
 
-
-                        {/* FORGOT */}
-
+                        {/* FORGOT PASSWORD */}
                         <div
                             className="forgot-password"
                             onClick={() =>
-                                navigate(
-                                    "/forgot-password"
-                                )
+                                navigate("/forgot-password")
                             }
                         >
                             Forgot Password?
                         </div>
 
-
-                        {/* BUTTON */}
-
+                        {/* SIGN IN BUTTON */}
                         <button
                             type="submit"
                             className="auth-button"
@@ -516,17 +238,12 @@ function Login() {
                         >
                             {loading
                                 ? "Signing In..."
-                                : "Sign In"
-                            }
+                                : "Sign In"}
                         </button>
-
                     </form>
 
-
                     {/* REGISTER */}
-
                     <div className="auth-footer">
-
                         <span>
                             Don't have an account?
                         </span>
@@ -534,30 +251,21 @@ function Login() {
                         <Link to="/register">
                             Create Account
                         </Link>
-
                     </div>
 
-
                     {/* HOME */}
-
                     <div className="auth-home-link-container">
-
                         <Link
                             to="/"
                             className="auth-home-link"
                         >
                             ← Back to Home
                         </Link>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     );
 }
-
 
 export default Login;

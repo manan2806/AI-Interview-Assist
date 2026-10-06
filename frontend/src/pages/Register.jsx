@@ -1,231 +1,5 @@
-// import { useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { registerUser } from "../services/authService";
-// import AuthLayout from "../components/AuthLayout";
-
-// function Register() {
-
-//     const navigate = useNavigate();
-
-//     const [name, setName] = useState("");
-//     const [email, setEmail] = useState("");
-//     const [password, setPassword] = useState("");
-//     const [confirmPassword, setConfirmPassword] = useState("");
-
-//     const [loading, setLoading] = useState(false);
-//     const [error, setError] = useState("");
-//     const [success, setSuccess] = useState("");
-
-//     const handleRegister = async (e) => {
-
-//         e.preventDefault();
-
-//         setError("");
-//         setSuccess("");
-
-//         if (!name || !email || !password || !confirmPassword) {
-//             setError("Please fill all fields.");
-//             return;
-//         }
-
-//         if (password.length < 6) {
-//             setError(
-//                 "Password must be at least 6 characters."
-//             );
-//             return;
-//         }
-
-//         if (password !== confirmPassword) {
-//             setError("Passwords do not match.");
-//             return;
-//         }
-
-//         try {
-
-//             setLoading(true);
-
-//             const data = await registerUser({
-//                 name,
-//                 email,
-//                 password
-//             });
-
-//             if (data.success) {
-
-//                 setSuccess(
-//                     data.message ||
-//                     "Registration successful."
-//                 );
-
-//                 setTimeout(() => {
-//                     navigate("/login");
-//                 }, 1200);
-
-//             } else {
-
-//                 setError(
-//                     data.message ||
-//                     "Registration failed."
-//                 );
-//             }
-
-//         } catch (error) {
-
-//             console.error("Register Error:", error);
-
-//             setError(
-//                 error.response?.data?.message ||
-//                 "Unable to create account. Please try again."
-//             );
-
-//         } finally {
-
-//             setLoading(false);
-//         }
-//     };
-
-//     return (
-//         <AuthLayout>
-
-//             <div className="auth-card register-card">
-
-//                 <div className="auth-header">
-
-//                     <div className="mobile-logo">
-//                         AI
-//                     </div>
-
-//                     <h2>Create Account</h2>
-
-//                     <p>
-//                         Start your AI interview preparation journey
-//                     </p>
-
-//                 </div>
-
-//                 {error && (
-//                     <div className="error-message">
-//                         {error}
-//                     </div>
-//                 )}
-
-//                 {success && (
-//                     <div className="success-message">
-//                         {success}
-//                     </div>
-//                 )}
-
-//                 <form onSubmit={handleRegister}>
-
-//                     <div className="form-group">
-
-//                         <label>Full Name</label>
-
-//                         <input
-//                             type="text"
-//                             placeholder="Enter your full name"
-//                             value={name}
-//                             onChange={(e) =>
-//                                 setName(e.target.value)
-//                             }
-//                             autoComplete="name"
-//                         />
-
-//                     </div>
-
-//                     <div className="form-group">
-
-//                         <label>Email Address</label>
-
-//                         <input
-//                             type="email"
-//                             placeholder="Enter your email"
-//                             value={email}
-//                             onChange={(e) =>
-//                                 setEmail(e.target.value)
-//                             }
-//                             autoComplete="email"
-//                         />
-
-//                     </div>
-
-//                     <div className="form-group">
-
-//                         <label>Password</label>
-
-//                         <input
-//                             type="password"
-//                             placeholder="Create a password"
-//                             value={password}
-//                             onChange={(e) =>
-//                                 setPassword(e.target.value)
-//                             }
-//                             autoComplete="new-password"
-//                         />
-
-//                     </div>
-
-//                     <div className="form-group">
-
-//                         <label>Confirm Password</label>
-
-//                         <input
-//                             type="password"
-//                             placeholder="Confirm your password"
-//                             value={confirmPassword}
-//                             onChange={(e) =>
-//                                 setConfirmPassword(e.target.value)
-//                             }
-//                             autoComplete="new-password"
-//                         />
-
-//                     </div>
-
-//                     <button
-//                         type="submit"
-//                         className="auth-button"
-//                         disabled={loading}
-//                     >
-//                         {loading
-//                             ? "Creating Account..."
-//                             : "Create Account"
-//                         }
-//                     </button>
-
-//                 </form>
-
-//                 <div className="auth-footer">
-
-//                     <span>Already have an account?</span>
-
-//                     <Link to="/login">
-//                         Sign In
-//                     </Link>
-
-//                 </div>
-
-//                 {/* HOME LINK */}
-//                 <div className="auth-home-link-container">
-
-//                     <Link
-//                         to="/"
-//                         className="auth-home-link"
-//                     >
-//                         ← Back to Home
-//                     </Link>
-
-//                 </div>
-
-//             </div>
-
-//         </AuthLayout>
-//     );
-// }
-
-// export default Register;
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 import { registerUser } from "../services/authService";
 
 function Register() {
@@ -235,12 +9,9 @@ function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
     const [loading, setLoading] = useState(false);
-
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
@@ -303,14 +74,12 @@ function Register() {
                 setTimeout(() => {
                     navigate("/login");
                 }, 1200);
-
             } else {
                 setError(
                     data.message ||
                     "Unable to create account."
                 );
             }
-
         } catch (error) {
             console.error("Register Error:", error);
 
@@ -318,7 +87,6 @@ function Register() {
                 error.response?.data?.message ||
                 "Unable to create account. Please try again."
             );
-
         } finally {
             setLoading(false);
         }
@@ -326,15 +94,9 @@ function Register() {
 
     return (
         <div className="auth-page">
-
-            {/* ==========================================
-                LEFT SECTION
-            ========================================== */}
-
+            {/* LEFT SECTION */}
             <div className="auth-left">
-
                 <div className="brand">
-
                     <div className="brand-icon">
                         AI
                     </div>
@@ -347,14 +109,10 @@ function Register() {
                         Prepare smarter and perform better
                         with AI-powered interview practice.
                     </p>
-
                 </div>
 
-
                 <div className="feature-list">
-
                     <div className="feature">
-
                         <span>✓</span>
 
                         <div>
@@ -367,12 +125,9 @@ function Register() {
                                 on your job role and experience.
                             </p>
                         </div>
-
                     </div>
 
-
                     <div className="feature">
-
                         <span>✓</span>
 
                         <div>
@@ -385,12 +140,9 @@ function Register() {
                                 your interview answers.
                             </p>
                         </div>
-
                     </div>
 
-
                     <div className="feature">
-
                         <span>✓</span>
 
                         <div>
@@ -403,33 +155,20 @@ function Register() {
                                 scores and improvements.
                             </p>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-
-            {/* ==========================================
-                RIGHT SECTION
-            ========================================== */}
-
+            {/* RIGHT SECTION */}
             <div className="auth-right">
-
                 <div className="auth-card register-card">
-
                     {/* MOBILE LOGO */}
-
                     <div className="mobile-logo">
                         AI
                     </div>
 
-
                     {/* HEADER */}
-
                     <div className="auth-header">
-
                         <h2>
                             Create Account
                         </h2>
@@ -437,36 +176,26 @@ function Register() {
                         <p>
                             Start your AI-powered interview preparation
                         </p>
-
                     </div>
 
-
                     {/* ERROR */}
-
                     {error && (
                         <div className="error-message">
                             {error}
                         </div>
                     )}
 
-
                     {/* SUCCESS */}
-
                     {success && (
                         <div className="success-message">
                             {success}
                         </div>
                     )}
 
-
                     {/* FORM */}
-
                     <form onSubmit={handleRegister}>
-
                         {/* NAME */}
-
                         <div className="form-group">
-
                             <label htmlFor="name">
                                 Full Name
                             </label>
@@ -482,14 +211,10 @@ function Register() {
                                 autoComplete="name"
                                 disabled={loading}
                             />
-
                         </div>
 
-
                         {/* EMAIL */}
-
                         <div className="form-group">
-
                             <label htmlFor="email">
                                 Email Address
                             </label>
@@ -505,20 +230,15 @@ function Register() {
                                 autoComplete="email"
                                 disabled={loading}
                             />
-
                         </div>
 
-
                         {/* PASSWORD */}
-
                         <div className="form-group">
-
                             <label htmlFor="password">
                                 Password
                             </label>
 
                             <div className="password-input-wrapper">
-
                                 <input
                                     id="password"
                                     type={
@@ -550,22 +270,16 @@ function Register() {
                                 >
                                     {showPassword ? "🙈" : "👁️"}
                                 </button>
-
                             </div>
-
                         </div>
 
-
                         {/* CONFIRM PASSWORD */}
-
                         <div className="form-group">
-
                             <label htmlFor="confirmPassword">
                                 Confirm Password
                             </label>
 
                             <div className="password-input-wrapper">
-
                                 <input
                                     id="confirmPassword"
                                     type={
@@ -601,14 +315,10 @@ function Register() {
                                 >
                                     {showConfirmPassword ? "🙈" : "👁️"}
                                 </button>
-
                             </div>
-
                         </div>
 
-
                         {/* BUTTON */}
-
                         <button
                             type="submit"
                             className="auth-button"
@@ -618,14 +328,10 @@ function Register() {
                                 ? "Creating Account..."
                                 : "Create Account"}
                         </button>
-
                     </form>
 
-
                     {/* LOGIN */}
-
                     <div className="auth-footer">
-
                         <span>
                             Already have an account?
                         </span>
@@ -633,27 +339,19 @@ function Register() {
                         <Link to="/login">
                             Sign In
                         </Link>
-
                     </div>
 
-
                     {/* HOME */}
-
                     <div className="auth-home-link-container">
-
                         <Link
                             to="/"
                             className="auth-home-link"
                         >
                             ← Back to Home
                         </Link>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     );
 }
