@@ -1510,10 +1510,10 @@ html {
 
 /* AUTH FOOTER */
 .success-message {
-    margin-top: 10px;
-    color: #16a34a;
-    font-size: 14px;
-    font-weight: 600;
+  margin-top: 10px;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Success Check Icon */
@@ -2569,18 +2569,6 @@ html {
     border-radius: 10px;
   }
 
-  .dashboard-nav-right {
-    gap: 10px;
-  }
-
-  .dashboard-nav-right a {
-    display: none;
-  }
-
-  .logout-button {
-    padding: 8px 12px;
-  }
-
   .dashboard-container {
     width: calc(100% - 24px);
     padding: 24px 0 45px;
@@ -2882,6 +2870,104 @@ html {
     text-align: left;
     padding-left: 11px;
   }
+}
+
+/* ==========================================
+   MOBILE HAMBURGER MENU
+========================================== */
+.dashboard-mobile-nav {
+  display: none;
+  position: relative;
+}
+
+.dashboard-menu-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: #182033;
+  font-size: 26px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 9px;
+}
+
+.dashboard-menu-button:hover {
+  background: #f1efff;
+}
+
+/* MOBILE DROPDOWN */
+.dashboard-mobile-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 200px;
+  padding: 7px;
+  background: #ffffff;
+  border: 1px solid #e3e6ee;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(31, 41, 55, 0.14);
+  z-index: 9999;
+}
+
+.dashboard-mobile-dropdown a,
+.dashboard-mobile-dropdown button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #303746;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.dashboard-mobile-dropdown a:hover,
+.dashboard-mobile-dropdown button:hover {
+  background: #f3f1ff;
+  color: #6258dc;
+}
+
+
+/* LOGOUT */
+.dashboard-mobile-dropdown button:last-child {
+  color: #dc2626;
+}
+
+.dashboard-mobile-dropdown button:last-child:hover {
+  background: #fff1f1;
+  color: #dc2626;
+}
+
+/* MOBILE NAVBAR */
+@media (max-width: 640px) {
+  .dashboard-nav-right {
+    display: none !important;
+  }
+
+  .dashboard-mobile-nav {
+    display: block;
+  }
+
+  .dashboard-navbar {
+    justify-content: space-between;
+  }
+
+  .dashboard-logo {
+    font-size: 15px;
+  }
+
 }
 
 

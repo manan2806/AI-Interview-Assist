@@ -15,6 +15,7 @@ function Dashboard() {
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // ==========================================
     // LOAD DASHBOARD DATA
@@ -204,28 +205,103 @@ function Dashboard() {
 
     return (
         <div className="dashboard-page">
-            {/* NAVBAR */}
+
+            {/* ==========================================
+                NAVBAR
+            ========================================== */}
 
             <nav className="dashboard-navbar">
+
+                {/* LOGO / BRAND */}
                 <div className="dashboard-logo">
                     <div className="dashboard-logo-icon">AI</div>
                     <span>Interview Assist</span>
                 </div>
 
+                {/* ==========================================
+                    DESKTOP NAVIGATION
+                ========================================== */}
+
                 <div className="dashboard-nav-right">
-                    <Link to="/support">Help & Support</Link>
 
-                    <Link to="/profile">Profile</Link>
+                    <Link to="/support">
+                        Help & Support
+                    </Link>
 
-                    <button onClick={handleLogout} className="logout-button">
+                    <Link to="/profile">
+                        Profile
+                    </Link>
+
+                    <button
+                        onClick={handleLogout}
+                        className="logout-button"
+                    >
                         Logout
                     </button>
+
                 </div>
+
+                {/* ==========================================
+                    MOBILE HAMBURGER
+                ========================================== */}
+
+                <div className="dashboard-mobile-nav">
+
+                    <button
+                        className="dashboard-menu-button"
+                        onClick={() =>
+                            setMobileMenuOpen(!mobileMenuOpen)
+                        }
+                        aria-label="Open menu"
+                        aria-expanded={mobileMenuOpen}
+                    >
+                        ☰
+                    </button>
+
+                    {mobileMenuOpen && (
+                        <div className="dashboard-mobile-dropdown">
+
+                            <Link
+                                to="/profile"
+                                onClick={() =>
+                                    setMobileMenuOpen(false)
+                                }
+                            >
+                                <span>👤</span>
+                                <span>Profile</span>
+                            </Link>
+
+                            <Link
+                                to="/support"
+                                onClick={() =>
+                                    setMobileMenuOpen(false)
+                                }
+                            >
+                                <span>🛟</span>
+                                <span>Help & Support</span>
+                            </Link>
+
+                            <button
+                                onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    handleLogout();
+                                }}
+                            >
+                                <span>🚪</span>
+                                <span>Logout</span>
+                            </button>
+
+                        </div>
+                    )}
+
+                </div>
+
             </nav>
 
             {/* MAIN */}
 
             <main className="dashboard-container">
+
                 {/* WELCOME */}
 
                 <section className="welcome-section">
@@ -254,6 +330,7 @@ function Dashboard() {
                 {/* PROFILE OVERVIEW */}
 
                 <section className="dashboard-grid">
+
                     <div className="dashboard-card">
                         <div className="card-icon">👤</div>
 
@@ -304,12 +381,15 @@ function Dashboard() {
                             </p>
                         </div>
                     </div>
+
                 </section>
 
                 {/* PERFORMANCE OVERVIEW */}
 
                 <section className="performance-section">
+
                     <div className="section-heading-row">
+
                         <div>
                             <h2>Performance Overview</h2>
 
@@ -324,13 +404,17 @@ function Dashboard() {
                         >
                             View History →
                         </Link>
+
                     </div>
 
                     <div className="performance-grid">
+
                         {/* AVERAGE SCORE */}
 
                         <div className="performance-card performance-score-card">
+
                             <div className="performance-card-top">
+
                                 <div className="performance-icon purple">
                                     📈
                                 </div>
@@ -338,6 +422,7 @@ function Dashboard() {
                                 <span className="performance-small-label">
                                     Average Score
                                 </span>
+
                             </div>
 
                             <div className="performance-score">
@@ -351,12 +436,15 @@ function Dashboard() {
                                     ? getPerformanceLabel(averageScore)
                                     : "Complete an interview to see your score."}
                             </p>
+
                         </div>
 
                         {/* COMPLETED */}
 
                         <div className="performance-card">
+
                             <div className="performance-card-top">
+
                                 <div className="performance-icon green">
                                     ✓
                                 </div>
@@ -364,6 +452,7 @@ function Dashboard() {
                                 <span className="performance-small-label">
                                     Completed
                                 </span>
+
                             </div>
 
                             <div className="performance-number">
@@ -375,12 +464,15 @@ function Dashboard() {
                                     ? "Interview completed"
                                     : "Interviews completed"}
                             </p>
+
                         </div>
 
                         {/* PRACTICE */}
 
                         <div className="performance-card">
+
                             <div className="performance-card-top">
+
                                 <div className="performance-icon orange">
                                     🎯
                                 </div>
@@ -388,6 +480,7 @@ function Dashboard() {
                                 <span className="performance-small-label">
                                     Practice
                                 </span>
+
                             </div>
 
                             <div className="performance-number">
@@ -397,14 +490,19 @@ function Dashboard() {
                             <p className="performance-description">
                                 Total interviews attempted
                             </p>
+
                         </div>
+
                     </div>
+
                 </section>
 
                 {/* RECENT INTERVIEWS */}
 
                 <section className="recent-section">
+
                     <div className="section-heading-row">
+
                         <div>
                             <h2>Recent Interviews</h2>
 
@@ -419,11 +517,15 @@ function Dashboard() {
                         >
                             View All →
                         </Link>
+
                     </div>
 
                     {recentInterviews.length > 0 ? (
+
                         <div className="recent-interviews">
+
                             {recentInterviews.map((interview, index) => {
+
                                 const score = Number(
                                     interview?.overall_score
                                 );
@@ -437,15 +539,19 @@ function Dashboard() {
                                             interview?.interview_id || index
                                         }
                                     >
+
                                         {/* LEFT */}
 
                                         <div className="recent-interview-main">
+
                                             <div className="recent-interview-icon">
                                                 {index === 0 ? "🎯" : "📋"}
                                             </div>
 
                                             <div>
+
                                                 <div className="recent-interview-title-row">
+
                                                     <h3>
                                                         {interview?.job_role ||
                                                             "Interview"}
@@ -455,6 +561,7 @@ function Dashboard() {
                                                         {interview?.interview_code ||
                                                             "N/A"}
                                                     </span>
+
                                                 </div>
 
                                                 <p>
@@ -468,15 +575,20 @@ function Dashboard() {
                                                         interview?.created_at
                                                     )}
                                                 </p>
+
                                             </div>
+
                                         </div>
 
                                         {/* SCORE */}
 
                                         <div className="recent-interview-score">
+
                                             {hasScore ? (
                                                 <>
-                                                    <strong>{score}%</strong>
+                                                    <strong>
+                                                        {score}%
+                                                    </strong>
 
                                                     <span>
                                                         {interview?.performance_level ||
@@ -490,6 +602,7 @@ function Dashboard() {
                                                     )}
                                                 </span>
                                             )}
+
                                         </div>
 
                                         {/* ACTION */}
@@ -507,12 +620,17 @@ function Dashboard() {
                                                 : "Continue"}{" "}
                                             →
                                         </Link>
+
                                     </div>
                                 );
                             })}
+
                         </div>
+
                     ) : (
+
                         <div className="empty-interviews">
+
                             <div className="empty-interviews-icon">
                                 📋
                             </div>
@@ -530,16 +648,21 @@ function Dashboard() {
                             >
                                 Start Your First Interview
                             </Link>
+
                         </div>
+
                     )}
+
                 </section>
 
                 {/* ACTIONS */}
 
                 <section className="action-section">
+
                     <h2>What would you like to do?</h2>
 
                     <div className="action-grid">
+
                         {/* PROFILE */}
 
                         <Link
@@ -560,6 +683,7 @@ function Dashboard() {
                         </Link>
 
                         {/* PROFILE IMPROVEMENT */}
+
                         <Link
                             to="/profile-improvement"
                             className="action-card"
@@ -579,6 +703,7 @@ function Dashboard() {
                         </Link>
 
                         {/* INTERVIEW */}
+
                         <Link
                             to="/interview/setup"
                             className="action-card"
@@ -597,6 +722,7 @@ function Dashboard() {
                         </Link>
 
                         {/* HISTORY */}
+
                         <Link
                             to="/interview/history"
                             className="action-card"
@@ -613,27 +739,35 @@ function Dashboard() {
 
                             <span className="arrow">→</span>
                         </Link>
+
                     </div>
+
                 </section>
+
             </main>
 
             <footer className="dashboard-footer">
 
                 <div className="dashboard-footer-content">
+
                     <div className="dashboard-footer-brand">
+
                         <div className="dashboard-footer-logo">
                             AI
                         </div>
 
                         <div>
                             <h3>AI Interview Assist</h3>
+
                             <p>
                                 Practice smarter. Perform better.
                             </p>
                         </div>
+
                     </div>
 
                     <div className="dashboard-footer-links">
+
                         <Link to="/dashboard">
                             Dashboard
                         </Link>
@@ -645,10 +779,13 @@ function Dashboard() {
                         <Link to="/profile">
                             Profile
                         </Link>
+
                     </div>
+
                 </div>
 
                 <div className="dashboard-footer-bottom">
+
                     <span>
                         © {new Date().getFullYear()} AI Interview Assist
                     </span>
@@ -656,8 +793,11 @@ function Dashboard() {
                     <span>
                         AI-powered interview practice platform
                     </span>
+
                 </div>
+
             </footer>
+
         </div>
     );
 }
