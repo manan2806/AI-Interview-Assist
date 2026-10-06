@@ -36,32 +36,41 @@ def generate_interview_pdf(interview, file_path):
     # ============================================================
     # COLORS
     # ============================================================
+    
+    # BLUE - MAIN
+    PRIMARY = colors.HexColor("#3B82D0")
+    PRIMARY_DARK = colors.HexColor("#2563A6")
+    PRIMARY_LIGHT = colors.HexColor("#EAF4FF")
 
-    PRIMARY = colors.HexColor("#4F46E5")
-    PRIMARY_DARK = colors.HexColor("#3730A3")
-    PRIMARY_LIGHT = colors.HexColor("#EEF2FF")
+    # PURPLE - SECONDARY ACCENT
+    PURPLE = colors.HexColor("#7568C9")
+    PURPLE_LIGHT = colors.HexColor("#F2F0FF")
 
-    PURPLE = colors.HexColor("#7C3AED")
-    PURPLE_LIGHT = colors.HexColor("#F5F3FF")
+    # GREEN - SUCCESS / STRENGTHS
+    GREEN = colors.HexColor("#198754")
+    GREEN_LIGHT = colors.HexColor("#EAF7EF")
 
-    GREEN = colors.HexColor("#16A34A")
-    GREEN_LIGHT = colors.HexColor("#F0FDF4")
+    # ORANGE - RECOMMENDATIONS / MEDIUM
+    ORANGE = colors.HexColor("#C47716")
+    ORANGE_LIGHT = colors.HexColor("#FFF3E0")
 
-    ORANGE = colors.HexColor("#EA580C")
-    ORANGE_LIGHT = colors.HexColor("#FFF7ED")
+    # RED - WEAKNESSES / LOW SCORE
+    RED = colors.HexColor("#C0392B")
+    RED_LIGHT = colors.HexColor("#FFF0EE")
 
-    RED = colors.HexColor("#DC2626")
-    RED_LIGHT = colors.HexColor("#FEF2F2")
+    # BLUE LIGHT
+    BLUE = colors.HexColor("#3B82D0")
+    BLUE_LIGHT = colors.HexColor("#EAF4FF")
 
-    BLUE = colors.HexColor("#2563EB")
-    BLUE_LIGHT = colors.HexColor("#EFF6FF")
+    # TEXT
+    DARK = colors.HexColor("#202737")
+    TEXT = colors.HexColor("#344054")
+    MUTED = colors.HexColor("#667085")
 
-    DARK = colors.HexColor("#1F2937")
-    TEXT = colors.HexColor("#374151")
-    MUTED = colors.HexColor("#6B7280")
+    # BORDER / BACKGROUND
+    BORDER = colors.HexColor("#D9DDE7")
+    LIGHT_BG = colors.HexColor("#F8FAFC")
 
-    BORDER = colors.HexColor("#D1D5DB")
-    LIGHT_BG = colors.HexColor("#F9FAFB")
     WHITE = colors.white
 
     # ============================================================
