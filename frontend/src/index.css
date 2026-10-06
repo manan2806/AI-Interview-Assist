@@ -121,6 +121,7 @@ html {
 /* MOBILE MENU BUTTON */
 .home-menu-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -131,18 +132,20 @@ html {
   background: linear-gradient(135deg,
       #f0edff,
       #eaf3ff);
-  color: #6258dc;
   cursor: pointer;
 }
-
 
 .home-menu-btn span {
   display: block;
   width: 20px;
   height: 2px;
-  margin: 3px 0;
-  border-radius: 2px;
+  margin: 0 0 4px;
+  border-radius: 3px;
   background: #6258dc;
+}
+
+.home-menu-btn span:last-child {
+  margin-bottom: 0;
 }
 
 /* HERO */
