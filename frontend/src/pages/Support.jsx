@@ -4,6 +4,8 @@ import { submitProblemReport } from "../services/interviewService";
 
 function Support() {
     const [showProblemForm, setShowProblemForm] = useState(false);
+    const [showFAQModal, setShowFAQModal] = useState(false);
+    const [showContactModal, setShowContactModal] = useState(false);
     const [problemType, setProblemType] = useState("");
     const [subject, setSubject] = useState("");
     const [description, setDescription] = useState("");
@@ -166,6 +168,7 @@ function Support() {
                         <button
                             type="button"
                             className="support-button secondary"
+                            onClick={() => setShowFAQModal(true)}
                         >
                             View FAQs
                         </button>
@@ -189,6 +192,7 @@ function Support() {
                         <button
                             type="button"
                             className="support-button secondary"
+                            onClick={() => setShowContactModal(true)}
                         >
                             Contact Support
                         </button>
@@ -337,6 +341,242 @@ function Support() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* FAQ MODAL */}
+            {showFAQModal && (
+                <div
+                    className="support-modal-overlay"
+                    onClick={() => setShowFAQModal(false)}
+                >
+                    <div
+                        className="support-modal support-info-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* HEADER */}
+                        <div className="support-modal-header">
+                            <div>
+                                <span className="support-label">
+                                    HELP CENTER
+                                </span>
+
+                                <h2>Frequently Asked Questions</h2>
+
+                                <p>
+                                    Find answers to common questions.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="support-close-button"
+                                onClick={() => setShowFAQModal(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* FAQ LIST */}
+                        <div className="faq-list">
+
+                            <div className="faq-item">
+                                <h3>
+                                    How do I start an interview?
+                                </h3>
+
+                                <p>
+                                    Go to your Dashboard and click
+                                    <strong> Start New Interview</strong>.
+                                    Complete the interview setup and start
+                                    answering the questions.
+                                </p>
+                            </div>
+
+                            <div className="faq-item">
+                                <h3>
+                                    Can I resume an unfinished interview?
+                                </h3>
+
+                                <p>
+                                    Yes. If your interview is still in progress,
+                                    you can resume it and continue from your
+                                    previous question.
+                                </p>
+                            </div>
+
+                            <div className="faq-item">
+                                <h3>
+                                    How is my interview evaluated?
+                                </h3>
+
+                                <p>
+                                    Your answers are evaluated using AI. The
+                                    result includes your score, strengths,
+                                    weaknesses and recommendations.
+                                </p>
+                            </div>
+
+                            <div className="faq-item">
+                                <h3>
+                                    Where can I see my previous interviews?
+                                </h3>
+
+                                <p>
+                                    You can view your previous interviews from
+                                    the Interview History section of your
+                                    Dashboard.
+                                </p>
+                            </div>
+
+                            <div className="faq-item">
+                                <h3>
+                                    Can I download my interview report?
+                                </h3>
+
+                                <p>
+                                    Yes. After completing an interview, you can
+                                    download the available interview report from
+                                    the interview result page.
+                                </p>
+                            </div>
+
+                            <div className="faq-item">
+                                <h3>
+                                    What if I face a technical problem?
+                                </h3>
+
+                                <p>
+                                    Use the <strong>Report a Problem </strong>
+                                    option on this Support page and describe
+                                    the issue you are experiencing.
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* CONTACT SUPPORT MODAL */}
+            {showContactModal && (
+                <div
+                    className="support-modal-overlay"
+                    onClick={() => setShowContactModal(false)}
+                >
+                    <div
+                        className="support-modal support-contact-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* HEADER */}
+                        <div className="support-modal-header">
+                            <div>
+                                <span className="support-label">
+                                    CONTACT SUPPORT
+                                </span>
+
+                                <h2>Need More Help?</h2>
+
+                                <p>
+                                    We're here to help you.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="support-close-button"
+                                onClick={() => setShowContactModal(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* CONTACT CONTENT */}
+                        <div className="contact-support-content">
+
+                            <div className="contact-support-icon">
+                                ✉️
+                            </div>
+
+                            <h3>
+                                Contact Our Support Team
+                            </h3>
+
+                            <p>
+                                If you need additional assistance with your
+                                interview, account or technical issues, you
+                                can contact our support team.
+                            </p>
+
+                            <div className="contact-support-info">
+
+                                <div className="contact-info-item">
+                                    <span className="contact-info-icon">
+                                        📧
+                                    </span>
+                                    <div>
+                                        <small>
+                                            Email Support
+                                        </small>
+                                        <strong>
+                                            support@aiinterviewassist.com
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div className="contact-info-item">
+                                    <span className="contact-info-icon">
+                                        🛠️
+                                    </span>
+                                    <div>
+                                        <small>
+                                            Support For
+                                        </small>
+                                        <strong>
+                                            Account, Interview & Technical Issues
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div className="contact-info-item">
+                                    <span className="contact-info-icon">
+                                        ⏱️
+                                    </span>
+                                    <div>
+                                        <small>
+                                            Response Time
+                                        </small>
+                                        <strong>
+                                            Usually within 24 hours
+                                        </strong>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <button
+                                type="button"
+                                className="support-button secondary contact-faq-button"
+                                onClick={() => {
+                                    setShowContactModal(false);
+                                    setShowFAQModal(true);
+                                }}
+                            >
+                                View FAQs
+                            </button>
+
+                            <button
+                                type="button"
+                                className="support-submit-button contact-report-button"
+                                onClick={() => {
+                                    setShowContactModal(false);
+                                    openProblemForm();
+                                }}
+                            >
+                                Report a Problem
+                            </button>
+
+                        </div>
                     </div>
                 </div>
             )}
