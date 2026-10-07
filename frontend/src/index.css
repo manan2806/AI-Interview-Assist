@@ -4809,7 +4809,6 @@ html {
   }
 }
 
-
 /* ==========================================
    INTERVIEW START
 ========================================== */
@@ -9133,6 +9132,7 @@ html {
   margin-top: 24px;
   padding: 26px;
   border-radius: 18px;
+
   background:
     radial-gradient(circle at 0% 0%, rgba(113, 103, 239, .20), transparent 30%),
     radial-gradient(circle at 100% 0%, rgba(59, 130, 246, .16), transparent 30%),

@@ -60,112 +60,154 @@ def evaluate_all_answers_with_gemini(
     answers
 ):
     """
-    Evaluate ALL interview answers in ONE Gemini request.
+    Evaluate complete interview using Gemini.
 
-    Primary model:
-        gemini-3.8-flash
-
-    Fallback model:
-        gemini-3.5-flash-lite
-
-    Returns:
-        list of evaluation dictionaries
+    Features:
+    - Supports 1-20 questions
+    - Primary + fallback model
+    - Limited retry for temporary Gemini errors
+    - Compact prompt
+    - Strict JSON validation
+    - Normalized evaluation structure
     """
     if gemini_client is None:
-        raise Exception("Gemini client is not available.")
+        raise Exception(
+            "Gemini client is not available."
+        )
 
-    # PREPARE QUESTIONS + ANSWERS
-    interview_text = ""
+    # VALIDATE INPUT
+    if not isinstance(questions, list):
+        raise Exception(
+            "Invalid questions data."
+        )
 
-    for index, question in enumerate(questions):
-        question_number = question.get("question_number", index + 1)
-        question_text = question.get("question", "")
-        candidate_answer = ""
+    if not isinstance(answers, list):
+        raise Exception(
+            "Invalid answers data."
+        )
 
-        for answer_data in answers:
-            if answer_data.get("question_number") == question_number:
-                candidate_answer = answer_data.get("answer", "")
-                break
+    if not questions:
+        raise Exception(
+            "No interview questions found."
+        )
 
-        interview_text += f"""
-Question {question_number}:
-{question_text}
+    # CREATE ANSWER LOOKUP
+    answer_map = {}
 
-Candidate Answer {question_number}:
-{candidate_answer}
+    for answer_data in answers:
+        if not isinstance(answer_data, dict):
+            continue
 
---------------------------------
-"""
+        question_number = answer_data.get(
+            "question_number"
+        )
 
-    # ==========================================
-    # GEMINI PROMPT
-    # ==========================================
+        if question_number is None:
+            continue
+
+        answer_text = answer_data.get(
+            "answer",
+            ""
+        )
+
+        answer_map[question_number] = str(
+            answer_text or ""
+        )
+
+    # PREPARE INTERVIEW DATA
+    interview_data = []
+
+    for index, question_data in enumerate(questions):
+        if not isinstance(question_data, dict):
+            continue
+
+        question_number = question_data.get(
+            "question_number",
+            index + 1
+        )
+
+        question_text = str(
+            question_data.get(
+                "question",
+                ""
+            ) or ""
+        )
+
+        candidate_answer = answer_map.get(
+            question_number,
+            ""
+        )
+
+        interview_data.append({
+            "question_number": question_number,
+            "question": question_text,
+            "answer": candidate_answer
+        })
+
+    if not interview_data:
+        raise Exception(
+            "No valid interview questions found."
+        )
+
+    # PROMPT
     prompt = f"""
-You are an expert technical interviewer.
+You are an expert interview evaluator.
 
-Evaluate ALL candidate answers from the complete interview.
+Evaluate every candidate answer independently.
 
 Candidate Information:
 
-Job Role:
-{job_role}
+Job Role: {job_role}
+Experience Level: {experience_level}
+Difficulty: {difficulty}
 
-Experience Level:
-{experience_level}
+Interview:
 
-Difficulty:
-{difficulty}
+{json.dumps(
+    interview_data,
+    ensure_ascii=False,
+    separators=(",", ":")
+)}
 
-Interview Questions and Candidate Answers:
+Evaluation rules:
 
-{interview_text}
+1. Evaluate every question.
+2. Return exactly one evaluation for every question.
+3. Keep question_number exactly unchanged.
+4. Score each answer from 0 to 10.
+5. Check correctness.
+6. Check relevance.
+7. Check technical accuracy.
+8. Consider the candidate's experience level.
+9. Identify important missing concepts.
+10. Be fair to a fresher.
+11. Do not give credit for concepts not explained.
+12. Do not combine questions.
+13. Do not skip questions.
+14. Return ONLY valid JSON.
+15. Do not return Markdown.
+16. Do not return code fences.
 
-Evaluation Requirements:
-
-1. Evaluate EVERY question and answer.
-2. Evaluate each answer independently based on its corresponding question.
-3. Check whether the answer is technically correct.
-4. Check whether the answer directly addresses the question.
-5. Consider the candidate's experience level.
-6. Identify important missing concepts.
-7. Do not give credit for concepts that were not actually explained.
-8. If an answer belongs to a different question, mark it as irrelevant or incorrect.
-9. Be fair to a fresher-level candidate.
-10. Give each answer a score from 0 to 10.
-11. Return exactly ONE evaluation object for EVERY question.
-12. Keep the question_number exactly matched with the original question.
-13. Do not skip any question.
-14. Do not evaluate multiple questions inside one evaluation object.
-15. Return ONLY valid JSON.
-16. Do not use Markdown.
-17. Do not use ```json.
-
-Return exactly this structure:
+Required JSON:
 
 {{
     "evaluations": [
         {{
             "question_number": 1,
             "score": 0,
-            "correctness": "Correct / Partially Correct / Incorrect",
-            "relevance": "Highly Relevant / Relevant / Partially Relevant / Irrelevant",
-            "technical_accuracy": "Excellent / Good / Average / Poor",
-            "strengths": [
-                "strength 1"
-            ],
-            "weaknesses": [
-                "weakness 1"
-            ],
-            "missing_concepts": [
-                "missing concept 1"
-            ],
-            "feedback": "Detailed but concise feedback for the candidate."
+            "correctness": "Correct",
+            "relevance": "Highly Relevant",
+            "technical_accuracy": "Excellent",
+            "strengths": [],
+            "weaknesses": [],
+            "missing_concepts": [],
+            "feedback": ""
         }}
     ]
 }}
 """
 
-    # MODEL FALLBACK CONFIGURATION
+    # MODEL CONFIGURATION
     models = [
         "gemini-3.8-flash",
         "gemini-3.5-flash-lite"
@@ -173,192 +215,338 @@ Return exactly this structure:
 
     last_error = None
 
-    # TRY EACH MODEL
-    for model in models:
-        max_retries = 3
+    # TRY MODELS
+    for model_index, model in enumerate(models):
+        max_retries = 2
 
         for attempt in range(max_retries):
             try:
                 print(
-                    "🤖 Evaluating complete interview "
-                    f"with {model} "
+                    "🤖 Gemini evaluation: "
+                    f"{model} "
                     f"(attempt {attempt + 1}/{max_retries})"
                 )
 
-                response = gemini_client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                    config={
-                        "response_mime_type": "application/json"
-                    }
+                response = (
+                    gemini_client.models.generate_content(
+                        model=model,
+                        contents=prompt,
+                        config={
+                            "response_mime_type":
+                                "application/json"
+                        }
+                    )
                 )
 
-                if not response or not response.text:
-                    raise Exception("Gemini returned an empty response.")
+                # RESPONSE VALIDATION
+                if response is None:
+                    raise Exception(
+                        "Gemini returned no response."
+                    )
 
-                # PARSE JSON
-                response_text = response.text.strip()
+                response_text = getattr(
+                    response,
+                    "text",
+                    None
+                )
 
-                if response_text.startswith("```json"):
-                    response_text = response_text[7:]
-                    if response_text.endswith("```"):
-                        response_text = response_text[:-3]
-                elif response_text.startswith("```"):
-                    response_text = response_text[3:]
-                    if response_text.endswith("```"):
-                        response_text = response_text[:-3]
+                if not response_text:
+                    raise Exception(
+                        "Gemini returned an empty response."
+                    )
 
                 response_text = response_text.strip()
-                ai_data = json.loads(response_text)
 
-                evaluations = ai_data.get("evaluations", [])
+                # REMOVE CODE FENCES IF GEMINI ADDS THEM
+                if response_text.startswith(
+                    "```json"
+                ):
+                    response_text = (
+                        response_text[7:]
+                    )
+                elif response_text.startswith(
+                    "```"
+                ):
+                    response_text = (
+                        response_text[3:]
+                    )
 
-                if not isinstance(evaluations, list):
-                    raise Exception("Gemini returned invalid evaluations.")
+                if response_text.endswith(
+                    "```"
+                ):
+                    response_text = (
+                        response_text[:-3]
+                    )
 
-                # VALIDATE EVALUATION COUNT
-                if len(evaluations) != len(questions):
+                response_text = response_text.strip()
+
+                # PARSE JSON
+                ai_data = json.loads(
+                    response_text
+                )
+
+                if not isinstance(
+                    ai_data,
+                    dict
+                ):
                     raise Exception(
-                        "Gemini evaluated an unexpected number of questions. "
-                        f"Expected: {len(questions)}, "
+                        "Gemini returned invalid JSON."
+                    )
+
+                evaluations = ai_data.get(
+                    "evaluations"
+                )
+
+                if not isinstance(
+                    evaluations,
+                    list
+                ):
+                    raise Exception(
+                        "Gemini returned invalid evaluations."
+                    )
+
+                # CHECK EVALUATION COUNT
+                expected_count = len(
+                    interview_data
+                )
+
+                if len(evaluations) != expected_count:
+                    raise Exception(
+                        "Gemini evaluated an unexpected "
+                        "number of questions. "
+                        f"Expected: {expected_count}, "
                         f"Received: {len(evaluations)}"
                     )
 
-                # NORMALIZE EVALUATIONS
-                normalized_evaluations = []
-                expected_question_numbers = []
+                # ORIGINAL QUESTION LOOKUP
+                question_map = {
+                    item["question_number"]: item
+                    for item in interview_data
+                }
 
-                for index, question in enumerate(questions):
-                    expected_question_numbers.append(
-                        question.get("question_number", index + 1)
-                    )
+                expected_numbers = [
+                    item["question_number"]
+                    for item in interview_data
+                ]
 
-                received_question_numbers = []
+                normalized = []
+                received_numbers = []
 
-                for index, evaluation in enumerate(evaluations):
-                    if not isinstance(evaluation, dict):
+                # NORMALIZE EACH EVALUATION
+                for index, evaluation in enumerate(
+                    evaluations
+                ):
+                    if not isinstance(
+                        evaluation,
+                        dict
+                    ):
                         raise Exception(
-                            f"Invalid evaluation object returned for question {index + 1}."
+                            "Invalid evaluation object "
+                            f"at position {index + 1}."
                         )
 
                     question_number = evaluation.get(
-                        "question_number",
-                        expected_question_numbers[index]
+                        "question_number"
                     )
 
-                    received_question_numbers.append(question_number)
-
-                    # FIND ORIGINAL QUESTION
-                    original_question = None
-
-                    for question in questions:
-                        if question.get("question_number") == question_number:
-                            original_question = question
-                            break
-
-                    if original_question is None:
-                        raise Exception(
-                            f"Gemini returned an invalid question number: {question_number}"
+                    # If Gemini omitted it,
+                    # use original question order.
+                    if question_number is None:
+                        question_number = (
+                            expected_numbers[index]
                         )
 
-                    # NORMALIZE SCORE
-                    score = evaluation.get("score", 0)
+                    if question_number not in question_map:
+                        raise Exception(
+                            "Gemini returned invalid "
+                            f"question number: "
+                            f"{question_number}"
+                        )
+
+                    received_numbers.append(
+                        question_number
+                    )
+
+                    original = question_map[
+                        question_number
+                    ]
+
+                    # SCORE NORMALIZATION
+                    score = evaluation.get(
+                        "score",
+                        0
+                    )
 
                     try:
                         score = float(score)
-                    except (ValueError, TypeError):
+                    except (
+                        ValueError,
+                        TypeError
+                    ):
                         score = 0
 
-                    score = max(0, min(10, score))
+                    score = max(
+                        0,
+                        min(
+                            10,
+                            score
+                        )
+                    )
 
                     if score.is_integer():
                         score = int(score)
 
+                    # FIELD NORMALIZATION
+                    evaluation["question_number"] = (
+                        question_number
+                    )
+
                     evaluation["score"] = score
 
-                    # DEFAULT FIELDS
-                    evaluation.setdefault("correctness", "Incorrect")
-                    evaluation.setdefault("relevance", "Irrelevant")
-                    evaluation.setdefault("technical_accuracy", "Poor")
-                    evaluation.setdefault("strengths", [])
-                    evaluation.setdefault("weaknesses", [])
-                    evaluation.setdefault("missing_concepts", [])
-                    evaluation.setdefault("feedback", "")
+                    evaluation.setdefault(
+                        "correctness",
+                        "Incorrect"
+                    )
 
-                    evaluation["question_number"] = question_number
-                    evaluation["evaluated_at"] = datetime.utcnow()
+                    evaluation.setdefault(
+                        "relevance",
+                        "Irrelevant"
+                    )
 
-                    # ADD ORIGINAL QUESTION
-                    evaluation["question"] = original_question.get(
-                        "question",
+                    evaluation.setdefault(
+                        "technical_accuracy",
+                        "Poor"
+                    )
+
+                    evaluation.setdefault(
+                        "strengths",
+                        []
+                    )
+
+                    evaluation.setdefault(
+                        "weaknesses",
+                        []
+                    )
+
+                    evaluation.setdefault(
+                        "missing_concepts",
+                        []
+                    )
+
+                    evaluation.setdefault(
+                        "feedback",
                         ""
                     )
 
-                    # ADD CANDIDATE ANSWER
-                    candidate_answer = ""
+                    # ENSURE LIST FIELDS ARE LISTS
+                    for field in [
+                        "strengths",
+                        "weaknesses",
+                        "missing_concepts"
+                    ]:
+                        if not isinstance(
+                            evaluation.get(field),
+                            list
+                        ):
+                            evaluation[field] = []
 
-                    for answer_data in answers:
-                        if answer_data.get("question_number") == question_number:
-                            candidate_answer = answer_data.get("answer", "")
-                            break
-
-                    evaluation["answer"] = candidate_answer
-                    normalized_evaluations.append(evaluation)
-
-                # VALIDATE QUESTION NUMBERS
-                if set(received_question_numbers) != set(expected_question_numbers):
-                    raise Exception(
-                        "Gemini returned mismatched question numbers."
+                    # ADD ORIGINAL QUESTION + ANSWER
+                    evaluation["question"] = (
+                        original["question"]
                     )
 
-                # SUCCESS
+                    evaluation["answer"] = (
+                        original["answer"]
+                    )
+
+                    evaluation["evaluated_at"] = (
+                        datetime.utcnow()
+                    )
+
+                    normalized.append(
+                        evaluation
+                    )
+
+                # QUESTION NUMBER VALIDATION
+                if set(received_numbers) != set(
+                    expected_numbers
+                ):
+                    raise Exception(
+                        "Gemini returned mismatched "
+                        "question numbers."
+                    )
+
+                # SORT TO ORIGINAL ORDER
+                normalized_map = {
+                    item["question_number"]: item
+                    for item in normalized
+                }
+
+                normalized = [
+                    normalized_map[number]
+                    for number in expected_numbers
+                ]
+
                 print(
-                    f"✅ Complete interview evaluation received from {model}."
+                    "✅ Gemini evaluation successful "
+                    f"using {model}."
                 )
 
-                return normalized_evaluations
+                return normalized
 
             except Exception as e:
                 last_error = e
                 error_message = str(e)
 
                 print(
-                    f"⚠️ Complete Interview Evaluation Error with {model}: "
+                    "⚠️ Gemini evaluation error "
+                    f"with {model}: "
                     f"{error_message}"
                 )
 
-                # TEMPORARY ERROR
-                is_temporary_error = (
+                # TEMPORARY ERROR DETECTION
+                temporary_error = (
                     "503" in error_message
                     or "UNAVAILABLE" in error_message
                     or "429" in error_message
-                    or "RESOURCE_EXHAUSTED" in error_message
+                    or "RESOURCE_EXHAUSTED"
+                    in error_message
+                    or "deadline" in error_message.lower()
+                    or "timeout" in error_message.lower()
                 )
 
-                if is_temporary_error and attempt < max_retries - 1:
-                    wait_time = 3 * (2 ** attempt)
-
-                    print(
-                        f"⏳ Retrying {model} in {wait_time} seconds..."
+                # Retry only temporary errors.
+                if (
+                    temporary_error
+                    and attempt < max_retries - 1
+                ):
+                    wait_time = 2 * (
+                        attempt + 1
                     )
 
-                    time.sleep(wait_time)
+                    print(
+                        "⏳ Temporary Gemini error. "
+                        f"Retrying in {wait_time} seconds..."
+                    )
+
+                    time.sleep(
+                        wait_time
+                    )
                     continue
-
-                # CURRENT MODEL FAILED , MOVE TO FALLBACK MODEL
-                print(
-                    f"➡️ Model {model} failed. "
-                    "Trying next Gemini model..."
-                )
-
                 break
+
+        print(
+            f"➡️ {model} failed. "
+            "Trying fallback model..."
+        )
 
     # ALL MODELS FAILED
     raise Exception(
-        "Unable to evaluate complete interview "
-        "with available Gemini models: "
-        f"{str(last_error)}"
+        "Unable to evaluate interview with "
+        "available Gemini models. "
+        f"Last error: {str(last_error)}"
     )
+
 
 # ==========================================
 # GENERATE OVERALL AI ANALYSIS
@@ -3011,11 +3199,21 @@ def timeout_interview(interview_id):
 @jwt_required()
 def evaluate_interview(interview_id):
 
+    object_id = None
+    user_id = None
+
     try:
+
+        # =========================================================
+        # USER
+        # =========================================================
 
         user_id = get_jwt_identity()
 
+        # =========================================================
         # VALIDATE INTERVIEW ID
+        # =========================================================
+
         object_id = get_interview_object_id(
             interview_id
         )
@@ -3027,7 +3225,10 @@ def evaluate_interview(interview_id):
                 "message": "Invalid interview ID."
             }), 400
 
+        # =========================================================
         # GET INTERVIEW
+        # =========================================================
+
         interview = interviews.find_one({
             "_id": object_id,
             "user_id": user_id
@@ -3040,25 +3241,10 @@ def evaluate_interview(interview_id):
                 "message": "Interview not found."
             }), 404
 
-        # GET QUESTIONS + ANSWERS
-        questions = interview.get(
-            "questions",
-            []
-        )
+        # =========================================================
+        # ALREADY EVALUATED
+        # =========================================================
 
-        answers = interview.get(
-            "answers",
-            []
-        )
-
-        if not questions:
-
-            return jsonify({
-                "success": False,
-                "message": "Interview questions not found."
-            }), 400
-
-        # IF ALREADY EVALUATED
         existing_evaluations = interview.get(
             "evaluations",
             []
@@ -3067,66 +3253,76 @@ def evaluate_interview(interview_id):
         if existing_evaluations:
 
             return jsonify({
-
                 "success": True,
-
-                "message":
-                    "Interview is already evaluated.",
-
-                "status":
-                    interview.get(
-                        "status",
-                        "completed"
-                    ),
-
-                "evaluations":
-                    existing_evaluations,
-
-                "evaluation_count":
-                    len(existing_evaluations)
-
+                "message": (
+                    "Interview is already evaluated."
+                ),
+                "status": interview.get(
+                    "status",
+                    "completed"
+                ),
+                "evaluations": existing_evaluations,
+                "evaluation_count": len(
+                    existing_evaluations
+                )
             }), 200
-        
-        # PREVENT DUPLICATE EVALUATION
-        if interview.get("evaluating") is True:
-            return jsonify({
-                "success" : False,
-                "message":"Interview evaluation is already ""in progress.",
-                "status":"evaluating"
-            }),409
 
-        # CHECK ANSWER COUNT
+        # =========================================================
+        # CHECK QUESTIONS
+        # =========================================================
+
+        questions = interview.get(
+            "questions",
+            []
+        )
+
+        if not questions:
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Interview questions not found."
+                )
+            }), 400
+
+        # =========================================================
+        # CHECK ANSWERS
+        # =========================================================
+
+        answers = interview.get(
+            "answers",
+            []
+        )
+
         if len(answers) != len(questions):
 
             return jsonify({
-
                 "success": False,
-
-                "message":
+                "message": (
                     "All interview questions must "
-                    "be answered before evaluation.",
-
-                "questions":
-                    len(questions),
-
-                "answers":
-                    len(answers)
-
+                    "be answered before evaluation."
+                ),
+                "questions": len(questions),
+                "answers": len(answers)
             }), 400
 
-        # CHECK GEMINI CLIENT
+        # =========================================================
+        # CHECK GEMINI
+        # =========================================================
+
         if gemini_client is None:
 
             return jsonify({
-
                 "success": False,
-
-                "message":
+                "message": (
                     "Gemini client is not available."
-
+                )
             }), 500
 
+        # =========================================================
         # CHECK STATUS
+        # =========================================================
+
         current_status = interview.get(
             "status"
         )
@@ -3137,68 +3333,83 @@ def evaluate_interview(interview_id):
         ]:
 
             return jsonify({
-
                 "success": False,
-
-                "message":
+                "message": (
                     "Interview is not ready "
-                    "for evaluation.",
-
-                "status":
-                    current_status
-
+                    "for evaluation."
+                ),
+                "status": current_status
             }), 400
 
-        # MARK INTERVIEW AS EVALUATING
-        interviews.update_one(
-             {
-                 "_id": object_id,
-                 "user_id": user_id
-            },
-            {
-                "$set": {
-                    "evaluating": True
-                }
-            }
+        # =========================================================
+        # CHECK EVALUATION LOCK
+        # =========================================================
+
+        evaluating = interview.get(
+            "evaluating",
+            False
         )
 
-        # GEMINI - ONE REQUEST
-        print(
-            "🤖 Starting complete interview "
-            "evaluation..."
+        evaluation_started_at = interview.get(
+            "evaluation_started_at"
         )
 
-        evaluations = (
-            evaluate_all_answers_with_gemini(
+        # =========================================================
+        # HANDLE EXISTING LOCK
+        # =========================================================
 
-                job_role=
-                    interview.get(
-                        "job_role",
-                        ""
+        if evaluating is True:
+
+            # -----------------------------------------------------
+            # Check whether lock is stale.
+            #
+            # If Render worker was killed, evaluating=True can
+            # remain in MongoDB forever.
+            # -----------------------------------------------------
+
+            stale_lock = False
+
+            if evaluation_started_at:
+
+                try:
+
+                    elapsed_seconds = (
+                        datetime.utcnow()
+                        - evaluation_started_at
+                    ).total_seconds()
+
+                    # 5 minutes
+                    if elapsed_seconds > 300:
+                        stale_lock = True
+
+                except Exception:
+                    stale_lock = True
+
+            else:
+                # Old records may have evaluating=True
+                # without timestamp.
+                stale_lock = True
+
+            if not stale_lock:
+
+                return jsonify({
+                    "success": False,
+                    "message": (
+                        "Interview evaluation is "
+                        "already in progress."
                     ),
+                    "status": "evaluating"
+                }), 409
 
-                experience_level=
-                    interview.get(
-                        "experience_level",
-                        ""
-                    ),
+            # -----------------------------------------------------
+            # Reset stale lock
+            # -----------------------------------------------------
 
-                difficulty=
-                    interview.get(
-                        "difficulty",
-                        ""
-                    ),
-
-                questions=
-                    questions,
-
-                answers=
-                    answers
+            print(
+                "⚠️ Stale evaluation lock detected. "
+                "Resetting..."
             )
-        )
 
-        # VALIDATE GEMINI RESULT
-        if not evaluations:
             interviews.update_one(
                 {
                     "_id": object_id,
@@ -3207,15 +3418,81 @@ def evaluate_interview(interview_id):
                 {
                     "$set": {
                         "evaluating": False
+                    },
+                    "$unset": {
+                        "evaluation_started_at": ""
                     }
                 }
             )
+
+        # =========================================================
+        # ATOMIC LOCK
+        # =========================================================
+
+        lock_result = interviews.update_one(
+            {
+                "_id": object_id,
+                "user_id": user_id,
+                "evaluating": {
+                    "$ne": True
+                }
+            },
+            {
+                "$set": {
+                    "evaluating": True,
+                    "evaluation_started_at":
+                        datetime.utcnow(),
+                    "status":
+                        "evaluation_pending"
+                }
+            }
+        )
+
+        if lock_result.modified_count == 0:
+
             return jsonify({
                 "success": False,
-                "message":"Gemini did not return " "any evaluations."
-            }), 500
+                "message": (
+                    "Interview evaluation is "
+                    "already in progress."
+                ),
+                "status": "evaluating"
+            }), 409
 
-        if len(evaluations) != len(questions):
+        # =========================================================
+        # START GEMINI
+        # =========================================================
+
+        print(
+            "🤖 Starting complete interview "
+            "evaluation..."
+        )
+
+        evaluations = (
+            evaluate_all_answers_with_gemini(
+                job_role=interview.get(
+                    "job_role",
+                    ""
+                ),
+                experience_level=interview.get(
+                    "experience_level",
+                    ""
+                ),
+                difficulty=interview.get(
+                    "difficulty",
+                    ""
+                ),
+                questions=questions,
+                answers=answers
+            )
+        )
+
+        # =========================================================
+        # VALIDATE GEMINI RESULT
+        # =========================================================
+
+        if not evaluations:
+
             interviews.update_one(
                 {
                     "_id": object_id,
@@ -3223,73 +3500,111 @@ def evaluate_interview(interview_id):
                 },
                 {
                     "$set": {
-                    "evaluating": False
+                        "evaluating": False
+                    },
+                    "$unset": {
+                        "evaluation_started_at": ""
                     }
                 }
-                )
+            )
 
             return jsonify({
                 "success": False,
-                "message":"Gemini did not evaluate " "all questions.",
-                "expected":len(questions),
-                "received":len(evaluations)
+                "message": (
+                    "Gemini did not return "
+                    "any evaluations."
+                )
             }), 500
 
-        # SAVE EVALUATIONS
-        update_result = interviews.update_one(
+        # =========================================================
+        # CHECK COUNT
+        # =========================================================
 
+        if len(evaluations) != len(questions):
+
+            interviews.update_one(
+                {
+                    "_id": object_id,
+                    "user_id": user_id
+                },
+                {
+                    "$set": {
+                        "evaluating": False
+                    },
+                    "$unset": {
+                        "evaluation_started_at": ""
+                    }
+                }
+            )
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Gemini did not evaluate "
+                    "all questions."
+                ),
+                "expected": len(questions),
+                "received": len(evaluations)
+            }), 500
+
+        # =========================================================
+        # SAVE FINAL EVALUATION
+        # =========================================================
+
+        update_result = interviews.update_one(
             {
                 "_id": object_id,
                 "user_id": user_id
             },
-
             {
                 "$set": {
-
-                    "evaluations":
-                        evaluations,
-
-                    "status":
-                        "completed",
-
+                    "evaluations": evaluations,
+                    "status": "completed",
                     "evaluating": False,
-
                     "evaluated_at":
                         datetime.utcnow()
+                },
+                "$unset": {
+                    "evaluation_started_at": ""
                 }
             }
         )
 
+        # =========================================================
         # CHECK DATABASE UPDATE
+        # =========================================================
+
         if update_result.modified_count == 0:
 
             print(
                 "⚠️ Evaluation data was not modified."
             )
 
+        # =========================================================
+        # SUCCESS
+        # =========================================================
+
         print(
             "✅ Complete interview evaluation "
             "saved successfully."
         )
 
-        # RETURN RESPONSE
         return jsonify({
-
             "success": True,
-
-            "message":
-                "Complete interview evaluated successfully.",
-
-            "status":
-                "completed",
-
-            "evaluations":
-                evaluations,
-
-            "evaluation_count":
-                len(evaluations)
-
+            "message": (
+                "Complete interview evaluated "
+                "successfully."
+            ),
+            "status": "completed",
+            "evaluations": evaluations,
+            "evaluation_count": len(
+                evaluations
+            )
         }), 200
+
+    # =============================================================
+    # ERROR
+    # =============================================================
 
     except Exception as e:
 
@@ -3298,35 +3613,54 @@ def evaluate_interview(interview_id):
             str(e)
         )
 
-        # RESET EVALUATING FLAG AFTER ERROR
-        try:
-            interviews.update_one(
+        # ---------------------------------------------------------
+        # RESET LOCK
+        # ---------------------------------------------------------
 
-            {
-                "_id": object_id,
-                "user_id": user_id
-            },
+        if (
+            object_id is not None
+            and user_id is not None
+        ):
 
-            {
-                "$set": {
-                    "evaluating": False
-                }
-            }
-        )
+            try:
 
-        except Exception as reset_error:
-            print("⚠️ Unable to reset evaluating flag:",str(reset_error))
+                interviews.update_one(
+                    {
+                        "_id": object_id,
+                        "user_id": user_id
+                    },
+                    {
+                        "$set": {
+                            "evaluating": False
+                        },
+                        "$unset": {
+                            "evaluation_started_at": ""
+                        }
+                    }
+                )
+
+                print(
+                    "🔓 Evaluation lock reset."
+                )
+
+            except Exception as reset_error:
+
+                print(
+                    "⚠️ Unable to reset "
+                    "evaluation lock:",
+                    str(reset_error)
+                )
+
+        # ---------------------------------------------------------
+        # DO NOT RETURN INTERNAL ERROR TO FRONTEND
+        # ---------------------------------------------------------
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Unable to evaluate complete interview.",
-
-            "error":
-                str(e)
-
+            "message": (
+                "Unable to evaluate "
+                "complete interview."
+            )
         }), 500
 
 # ==========================================
