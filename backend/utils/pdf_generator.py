@@ -251,9 +251,6 @@ def generate_interview_pdf(interview, file_path):
         return RED_LIGHT
 
     def section_header(title):
-        """
-        Purple section heading.
-        """
 
         table = Table(
             [
@@ -516,18 +513,18 @@ def generate_interview_pdf(interview, file_path):
 
     story.append(Spacer(1, 5))
 
-    interview_id = str(
-        interview.get("_id", "")
-    )
+    interview_id = str(interview.get("_id", ""))
+    
+    interview_code = interview.get("interview_code","-")
 
     interview_info = [
         [
             Paragraph(
-                "<b>Interview ID</b>",
+                "<b>Interview Code</b>",
                 label_style
             ),
             Paragraph(
-                safe_text(interview_id),
+                safe_text(interview_code),
                 value_style
             )
         ],
@@ -628,8 +625,38 @@ def generate_interview_pdf(interview, file_path):
             (
                 "BACKGROUND",
                 (0, 0),
-                (0, -1),
-                PRIMARY_LIGHT
+                (0, 0),
+                PURPLE_LIGHT
+            ),
+            (
+                "BACKGROUND",
+                (0, 1),
+                (0, 1),
+                BLUE_LIGHT
+            ),
+            (
+                "BACKGROUND",
+                (0, 2),
+                (0, 2),
+                GREEN_LIGHT
+            ),
+            (
+                "BACKGROUND",
+                (0, 3),
+                (0, 3),
+                ORANGE_LIGHT
+            ),
+            (
+                "BACKGROUND",
+                (0, 4),
+                (0, 4),
+                BLUE_LIGHT
+            ),
+            (
+                "BACKGROUND",
+                (0, 5),
+                (0, 5),
+                GREEN_LIGHT
             ),
             (
                 "VALIGN",
@@ -889,7 +916,7 @@ def generate_interview_pdf(interview, file_path):
                 "BACKGROUND",
                 (1, 0),
                 (1, 0),
-                PURPLE_LIGHT
+                ORANGE_LIGHT
             ),
             (
                 "BACKGROUND",
