@@ -118,12 +118,12 @@ html {
 }
 
 .home-menu-btn {
-  display: none !important;
+  display: none;
 }
 
 /* MOBILE MENU BUTTON */
 .home-menu-btn {
-  display: flex;
+  /* display: flex;  */
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -838,7 +838,7 @@ html {
 
   /* HAMBURGER */
   .home-menu-btn {
-    display: flex;
+    display: flex !important;
   }
 
   /* MOBILE NAV */
