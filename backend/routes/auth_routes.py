@@ -1,14 +1,16 @@
-from flask import Blueprint, request, jsonify , redirect , session
+from flask import Blueprint, request, jsonify, redirect, session
 from flask_bcrypt import Bcrypt
 import uuid
-import os 
+import os
 import secrets
 import hashlib
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 from google_auth_oauthlib.flow import Flow
-import database 
+import database
 import base64
 from utils.auth_utils import generate_token
 from utils.gmail_service import get_gmail_service
@@ -19,7 +21,10 @@ bcrypt = Bcrypt()
 # GMAIL API OAUTH CONFIGURATION
 GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 GMAIL_CREDENTIALS_FILE = "gmail_oauth_credentials.json"
-GMAIL_REDIRECT_URI = ("https://ai-interview-assist-backend.onrender.com" "/oauth2callback")
+GMAIL_REDIRECT_URI = (
+    "https://ai-interview-assist-backend.onrender.com" "/oauth2callback"
+)
+
 
 # ==========================================
 # USER REGISTER API
@@ -32,10 +37,10 @@ def register():
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "Please send valid JSON data"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
 
         # GET DATA
         name = data.get("name")
@@ -44,17 +49,22 @@ def register():
 
         # VALIDATION
         if not name or not email or not password:
-            return jsonify({
-                "success": False,
-                "message": "Name, email and password are required"
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Name, email and password are required",
+                    }
+                ),
+                400,
+            )
 
         # CHECK DATABASE
         if database.db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = database.db["users"]
 
@@ -62,65 +72,47 @@ def register():
         email = email.strip().lower()
 
         # CHECK EXISTING USER
-        existing_user = users.find_one({
-            "email": email
-        })
+        existing_user = users.find_one({"email": email})
 
         if existing_user:
-            return jsonify({
-                "success": False,
-                "message": "Email already registered"
-            }), 409
+            return (
+                jsonify({"success": False, "message": "Email already registered"}),
+                409,
+            )
 
         # HASH PASSWORD
-        hashed_password = bcrypt.generate_password_hash(
-            password
-        ).decode("utf-8")
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
 
         # CREATE USER
         user = {
-
             "user_id": "USR-" + str(uuid.uuid4())[:8].upper(),
-
             "name": name.strip(),
-
             "email": email,
-
             "password": hashed_password,
-
             "skills": [],
-
             "target_role": "",
-
-            "experience_level": "Fresher"
-
+            "experience_level": "Fresher",
         }
 
         # SAVE USER
         result = users.insert_one(user)
 
         # SUCCESS RESPONSE
-        return jsonify({
-
-            "success": True,
-
-            "message": "User registered successfully 🎉",
-
-            "user_id": user["user_id"],
-
-            "mongo_id": str(result.inserted_id)
-
-        }), 201
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "User registered successfully 🎉",
+                    "user_id": user["user_id"],
+                    "mongo_id": str(result.inserted_id),
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
 
-        return jsonify({
-
-            "success": False,
-
-            "message": str(e)
-
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 # ==========================================
@@ -134,10 +126,10 @@ def login():
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "Please send valid JSON data"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
 
         # GET LOGIN DATA
         email = data.get("email")
@@ -145,88 +137,69 @@ def login():
 
         # VALIDATION
         if not email or not password:
-            return jsonify({
-                "success": False,
-                "message": "Email and password are required"
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Email and password are required"}
+                ),
+                400,
+            )
 
         print("🔍 LOGIN DATABASE OBJECT:", database.db)
         print("🔍 LOGIN DATABASE TYPE:", type(database.db))
         # CHECK DATABASE
         if database.db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = database.db["users"]
 
         # FIND USER
-        user = users.find_one({
-            "email": email.strip().lower()
-        })
+        user = users.find_one({"email": email.strip().lower()})
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "Invalid email or password"
-            }), 401
+            return (
+                jsonify({"success": False, "message": "Invalid email or password"}),
+                401,
+            )
 
         # VERIFY PASSWORD
-        password_correct = bcrypt.check_password_hash(
-            user["password"],
-            password
-        )
+        password_correct = bcrypt.check_password_hash(user["password"], password)
 
         if not password_correct:
-            return jsonify({
-                "success": False,
-                "message": "Invalid email or password"
-            }), 401
+            return (
+                jsonify({"success": False, "message": "Invalid email or password"}),
+                401,
+            )
 
         # GENERATE JWT TOKEN
         token = generate_token(user)
 
         # LOGIN SUCCESS
-        return jsonify({
-
-            "success": True,
-
-            "message": "Login successful 🎉",
-
-            "token": token,
-
-            "user": {
-
-                "user_id": user["user_id"],
-
-                "name": user["name"],
-
-                "email": user["email"],
-
-                "skills": user.get("skills", []),
-
-                "target_role": user.get(
-                    "target_role",
-                    ""
-                ),
-
-                "experience_level": user.get(
-                    "experience_level",
-                    "Fresher"
-                )
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Login successful 🎉",
+                    "token": token,
+                    "user": {
+                        "user_id": user["user_id"],
+                        "name": user["name"],
+                        "email": user["email"],
+                        "skills": user.get("skills", []),
+                        "target_role": user.get("target_role", ""),
+                        "experience_level": user.get("experience_level", "Fresher"),
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
 
-        return jsonify({
+        return jsonify({"success": False, "message": str(e)}), 500
 
-            "success": False,
-
-            "message": str(e)
-
-        }), 500
 
 # ==========================================
 # SEND PASSWORD RESET OTP EMAIL
@@ -624,10 +597,7 @@ def send_otp_email(recipient_email, otp):
     message["Subject"] = subject
 
     # HTML ONLY
-    message.set_content(
-        html_body,
-        subtype="html"
-    )
+    message.set_content(html_body, subtype="html")
 
     # GMAIL API SEND
     print("==========================================")
@@ -639,23 +609,12 @@ def send_otp_email(recipient_email, otp):
 
         gmail_service = get_gmail_service()
 
-        encoded_message = (
-            base64.urlsafe_b64encode(
-                message.as_bytes()
-            )
-            .decode()
-        )
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
         result = (
-            gmail_service
-            .users()
+            gmail_service.users()
             .messages()
-            .send(
-                userId="me",
-                body={
-                    "raw": encoded_message
-                }
-            )
+            .send(userId="me", body={"raw": encoded_message})
             .execute()
         )
 
@@ -673,7 +632,8 @@ def send_otp_email(recipient_email, otp):
         print("==========================================")
 
         return False
-    
+
+
 # ==========================================
 # FORGOT PASSWORD API
 # ==========================================
@@ -683,44 +643,39 @@ def forgot_password():
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "Please send valid JSON data"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
 
         email = data.get("email")
 
         if not email:
-            return jsonify({
-                "success": False,
-                "message": "Email is required"
-            }), 400
+            return jsonify({"success": False, "message": "Email is required"}), 400
 
         email = email.strip().lower()
 
         if database.db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = database.db["users"]
 
-        user = users.find_one({
-            "email": email
-        })
+        user = users.find_one({"email": email})
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "No account found with this email"
-            }), 404
+            return (
+                jsonify(
+                    {"success": False, "message": "No account found with this email"}
+                ),
+                404,
+            )
 
         otp = f"{secrets.randbelow(1000000):06d}"
 
-        otp_hash = hashlib.sha256(
-            otp.encode()
-        ).hexdigest()
+        otp_hash = hashlib.sha256(otp.encode()).hexdigest()
 
         otp_expiry = datetime.utcnow() + timedelta(minutes=10)
 
@@ -730,43 +685,38 @@ def forgot_password():
                 "$set": {
                     "reset_otp": otp_hash,
                     "reset_otp_expiry": otp_expiry,
-                    "reset_otp_verified": False
+                    "reset_otp_verified": False,
                 }
-            }
+            },
         )
 
         print("🚀 FORGOT PASSWORD: Calling Gmail SMTP send_otp_email()")
         email_sent = send_otp_email(email, otp)
-        print("🚀 FORGOT PASSWORD: send_otp_email returned:",email_sent)
+        print("🚀 FORGOT PASSWORD: send_otp_email returned:", email_sent)
 
         if not email_sent:
             users.update_one(
                 {"_id": user["_id"]},
-                {
-                    "$unset": {
-                        "reset_otp": "",
-                        "reset_otp_expiry": ""
-                    }
-                }
+                {"$unset": {"reset_otp": "", "reset_otp_expiry": ""}},
             )
 
-            return jsonify({
-                "success": False,
-                "message": "Unable to send OTP email"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Unable to send OTP email"}),
+                500,
+            )
 
-        return jsonify({
-            "success": True,
-            "message": "OTP sent successfully to your email"
-        }), 200
+        return (
+            jsonify(
+                {"success": True, "message": "OTP sent successfully to your email"}
+            ),
+            200,
+        )
 
     except Exception as e:
         print("Forgot password error:", e)
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # VERIFY OTP API
@@ -777,81 +727,66 @@ def verify_otp():
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "Please send valid JSON data"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
 
         email = data.get("email")
         otp = data.get("otp")
 
         if not email or not otp:
-            return jsonify({
-                "success": False,
-                "message": "Email and OTP are required"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Email and OTP are required"}),
+                400,
+            )
 
         email = email.strip().lower()
         otp = otp.strip()
 
         if database.db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = database.db["users"]
 
-        user = users.find_one({
-            "email": email
-        })
+        user = users.find_one({"email": email})
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "User not found"
-            }), 404
+            return jsonify({"success": False, "message": "User not found"}), 404
 
         stored_otp = user.get("reset_otp")
         otp_expiry = user.get("reset_otp_expiry")
 
         if not stored_otp or not otp_expiry:
-            return jsonify({
-                "success": False,
-                "message": "OTP not found. Please request a new OTP"
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "OTP not found. Please request a new OTP",
+                    }
+                ),
+                400,
+            )
 
         if datetime.utcnow() > otp_expiry:
             users.update_one(
                 {"_id": user["_id"]},
-                {
-                    "$unset": {
-                        "reset_otp": "",
-                        "reset_otp_expiry": ""
-                    }
-                }
+                {"$unset": {"reset_otp": "", "reset_otp_expiry": ""}},
             )
 
-            return jsonify({
-                "success": False,
-                "message": "OTP has expired"
-            }), 400
+            return jsonify({"success": False, "message": "OTP has expired"}), 400
 
-        entered_otp_hash = hashlib.sha256(
-            otp.encode()
-        ).hexdigest()
+        entered_otp_hash = hashlib.sha256(otp.encode()).hexdigest()
 
         if entered_otp_hash != stored_otp:
-            return jsonify({
-                "success": False,
-                "message": "Invalid OTP"
-            }), 400
+            return jsonify({"success": False, "message": "Invalid OTP"}), 400
 
         reset_token = secrets.token_urlsafe(32)
 
-        reset_token_hash = hashlib.sha256(
-            reset_token.encode()
-        ).hexdigest()
+        reset_token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
 
         reset_token_expiry = datetime.utcnow() + timedelta(minutes=10)
 
@@ -861,28 +796,28 @@ def verify_otp():
                 "$set": {
                     "reset_otp_verified": True,
                     "reset_token": reset_token_hash,
-                    "reset_token_expiry": reset_token_expiry
+                    "reset_token_expiry": reset_token_expiry,
                 },
-                "$unset": {
-                    "reset_otp": "",
-                    "reset_otp_expiry": ""
-                }
-            }
+                "$unset": {"reset_otp": "", "reset_otp_expiry": ""},
+            },
         )
 
-        return jsonify({
-            "success": True,
-            "message": "OTP verified successfully",
-            "reset_token": reset_token
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "OTP verified successfully",
+                    "reset_token": reset_token,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         print("OTP verification error:", e)
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # RESET PASSWORD API
@@ -893,56 +828,63 @@ def reset_password():
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "Please send valid JSON data"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
 
         email = data.get("email")
         reset_token = data.get("reset_token")
         new_password = data.get("new_password")
 
         if not email or not reset_token or not new_password:
-            return jsonify({
-                "success": False,
-                "message": "Email, reset token and new password are required"
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Email, reset token and new password are required",
+                    }
+                ),
+                400,
+            )
 
         email = email.strip().lower()
 
         if len(new_password) < 6:
-            return jsonify({
-                "success": False,
-                "message": "Password must be at least 6 characters"
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Password must be at least 6 characters",
+                    }
+                ),
+                400,
+            )
 
         if database.db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = database.db["users"]
 
-        user = users.find_one({
-            "email": email
-        })
+        user = users.find_one({"email": email})
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "User not found"
-            }), 404
+            return jsonify({"success": False, "message": "User not found"}), 404
 
         stored_token = user.get("reset_token")
         token_expiry = user.get("reset_token_expiry")
         otp_verified = user.get("reset_otp_verified", False)
 
         if not stored_token or not token_expiry or not otp_verified:
-            return jsonify({
-                "success": False,
-                "message": "Password reset is not authorized"
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Password reset is not authorized"}
+                ),
+                400,
+            )
 
         if datetime.utcnow() > token_expiry:
             users.update_one(
@@ -951,56 +893,181 @@ def reset_password():
                     "$unset": {
                         "reset_token": "",
                         "reset_token_expiry": "",
-                        "reset_otp_verified": ""
+                        "reset_otp_verified": "",
                     }
-                }
+                },
             )
 
-            return jsonify({
-                "success": False,
-                "message": "Reset session has expired"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Reset session has expired"}),
+                400,
+            )
 
-        token_hash = hashlib.sha256(
-            reset_token.encode()
-        ).hexdigest()
+        token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
 
         if token_hash != stored_token:
-            return jsonify({
-                "success": False,
-                "message": "Invalid reset token"
-            }), 400
+            return jsonify({"success": False, "message": "Invalid reset token"}), 400
 
-        hashed_password = bcrypt.generate_password_hash(
-            new_password
-        ).decode("utf-8")
+        hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
 
         users.update_one(
             {"_id": user["_id"]},
             {
-                "$set": {
-                    "password": hashed_password
-                },
+                "$set": {"password": hashed_password},
                 "$unset": {
                     "reset_token": "",
                     "reset_token_expiry": "",
-                    "reset_otp_verified": ""
-                }
-            }
+                    "reset_otp_verified": "",
+                },
+            },
         )
 
-        return jsonify({
-            "success": True,
-            "message": "Password reset successfully 🎉"
-        }), 200
+        return (
+            jsonify({"success": True, "message": "Password reset successfully 🎉"}),
+            200,
+        )
 
     except Exception as e:
         print("Reset password error:", e)
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ==========================================
+# GET USER SETTINGS API
+# ==========================================
+@auth_bp.route("/api/settings", methods=["GET"])
+@jwt_required()
+def get_settings():
+
+    try:
+        user_id = get_jwt_identity()
+        if database.db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
+
+        users = database.db["users"]
+        user = users.find_one({"user_id": user_id})
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+
+        settings = user.get("settings", {})
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "settings": {
+                        "interview_type": settings.get("interview_type", "Technical"),
+                        "difficulty": settings.get("difficulty", "Medium"),
+                        "number_of_questions": settings.get("number_of_questions", 10),
+                        "theme": settings.get("theme", "Light"),
+                    },
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        print("Get settings error:", e)
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ==========================================
+# UPDATE USER SETTINGS API
+# ==========================================
+@auth_bp.route("/api/settings", methods=["PUT"])
+@jwt_required()
+def update_settings():
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json(silent=True)
+
+        if not data:
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
+
+        if database.db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
+
+        # GET SETTINGS
+        interview_type = data.get("interview_type", "Technical")
+        difficulty = data.get("difficulty", "Medium")
+        number_of_questions = data.get("number_of_questions", 10)
+        theme = data.get("theme", "Light")
+
+        # VALIDATION
+        allowed_interview_types = ["Technical", "HR", "Mixed"]
+        allowed_difficulties = ["Easy", "Medium", "Hard"]
+        allowed_themes = ["Light", "Dark", "System"]
+
+        if interview_type not in allowed_interview_types:
+            return jsonify({"success": False, "message": "Invalid interview type"}), 400
+
+        if difficulty not in allowed_difficulties:
+            return jsonify({"success": False, "message": "Invalid difficulty"}), 400
+
+        if theme not in allowed_themes:
+            return jsonify({"success": False, "message": "Invalid theme"}), 400
+
+        try:
+            number_of_questions = int(number_of_questions)
+        except (TypeError, ValueError):
+            return (
+                jsonify({"success": False, "message": "Invalid number of questions"}),
+                400,
+            )
+        if number_of_questions not in [5, 10, 15, 20]:
+            return (
+                jsonify({"success": False, "message": "Invalid number of questions"}),
+                400,
+            )
+
+        # UPDATE USER
+        users = database.db["users"]
+        result = users.update_one(
+            {"user_id": user_id},
+            {
+                "$set": {
+                    "settings": {
+                        "interview_type": interview_type,
+                        "difficulty": difficulty,
+                        "number_of_questions": number_of_questions,
+                        "theme": theme,
+                    }
+                }
+            },
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"success": False, "message": "User not found"}), 404
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Settings saved successfully",
+                    "settings": {
+                        "interview_type": interview_type,
+                        "difficulty": difficulty,
+                        "number_of_questions": number_of_questions,
+                        "theme": theme,
+                    },
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        print("Update settings error:", e)
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # GMAIL OAUTH AUTHORIZATION
@@ -1010,109 +1077,83 @@ def gmail_authorize():
 
     try:
 
-        if not os.path.exists(
-            GMAIL_CREDENTIALS_FILE
-        ):
-            return jsonify({
-                "success": False,
-                "message": (
-                    "gmail_oauth_credentials.json "
-                    "not found"
-                )
-            }), 500
+        if not os.path.exists(GMAIL_CREDENTIALS_FILE):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("gmail_oauth_credentials.json " "not found"),
+                    }
+                ),
+                500,
+            )
 
         flow = Flow.from_client_secrets_file(
-            GMAIL_CREDENTIALS_FILE,
-            scopes=GMAIL_SCOPES
+            GMAIL_CREDENTIALS_FILE, scopes=GMAIL_SCOPES
         )
 
-        flow.redirect_uri = (
-            "http://localhost:5000/oauth2callback"
-        )
+        flow.redirect_uri = "http://localhost:5000/oauth2callback"
 
-        authorization_url, state = (
-            flow.authorization_url(
-                access_type="offline",
-                include_granted_scopes="true",
-                prompt="consent"
-            )
+        authorization_url, state = flow.authorization_url(
+            access_type="offline", include_granted_scopes="true", prompt="consent"
         )
 
         # Save OAuth state
         session["gmail_oauth_state"] = state
 
         # Save PKCE code verifier
-        session["gmail_code_verifier"] = (
-            flow.code_verifier
-        )
+        session["gmail_code_verifier"] = flow.code_verifier
 
-        return redirect(
-            authorization_url
-        )
+        return redirect(authorization_url)
 
     except Exception as e:
 
-        print(
-            "Gmail authorization error:",
-            str(e)
-        )
+        print("Gmail authorization error:", str(e))
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # GMAIL OAUTH CALLBACK
 # ==========================================
-
 @auth_bp.route("/oauth2callback", methods=["GET"])
 def oauth2callback():
 
     try:
 
-        if not os.path.exists(
-            GMAIL_CREDENTIALS_FILE
-        ):
-            return jsonify({
-                "success": False,
-                "message": (
-                    "gmail_oauth_credentials.json "
-                    "not found"
-                )
-            }), 500
+        if not os.path.exists(GMAIL_CREDENTIALS_FILE):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("gmail_oauth_credentials.json " "not found"),
+                    }
+                ),
+                500,
+            )
 
         # Get saved OAuth state
-        saved_state = session.get(
-            "gmail_oauth_state"
-        )
+        saved_state = session.get("gmail_oauth_state")
 
         # Get saved PKCE verifier
-        code_verifier = session.get(
-            "gmail_code_verifier"
-        )
+        code_verifier = session.get("gmail_code_verifier")
 
         if not saved_state:
-            return jsonify({
-                "success": False,
-                "message": "OAuth state is missing"
-            }), 400
+            return jsonify({"success": False, "message": "OAuth state is missing"}), 400
 
         if not code_verifier:
-            return jsonify({
-                "success": False,
-                "message": "OAuth code verifier is missing"
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "OAuth code verifier is missing"}
+                ),
+                400,
+            )
 
         flow = Flow.from_client_secrets_file(
-            GMAIL_CREDENTIALS_FILE,
-            scopes=GMAIL_SCOPES,
-            state=saved_state
+            GMAIL_CREDENTIALS_FILE, scopes=GMAIL_SCOPES, state=saved_state
         )
 
-        flow.redirect_uri = (
-            "http://localhost:5000/oauth2callback"
-        )
+        flow.redirect_uri = "http://localhost:5000/oauth2callback"
         # flow.redirect_uri = (
         #     "https://ai-interview-assist-backend.onrender.com"
         #     "/oauth2callback"
@@ -1123,48 +1164,27 @@ def oauth2callback():
 
         authorization_response = request.url
 
-        flow.fetch_token(
-            authorization_response=authorization_response
-        )
+        flow.fetch_token(authorization_response=authorization_response)
 
         credentials = flow.credentials
 
         # Save Gmail token
-        with open(
-            "gmail_token.json",
-            "w"
-        ) as token_file:
+        with open("gmail_token.json", "w") as token_file:
 
-            token_file.write(
-                credentials.to_json()
-            )
+            token_file.write(credentials.to_json())
 
         # Remove temporary OAuth session data
-        session.pop(
-            "gmail_oauth_state",
-            None
-        )
+        session.pop("gmail_oauth_state", None)
 
-        session.pop(
-            "gmail_code_verifier",
-            None
-        )
+        session.pop("gmail_code_verifier", None)
 
-        print(
-            "=========================================="
-        )
+        print("==========================================")
 
-        print(
-            "✅ GMAIL OAUTH AUTHORIZATION SUCCESSFUL"
-        )
+        print("✅ GMAIL OAUTH AUTHORIZATION SUCCESSFUL")
 
-        print(
-            "✅ gmail_token.json CREATED"
-        )
+        print("✅ gmail_token.json CREATED")
 
-        print(
-            "=========================================="
-        )
+        print("==========================================")
 
         return """
         <h2>Gmail Authorization Successful ✅</h2>
@@ -1173,12 +1193,6 @@ def oauth2callback():
 
     except Exception as e:
 
-        print(
-            "Gmail OAuth callback error:",
-            str(e)
-        )
+        print("Gmail OAuth callback error:", str(e))
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500

@@ -10,6 +10,7 @@ from routes.profile_routes import user_bp
 from routes.interview_routes import interview_bp
 from routes.support_routes import support_bp
 
+
 def create_app():
 
     load_dotenv()
@@ -22,13 +23,25 @@ def create_app():
 
     JWTManager(app)
 
-    CORS(app)
+    CORS(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": [
+                    "http://localhost:5173",
+                    "https://ai-interview-assist-two.vercel.app",
+                ],
+                "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+            }
+        },
+    )
 
     bcrypt.init_app(app)
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
-    app.register_blueprint(interview_bp,url_prefix="/api/interview")
+    app.register_blueprint(interview_bp, url_prefix="/api/interview")
     app.register_blueprint(support_bp)
 
     # print("\n========== REGISTERED INTERVIEW ROUTES ==========")
@@ -41,21 +54,16 @@ def create_app():
 
     @app.route("/", methods=["GET"])
     def home():
-        return jsonify({
-            "success": True,
-            "message": "AI Interview Assist Backend is Running 🚀"
-        })
+        return jsonify(
+            {"success": True, "message": "AI Interview Assist Backend is Running 🚀"}
+        )
 
     return app
 
 
 app = create_app()
 
-app.secret_key = os.getenv(
-    "FLASK_SECRET_KEY",
-    "local-development-secret-key"
-)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "local-development-secret-key")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",debug=True, port=5000)
-
+    app.run(host="0.0.0.0", debug=True, port=5000)
