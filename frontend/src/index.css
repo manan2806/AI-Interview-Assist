@@ -10426,3 +10426,461 @@ html {
     width: 100%;
   }
 }
+
+/* ==========================================
+   SETTINGS PAGE
+========================================== */
+.settings-page {
+  min-height: 100vh;
+  padding: 40px 24px 60px;
+  background:
+    radial-gradient(circle at top left,
+      rgba(108, 99, 255, 0.10),
+      transparent 35%),
+    radial-gradient(circle at bottom right,
+      rgba(59, 130, 246, 0.08),
+      transparent 35%),
+    #f5f7fb;
+}
+
+/* SETTINGS CONTAINER */
+.settings-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+.settings-header {
+  margin-bottom: 30px;
+}
+
+.settings-label {
+  margin: 0 0 7px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6c63ff;
+}
+
+.settings-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #20243a;
+}
+
+.settings-header>div>p:last-child {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6f7587;
+}
+
+/* SETTINGS LAYOUT */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* SETTINGS SIDEBAR */
+.settings-sidebar {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #e7e9f2;
+  border-radius: 18px;
+  box-shadow:
+    0 8px 28px rgba(31, 35, 55, 0.06);
+}
+
+/* SIDEBAR MENU */
+.settings-menu {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 13px 15px;
+  margin: 2px 0;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  color: #62697b;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.settings-menu:hover {
+  background: #f2f1ff;
+  color: #5148d8;
+}
+
+.settings-menu.active {
+  background: linear-gradient(135deg,
+      #6c63ff,
+      #5148d8);
+  color: #ffffff;
+  box-shadow:
+    0 6px 16px rgba(108, 99, 255, 0.22);
+}
+
+.settings-menu.active:hover {
+  color: #ffffff;
+  transform: translateX(1px);
+}
+
+/* SETTINGS CONTENT */
+.settings-content {
+  min-width: 0;
+}
+
+/* SETTINGS CARD */
+.settings-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #e7e9f2;
+  border-radius: 18px;
+  box-shadow:
+    0 8px 30px rgba(31, 35, 55, 0.06);
+}
+
+.settings-card h2 {
+  margin: 0 0 8px;
+  font-size: 23px;
+  font-weight: 750;
+  color: #20243a;
+}
+
+.settings-card>p {
+  margin: 0 0 25px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #717789;
+}
+
+/* SECTION HEADER */
+.settings-section-header {
+  margin-bottom: 26px;
+}
+
+.settings-section-header h2 {
+  margin: 0 0 7px;
+  font-size: 23px;
+  font-weight: 750;
+  color: #20243a;
+}
+
+.settings-section-header p {
+  margin: 0;
+  color: #717789;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* SETTINGS OPTION */
+.settings-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 15px;
+  background: #f8f9ff;
+  border: 1px solid #e7e8f4;
+  border-radius: 14px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.settings-option:last-child {
+  margin-bottom: 0;
+}
+
+.settings-option:hover {
+  transform: translateY(-2px);
+  border-color: #d8d5ff;
+  box-shadow:
+    0 7px 20px rgba(80, 72, 216, 0.08);
+}
+
+/* OPTION ICON */
+.settings-option-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #eeecff;
+  border-radius: 12px;
+  font-size: 21px;
+}
+
+/* OPTION INFORMATION */
+.settings-option-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-option-info h3 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #252a3a;
+}
+
+.settings-option-info p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #73798c;
+}
+
+/* OPTION BUTTON */
+.settings-option-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 9px;
+  background: #6c63ff;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.settings-option-button:hover {
+  background: #5148d8;
+  transform: translateY(-1px);
+  box-shadow:
+    0 5px 12px rgba(81, 72, 216, 0.20);
+}
+
+/* INTERVIEW PREFERENCES */
+.settings-field {
+  margin-bottom: 22px;
+}
+
+.settings-field:last-child {
+  margin-bottom: 0;
+}
+
+/* FIELD LABEL */
+.settings-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #252a3a;
+}
+
+/* FIELD SELECT */
+.settings-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #dfe2ec;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #303548;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.settings-field select:hover {
+  border-color: #bdb8ff;
+}
+
+.settings-field select:focus {
+  border-color: #6c63ff;
+  box-shadow:
+    0 0 0 3px rgba(108, 99, 255, 0.10);
+}
+
+/* FIELD DESCRIPTION */
+.settings-field small {
+  display: block;
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #818798;
+}
+
+/* DANGER / DELETE ACCOUNT */
+.settings-danger-option {
+  background: #fff8f8;
+  border-color: #f3dddd;
+}
+
+.settings-danger-option:hover {
+  border-color: #efcaca;
+  box-shadow:
+    0 7px 20px rgba(220, 70, 70, 0.07);
+}
+
+.settings-danger-option .settings-option-icon {
+  background: #ffe9e9;
+}
+
+.settings-danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 9px;
+  background: #dc4b4b;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.settings-danger-button:hover {
+  background: #c93636;
+  transform: translateY(-1px);
+  box-shadow:
+    0 5px 12px rgba(201, 54, 54, 0.18);
+}
+
+/* PLACEHOLDER */
+.settings-placeholder {
+  padding: 24px;
+  background: #f8f9fd;
+  border: 1px dashed #dfe2ec;
+  border-radius: 13px;
+  color: #7a8091;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* TABLET */
+@media (max-width: 850px) {
+  .settings-page {
+    padding: 28px 18px 45px;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .settings-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .settings-menu {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 520px) {
+  .settings-page {
+    padding: 22px 14px 35px;
+  }
+
+  /* HEADER */
+  .settings-header {
+    margin-bottom: 22px;
+  }
+
+  .settings-header h1 {
+    font-size: 27px;
+  }
+
+  .settings-header>div>p:last-child {
+    font-size: 14px;
+  }
+
+  /* SIDEBAR */
+  .settings-sidebar {
+    grid-template-columns: 1fr 1fr;
+    padding: 7px;
+  }
+
+  .settings-menu {
+    padding: 11px 8px;
+    font-size: 12px;
+  }
+
+  /* CARD */
+  .settings-card {
+    padding: 21px 17px;
+    border-radius: 15px;
+  }
+
+  .settings-card h2,
+  .settings-section-header h2 {
+    font-size: 20px;
+  }
+
+  /* OPTIONS */
+  .settings-option {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .settings-option-info {
+    flex: 1;
+    min-width: calc(100% - 65px);
+  }
+
+  .settings-option-button,
+  .settings-danger-button {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  /* FIELDS */
+  .settings-field {
+    margin-bottom: 19px;
+  }
+
+  .settings-field label {
+    font-size: 13px;
+  }
+
+  .settings-field select {
+    padding: 11px 12px;
+    font-size: 13px;
+  }
+
+  .settings-field small {
+    font-size: 11px;
+  }
+}

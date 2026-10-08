@@ -232,6 +232,10 @@ function Dashboard() {
                         Profile
                     </Link>
 
+                    <Link to="/settings">
+                        Settings
+                    </Link>
+
                     <button
                         onClick={handleLogout}
                         className="logout-button"
