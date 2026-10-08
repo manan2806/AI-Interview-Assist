@@ -1192,7 +1192,135 @@ def oauth2callback():
         """
 
     except Exception as e:
-
         print("Gmail OAuth callback error:", str(e))
-
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ==========================================
+# CHANGE PASSWORD
+# ==========================================
+@auth_bp.route("/api/change-password", methods=["PUT"])
+@jwt_required()
+def change_password():
+    try:
+        user_id = get_jwt_identity()
+
+        data = request.get_json(silent=True)
+
+        if not data:
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data."}),
+                400,
+            )
+
+        current_password = data.get("current_password", "").strip()
+        new_password = data.get("new_password", "").strip()
+        confirm_password = data.get("confirm_password", "").strip()
+
+        # Required fields
+        if not current_password or not new_password or not confirm_password:
+            return (
+                jsonify(
+                    {"success": False, "message": "All password fields are required."}
+                ),
+                400,
+            )
+
+        # Confirm password
+        if new_password != confirm_password:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "New password and confirm password do not match.",
+                    }
+                ),
+                400,
+            )
+
+        # Minimum password length
+        if len(new_password) < 6:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "New password must be at least 6 characters.",
+                    }
+                ),
+                400,
+            )
+
+        # Same password check
+        if current_password == new_password:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "New password must be different from current password.",
+                    }
+                ),
+                400,
+            )
+
+        # Database check
+        if database.db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        users = database.db["users"]
+
+        # Find logged-in user
+        user = users.find_one({"user_id": user_id})
+
+        if not user:
+            return jsonify({"success": False, "message": "User not found."}), 404
+
+        # Check current password
+        stored_password = user.get("password", "")
+
+        if not stored_password:
+            return (
+                jsonify(
+                    {"success": False, "message": "Password information not found."}
+                ),
+                500,
+            )
+
+        if not bcrypt.check_password_hash(stored_password, current_password):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "The current password you entered is incorrect.",
+                    }
+                ),
+                400,
+            )
+
+        # Generate new password hash
+        hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+        # Update password
+        result = users.update_one(
+            {"user_id": user_id}, {"$set": {"password": hashed_password}}
+        )
+
+        if result.modified_count == 0:
+            return (
+                jsonify(
+                    {"success": False, "message": "Password could not be updated."}
+                ),
+                500,
+            )
+
+        return (
+            jsonify({"success": True, "message": "Password changed successfully."}),
+            200,
+        )
+
+    except Exception as e:
+        print("Change password error:", repr(e))
+
+        return jsonify({"success": False, "message": "Unable to change password."}), 500

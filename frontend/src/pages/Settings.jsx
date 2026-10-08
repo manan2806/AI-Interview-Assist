@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     getSettings,
     updateSettings,
 } from "../services/api";
 
+import { changePassword } from "../services/authService";
+
 function Settings() {
+    const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState("account");
+
+    const [showChangePassword, setShowChangePassword] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordError, setPasswordError] = useState("");
+    const [passwordSuccess, setPasswordSuccess] = useState("");
 
     // ==========================================
     // SETTINGS STATE
@@ -160,6 +171,87 @@ function Settings() {
     };
 
     // ==========================================
+    // HANDLE CHANGE PASSWORD
+    // ==========================================
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+
+        setPasswordError("");
+        setPasswordSuccess("");
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            setPasswordError("All password fields are required.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError("New password and confirm password do not match.");
+            return;
+        }
+
+        if (currentPassword === newPassword) {
+            setPasswordError(
+                "New password must be different from current password."
+            );
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setPasswordError(
+                "New password must be at least 6 characters."
+            );
+            return;
+        }
+
+        try {
+            setPasswordLoading(true);
+
+            const data = await changePassword({
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword,
+            });
+
+            console.log("Change Password Response:", data);
+
+            if (data?.success === true) {
+                setPasswordSuccess(
+                    data.message || "Password changed successfully."
+                );
+
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+
+                setTimeout(() => {
+                    setShowChangePassword(false);
+                    setPasswordSuccess("");
+                }, 1500);
+
+                return;
+            }
+
+            setPasswordError(
+                data?.message || "Unable to change password."
+            );
+
+        } catch (error) {
+            console.error(
+                "Change Password Error:",
+                error.response?.data || error
+            );
+
+            setPasswordError(
+                error.response?.data?.message ||
+                error.message ||
+                "Unable to change password."
+            );
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
+    // ==========================================
     // LOADING
     // ==========================================
 
@@ -191,22 +283,29 @@ function Settings() {
                         <span className="settings-label">
                             Preferences
                         </span>
-
                         <h1>Settings</h1>
-
                         <p>
                             Customize your Interview Assist experience.
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="settings-save-button"
-                        onClick={handleSaveSettings}
-                        disabled={saving}
-                    >
-                        {saving ? "Saving..." : "Save Changes"}
-                    </button>
+                    <div className="settings-header-actions">
+                        <button
+                            type="button"
+                            className="settings-save-button"
+                            onClick={handleSaveSettings}
+                            disabled={saving}
+                        >
+                            {saving ? "Saving..." : "Save Changes"}
+                        </button>
+
+                        <button
+                            className="result-back-btn"
+                            onClick={() => navigate("/dashboard")}
+                        >
+                            Dashboard
+                        </button>
+                    </div>
                 </div>
 
                 {/* ==========================================
@@ -632,7 +731,15 @@ function Settings() {
 
                                     <button
                                         type="button"
-                                        className="settings-option-button"
+                                        className="change-password-open-button"
+                                        onClick={() => {
+                                            setPasswordError("");
+                                            setPasswordSuccess("");
+                                            setCurrentPassword("");
+                                            setNewPassword("");
+                                            setConfirmPassword("");
+                                            setShowChangePassword(true);
+                                        }}
                                     >
                                         Change Password
                                     </button>
@@ -662,6 +769,150 @@ function Settings() {
                     </main>
                 </div>
             </div>
+
+            {/* ==========================================
+                CHANGE PASSWORD MODAL
+            ========================================== */}
+            {showChangePassword && (
+                <div className="change-password-overlay">
+                    <div className="change-password-modal">
+                        {/* HEADER */}
+                        <div className="change-password-header">
+
+                            <div>
+                                <span className="change-password-label">
+                                    Account Security
+                                </span>
+
+                                <h2>
+                                    Change Password
+                                </h2>
+
+                                <p>
+                                    Update your account password securely.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="change-password-close"
+                                onClick={() => {
+                                    setShowChangePassword(false);
+                                    setPasswordError("");
+                                    setPasswordSuccess("");
+                                }}
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                        {/* FORM */}
+                        <form
+                            className="change-password-form"
+                            onSubmit={handleChangePassword}
+                        >
+
+                            {/* ERROR */}
+                            {passwordError && (
+                                <div className="change-password-error">
+                                    {passwordError}
+                                </div>
+                            )}
+
+                            {/* SUCCESS */}
+                            {passwordSuccess && (
+                                <div className="change-password-success">
+                                    {passwordSuccess}
+                                </div>
+                            )}
+
+                            {/* CURRENT PASSWORD */}
+                            <div className="change-password-group">
+                                <label>
+                                    Current Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) =>
+                                        setCurrentPassword(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Enter current password"
+                                    required
+                                />
+                            </div>
+
+                            {/* NEW PASSWORD */}
+                            <div className="change-password-group">
+
+                                <label>
+                                    New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) =>
+                                        setNewPassword(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Enter new password"
+                                    required
+                                />
+                            </div>
+
+                            {/* CONFIRM PASSWORD */}
+                            <div className="change-password-group">
+                                <label>
+                                    Confirm New Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Confirm new password"
+                                    required
+                                />
+                            </div>
+
+                            {/* ACTION BUTTONS */}
+                            <div className="change-password-actions">
+                                <button
+                                    type="button"
+                                    className="change-password-cancel"
+                                    onClick={() => {
+                                        setShowChangePassword(false);
+                                        setPasswordError("");
+                                        setPasswordSuccess("");
+                                    }}
+                                    disabled={passwordLoading}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    className="change-password-submit"
+                                    disabled={passwordLoading}
+                                >
+                                    {passwordLoading
+                                        ? "Changing..."
+                                        : "Change Password"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

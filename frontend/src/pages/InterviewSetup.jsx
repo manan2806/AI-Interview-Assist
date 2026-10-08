@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getUser } from "../utils/auth";
+import { getSettings } from "../services/api";
 
 import {
     createInterview,
@@ -35,6 +36,41 @@ function InterviewSetup() {
     const [loading, setLoading] = useState(false);
     const [loadingStep, setLoadingStep] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const loadSavedSettings = async () => {
+            try {
+                const response = await getSettings();
+                if (response?.success && response?.settings) {
+                    const savedSettings = response.settings;
+                    if (savedSettings.interview_type) {
+                        setInterviewType(
+                            savedSettings.interview_type
+                        );
+                    }
+                    if (savedSettings.difficulty) {
+                        setDifficulty(
+                            savedSettings.difficulty
+                        );
+                    }
+
+                    if (savedSettings.number_of_questions) {
+                        setQuestionCount(
+                            Number(
+                                savedSettings.number_of_questions
+                            )
+                        );
+                    }
+                }
+            } catch (error) {
+                console.error(
+                    "Load Saved Interview Settings Error:",
+                    error
+                );
+            }
+        };
+        loadSavedSettings();
+    }, []);
 
     // ==========================================
     // START INTERVIEW

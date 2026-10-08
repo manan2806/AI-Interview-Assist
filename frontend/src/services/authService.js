@@ -45,12 +45,9 @@ export const updateProfile = async (profileData) => {
 // ==========================================
 
 export const forgotPassword = async (email) => {
-
-    const response = await api.post(
-        "/api/forgot-password",
-        {
-            email: email
-        }
+    const response = await api.post("/api/forgot-password", {
+        email: email
+    }
     );
 
     return response.data;
@@ -62,12 +59,10 @@ export const forgotPassword = async (email) => {
 
 export const verifyOTP = async (email, otp) => {
 
-    const response = await api.post(
-        "/api/verify-otp",
-        {
-            email: email,
-            otp: otp
-        }
+    const response = await api.post("/api/verify-otp", {
+        email: email,
+        otp: otp
+    }
     );
 
     return response.data;
@@ -78,14 +73,22 @@ export const verifyOTP = async (email, otp) => {
 // ==========================================
 
 export const resetPassword = async (email, resetToken, newPassword) => {
-
-    const response = await api.post("/api/reset-password",
-        {
-            email: email,
-            reset_token: resetToken,
-            new_password: newPassword
-        }
+    const response = await api.post("/api/reset-password", {
+        email: email,
+        reset_token: resetToken,
+        new_password: newPassword
+    }
     );
+
+    return response.data;
+};
+
+// ==========================================
+// CHANGE PASSWORD
+// ==========================================
+
+export const changePassword = async (passwordData) => {
+    const response = await api.put("/api/change-password", passwordData);
 
     return response.data;
 };
