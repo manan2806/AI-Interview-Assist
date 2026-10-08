@@ -11279,20 +11279,41 @@ html {
     grid-template-columns: 1fr;
   }
 
-  .settings-option-card,
-  .settings-security-card {
+  .settings-option-card {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
+  .settings-security-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+  }
+
   .settings-option-info {
     min-width: 0;
-    width: calc(100% - 70px);
+    width: 100%;
+  }
+
+  .settings-option-info h3 {
+    font-size: 15px;
+  }
+
+  .settings-option-info p {
+    font-size: 12px;
+    line-height: 1.5;
   }
 
   .settings-option-button {
     width: 100%;
     text-align: center;
+  }
+
+  .settings-security-card .change-password-open-button {
+    width: 100%;
+    min-width: 0;
+    margin-top: 2px;
   }
 
   .settings-danger-card {
