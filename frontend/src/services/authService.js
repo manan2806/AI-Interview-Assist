@@ -92,3 +92,16 @@ export const changePassword = async (passwordData) => {
 
     return response.data;
 };
+
+// ==========================================
+// DELETE ACCOUNT
+// ==========================================
+
+export const deleteAccount = async (currentPassword) => {
+    const response = await api.delete("/api/delete-account", {
+        data: { current_password: currentPassword }
+    }
+    );
+
+    return response.data;
+};

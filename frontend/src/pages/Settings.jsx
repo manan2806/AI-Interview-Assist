@@ -5,7 +5,7 @@ import {
     updateSettings,
 } from "../services/api";
 
-import { changePassword } from "../services/authService";
+import { changePassword, deleteAccount } from "../services/authService";
 
 function Settings() {
     const navigate = useNavigate();
@@ -18,6 +18,11 @@ function Settings() {
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [passwordError, setPasswordError] = useState("");
     const [passwordSuccess, setPasswordSuccess] = useState("");
+    const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+    const [deletePassword, setDeletePassword] = useState("");
+    const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
 
     // ==========================================
     // SETTINGS STATE
@@ -248,6 +253,56 @@ function Settings() {
             );
         } finally {
             setPasswordLoading(false);
+        }
+    };
+
+    // ==========================================
+    // HANDLE DELETE ACCOUNT
+    // ==========================================
+    const handleDeleteAccount = async () => {
+        if (!deletePassword) {
+            setDeleteError("Please enter your current password.");
+            return;
+        }
+
+        if (!deleteConfirmed) {
+            setDeleteError("Please confirm that you understand this action.");
+            return;
+        }
+
+        try {
+            setDeleteLoading(true);
+            setDeleteError("");
+
+            const response = await deleteAccount(deletePassword);
+
+            if (!response?.success) {
+                setDeleteError(response?.message || "Unable to delete your account.");
+                return;
+            }
+
+            // Clear authentication data
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            // Clear interview-related local storage
+            Object.keys(localStorage).forEach((key) => {
+                if (
+                    key.startsWith("interview_") ||
+                    key.startsWith("interview_deadline_")
+                ) {
+                    localStorage.removeItem(key);
+                }
+            });
+
+            // Redirect to login
+            navigate("/login");
+
+        } catch (error) {
+            console.error("Delete Account Error:", error);
+            setDeleteError(error?.response?.data?.message || "Unable to delete your account.");
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -760,6 +815,11 @@ function Settings() {
                                     <button
                                         type="button"
                                         className="settings-danger-button"
+                                        onClick={() => {
+                                            setDeletePassword("");
+                                            setDeleteConfirmed(false);
+                                            setShowDeleteAccount(true);
+                                        }}
                                     >
                                         Delete Account
                                     </button>
@@ -910,6 +970,122 @@ function Settings() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ==========================================
+                DELETE ACCOUNT MODEL
+            ========================================== */}
+            {showDeleteAccount && (
+                <div
+                    className="delete-account-overlay"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setShowDeleteAccount(false);
+                            setDeletePassword("");
+                            setDeleteConfirmed(false);
+                        }
+                    }}
+                >
+                    <div className="delete-account-modal">
+                        <div className="delete-account-header">
+                            <div>
+                                <span className="delete-account-label">
+                                    Account Security
+                                </span>
+                                <h2>Delete Account</h2>
+                                <p>
+                                    This action will permanently delete your
+                                    account and all associated interview data.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="delete-account-close"
+                                onClick={() => {
+                                    setShowDeleteAccount(false);
+                                    setDeletePassword("");
+                                    setDeleteConfirmed(false);
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="delete-account-warning">
+                            <span className="delete-account-warning-icon">
+                                ⚠
+                            </span>
+                            <div>
+                                <strong>This action cannot be undone.</strong>
+                                <p>
+                                    Your profile, interview history, results,
+                                    and related data will be permanently removed.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="delete-account-group">
+                            <label htmlFor="delete-account-password">
+                                Current Password
+                            </label>
+                            <input
+                                id="delete-account-password"
+                                type="password"
+                                value={deletePassword}
+                                onChange={(e) => {
+                                    setDeletePassword(e.target.value);
+                                    setDeleteError("");
+                                }}
+                                placeholder="Enter your current password"
+                                autoComplete="current-password"
+                            />
+                        </div>
+
+                        <label className="delete-account-confirm">
+                            <input
+                                type="checkbox"
+                                checked={deleteConfirmed}
+                                onChange={(e) => {
+                                    setDeleteConfirmed(e.target.checked);
+                                    setDeleteError("");
+                                }}
+                            />
+                            <span>
+                                I understand that my account and interview data
+                                will be permanently deleted.
+                            </span>
+                        </label>
+
+                        <div className="delete-account-actions">
+                            <button
+                                type="button"
+                                className="delete-account-cancel"
+                                onClick={() => {
+                                    setShowDeleteAccount(false);
+                                    setDeletePassword("");
+                                    setDeleteConfirmed(false);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="delete-account-confirm-button"
+                                onClick={handleDeleteAccount}
+                                disabled={
+                                    !deletePassword ||
+                                    !deleteConfirmed ||
+                                    deleteLoading
+                                }
+                            >
+                                {deleteLoading
+                                    ? "Deleting Account..."
+                                    : "Delete My Account"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
