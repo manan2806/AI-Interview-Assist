@@ -73,29 +73,55 @@ function InterviewStart() {
                         const parsedSetup = JSON.parse(savedSetup);
                         setSetup(parsedSetup);
 
+                        // INTERVIEW DURATION / TIMER
                         if (parsedSetup?.duration !== "No Limit") {
+                            let durationMinutes = null;
 
-                            const durationMinutes = parseInt(
-                                parsedSetup?.duration,
-                                10
-                            );
+                            // CUSTOM DURATION
+                            if (parsedSetup?.duration === "Custom") {
+                                const customMinutes = Number(
+                                    parsedSetup?.custom_duration
+                                );
 
-                            if (!isNaN(durationMinutes)) {
+                                if (
+                                    Number.isFinite(customMinutes) &&
+                                    customMinutes >= 3 &&
+                                    customMinutes <= 60
+                                ) {
+                                    durationMinutes = customMinutes;
+                                }
+                            }
 
+                            // NORMAL DURATION (10 , 20 , 30 min)
+                            else {
+                                const parsedMinutes = parseInt(
+                                    String(parsedSetup?.duration || ""),
+                                    10
+                                );
+
+                                if (
+                                    Number.isFinite(parsedMinutes) &&
+                                    parsedMinutes > 0
+                                ) {
+                                    durationMinutes = parsedMinutes;
+                                }
+                            }
+
+                            // CREATE / RESTORE INTERVIEW DEADLINE
+                            if (durationMinutes !== null) {
                                 const deadlineKey =
                                     `interview_deadline_${savedInterviewId}`;
 
                                 let savedDeadline =
                                     localStorage.getItem(deadlineKey);
 
+                                // Create deadline only once
                                 if (!savedDeadline) {
-
                                     const deadline =
                                         Date.now() +
                                         durationMinutes * 60 * 1000;
 
-                                    savedDeadline =
-                                        String(deadline);
+                                    savedDeadline = String(deadline);
 
                                     localStorage.setItem(
                                         deadlineKey,
@@ -106,29 +132,50 @@ function InterviewStart() {
                                 const deadlineTime =
                                     Number(savedDeadline);
 
-                                setInterviewDeadline(deadlineTime);
+                                // VALID DEADLINE
+                                if (
+                                    Number.isFinite(deadlineTime) &&
+                                    deadlineTime > 0
+                                ) {
+                                    setInterviewDeadline(deadlineTime);
 
-                                const remainingSeconds =
-                                    Math.max(
-                                        0,
-                                        Math.floor(
-                                            (deadlineTime - Date.now()) / 1000
-                                        )
-                                    );
+                                    const remainingSeconds =
+                                        Math.max(
+                                            0,
+                                            Math.floor(
+                                                (deadlineTime - Date.now()) /
+                                                1000
+                                            )
+                                        );
 
-                                setRemainingTime(remainingSeconds);
+                                    setRemainingTime(remainingSeconds);
+                                } else {
+                                    setInterviewDeadline(null);
+                                    setRemainingTime(null);
+                                }
+                            } else {
+                                // Invalid duration
+                                setInterviewDeadline(null);
+                                setRemainingTime(null);
                             }
-
                         } else {
-
+                            // NO LIMIT
                             setInterviewDeadline(null);
                             setRemainingTime(null);
                         }
                     } catch (parseError) {
-                        console.error("Setup Parse Error:", parseError);
+                        console.error(
+                            "Setup Parse Error:",
+                            parseError
+                        );
+
                         setSetup(null);
+                        setInterviewDeadline(null);
+                        setRemainingTime(null);
                     }
                 }
+
+
 
                 setLoadingStep("Checking your interview progress...");
 

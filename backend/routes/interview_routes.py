@@ -1,13 +1,13 @@
-from flask import Blueprint, request, jsonify , send_file
+from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from google import genai
 from bson import ObjectId
 from dotenv import load_dotenv
 
-import os ,json , time , random
+import os, json, time, random
 
-from database import interviews , users
+from database import interviews, users
 from utils.pdf_generator import generate_interview_pdf
 from utils.email_service import send_interview_report_email
 
@@ -26,6 +26,7 @@ if gemini_api_key:
 else:
     gemini_client = None
 
+
 # ==========================================
 # HELPER - CONVERT MONGO ID
 # ==========================================
@@ -35,6 +36,7 @@ def get_interview_object_id(interview_id):
     except Exception:
         return None
 
+
 # ==========================================
 # HELPER - GENERATE INTERVIEW CODE
 # ==========================================
@@ -42,22 +44,17 @@ def generate_interview_code():
     while True:
         code = f"INT{random.randint(100000, 999999)}"
 
-        existing_interview = interviews.find_one({
-            "interview_code": code
-        })
+        existing_interview = interviews.find_one({"interview_code": code})
 
         if not existing_interview:
             return code
+
 
 # ==========================================
 # HELPER - GEMINI EVALUATION FOR ALL ANSWERS
 # ==========================================
 def evaluate_all_answers_with_gemini(
-    job_role,
-    experience_level,
-    difficulty,
-    questions,
-    answers
+    job_role, experience_level, difficulty, questions, answers
 ):
     """
     Evaluate complete interview using Gemini.
@@ -65,91 +62,57 @@ def evaluate_all_answers_with_gemini(
     Features:
     - Supports 1-20 questions
     - Primary + fallback model
-    - Limited retry for temporary Gemini errors
+    - 503 high-demand errors immediately use fallback
+    - Limited retry for rate-limit / timeout errors
     - Compact prompt
     - Strict JSON validation
     - Normalized evaluation structure
     """
     if gemini_client is None:
-        raise Exception(
-            "Gemini client is not available."
-        )
-
+        raise Exception("Gemini client is not available.")
+    # ==========================================================
     # VALIDATE INPUT
+    # ==========================================================
     if not isinstance(questions, list):
-        raise Exception(
-            "Invalid questions data."
-        )
-
+        raise Exception("Invalid questions data.")
     if not isinstance(answers, list):
-        raise Exception(
-            "Invalid answers data."
-        )
-
+        raise Exception("Invalid answers data.")
     if not questions:
-        raise Exception(
-            "No interview questions found."
-        )
-
+        raise Exception("No interview questions found.")
+    # ==========================================================
     # CREATE ANSWER LOOKUP
+    # ==========================================================
     answer_map = {}
-
     for answer_data in answers:
         if not isinstance(answer_data, dict):
             continue
-
-        question_number = answer_data.get(
-            "question_number"
-        )
-
+        question_number = answer_data.get("question_number")
         if question_number is None:
             continue
-
-        answer_text = answer_data.get(
-            "answer",
-            ""
-        )
-
-        answer_map[question_number] = str(
-            answer_text or ""
-        )
-
+        answer_text = answer_data.get("answer", "")
+        answer_map[question_number] = str(answer_text or "")
+    # ==========================================================
     # PREPARE INTERVIEW DATA
+    # ==========================================================
     interview_data = []
-
     for index, question_data in enumerate(questions):
         if not isinstance(question_data, dict):
             continue
-
-        question_number = question_data.get(
-            "question_number",
-            index + 1
+        question_number = question_data.get("question_number", index + 1)
+        question_text = str(question_data.get("question", "") or "")
+        candidate_answer = answer_map.get(question_number, "")
+        interview_data.append(
+            {
+                "question_number": question_number,
+                "question": question_text,
+                "answer": candidate_answer,
+            }
         )
-
-        question_text = str(
-            question_data.get(
-                "question",
-                ""
-            ) or ""
-        )
-
-        candidate_answer = answer_map.get(
-            question_number,
-            ""
-        )
-
-        interview_data.append({
-            "question_number": question_number,
-            "question": question_text,
-            "answer": candidate_answer
-        })
-
     if not interview_data:
-        raise Exception(
-            "No valid interview questions found."
-        )
-
+        raise Exception("No valid interview questions found.")
+    # ==========================================================
     # PROMPT
+    # ==========================================================
     prompt = f"""
 You are an expert interview evaluator.
 
@@ -206,19 +169,16 @@ Required JSON:
     ]
 }}
 """
-
+    # ==========================================================
     # MODEL CONFIGURATION
-    models = [
-        "gemini-3.8-flash",
-        "gemini-3.5-flash-lite"
-    ]
-
+    # ==========================================================
+    models = ["gemini-3.8-flash", "gemini-3.5-flash-lite"]
     last_error = None
-
+    # ==========================================================
     # TRY MODELS
-    for model_index, model in enumerate(models):
+    # ==========================================================
+    for model in models:
         max_retries = 2
-
         for attempt in range(max_retries):
             try:
                 print(
@@ -226,90 +186,46 @@ Required JSON:
                     f"{model} "
                     f"(attempt {attempt + 1}/{max_retries})"
                 )
-
-                response = (
-                    gemini_client.models.generate_content(
-                        model=model,
-                        contents=prompt,
-                        config={
-                            "response_mime_type":
-                                "application/json"
-                        }
-                    )
+                # ==================================================
+                # GEMINI REQUEST
+                # ==================================================
+                response = gemini_client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config={"response_mime_type": "application/json"},
                 )
-
+                # ==================================================
                 # RESPONSE VALIDATION
+                # ==================================================
                 if response is None:
-                    raise Exception(
-                        "Gemini returned no response."
-                    )
-
-                response_text = getattr(
-                    response,
-                    "text",
-                    None
-                )
-
+                    raise Exception("Gemini returned no response.")
+                response_text = getattr(response, "text", None)
                 if not response_text:
-                    raise Exception(
-                        "Gemini returned an empty response."
-                    )
-
+                    raise Exception("Gemini returned an empty response.")
                 response_text = response_text.strip()
-
-                # REMOVE CODE FENCES IF GEMINI ADDS THEM
-                if response_text.startswith(
-                    "```json"
-                ):
-                    response_text = (
-                        response_text[7:]
-                    )
-                elif response_text.startswith(
-                    "```"
-                ):
-                    response_text = (
-                        response_text[3:]
-                    )
-
-                if response_text.endswith(
-                    "```"
-                ):
-                    response_text = (
-                        response_text[:-3]
-                    )
-
+                # ==================================================
+                # REMOVE CODE FENCES
+                # ==================================================
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:]
+                elif response_text.startswith("```"):
+                    response_text = response_text[3:]
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
                 response_text = response_text.strip()
-
+                # ==================================================
                 # PARSE JSON
-                ai_data = json.loads(
-                    response_text
-                )
-
-                if not isinstance(
-                    ai_data,
-                    dict
-                ):
-                    raise Exception(
-                        "Gemini returned invalid JSON."
-                    )
-
-                evaluations = ai_data.get(
-                    "evaluations"
-                )
-
-                if not isinstance(
-                    evaluations,
-                    list
-                ):
-                    raise Exception(
-                        "Gemini returned invalid evaluations."
-                    )
-
+                # ==================================================
+                ai_data = json.loads(response_text)
+                if not isinstance(ai_data, dict):
+                    raise Exception("Gemini returned invalid JSON.")
+                evaluations = ai_data.get("evaluations")
+                if not isinstance(evaluations, list):
+                    raise Exception("Gemini returned invalid evaluations.")
+                # ==================================================
                 # CHECK EVALUATION COUNT
-                expected_count = len(
-                    interview_data
-                )
-
+                # ==================================================
+                expected_count = len(interview_data)
                 if len(evaluations) != expected_count:
                     raise Exception(
                         "Gemini evaluated an unexpected "
@@ -317,230 +233,147 @@ Required JSON:
                         f"Expected: {expected_count}, "
                         f"Received: {len(evaluations)}"
                     )
-
+                # ==================================================
                 # ORIGINAL QUESTION LOOKUP
+                # ==================================================
                 question_map = {
-                    item["question_number"]: item
-                    for item in interview_data
+                    item["question_number"]: item for item in interview_data
                 }
-
-                expected_numbers = [
-                    item["question_number"]
-                    for item in interview_data
-                ]
-
+                expected_numbers = [item["question_number"] for item in interview_data]
                 normalized = []
                 received_numbers = []
-
+                # ==================================================
                 # NORMALIZE EACH EVALUATION
-                for index, evaluation in enumerate(
-                    evaluations
-                ):
-                    if not isinstance(
-                        evaluation,
-                        dict
-                    ):
+                # ==================================================
+                for index, evaluation in enumerate(evaluations):
+                    if not isinstance(evaluation, dict):
                         raise Exception(
-                            "Invalid evaluation object "
-                            f"at position {index + 1}."
+                            "Invalid evaluation object " f"at position {index + 1}."
                         )
-
-                    question_number = evaluation.get(
-                        "question_number"
-                    )
-
-                    # If Gemini omitted it,
+                    question_number = evaluation.get("question_number")
+                    # If Gemini omitted question number,
                     # use original question order.
                     if question_number is None:
-                        question_number = (
-                            expected_numbers[index]
-                        )
-
+                        question_number = expected_numbers[index]
                     if question_number not in question_map:
                         raise Exception(
                             "Gemini returned invalid "
-                            f"question number: "
-                            f"{question_number}"
+                            f"question number: {question_number}"
                         )
-
-                    received_numbers.append(
-                        question_number
-                    )
-
-                    original = question_map[
-                        question_number
-                    ]
-
+                    received_numbers.append(question_number)
+                    original = question_map[question_number]
+                    # ==================================================
                     # SCORE NORMALIZATION
-                    score = evaluation.get(
-                        "score",
-                        0
-                    )
-
+                    # ==================================================
+                    score = evaluation.get("score", 0)
                     try:
                         score = float(score)
-                    except (
-                        ValueError,
-                        TypeError
-                    ):
+                    except (ValueError, TypeError):
                         score = 0
-
-                    score = max(
-                        0,
-                        min(
-                            10,
-                            score
-                        )
-                    )
-
+                    score = max(0, min(10, score))
                     if score.is_integer():
                         score = int(score)
-
+                    # ==================================================
                     # FIELD NORMALIZATION
-                    evaluation["question_number"] = (
-                        question_number
-                    )
-
+                    # ==================================================
+                    evaluation["question_number"] = question_number
                     evaluation["score"] = score
-
-                    evaluation.setdefault(
-                        "correctness",
-                        "Incorrect"
-                    )
-
-                    evaluation.setdefault(
-                        "relevance",
-                        "Irrelevant"
-                    )
-
-                    evaluation.setdefault(
-                        "technical_accuracy",
-                        "Poor"
-                    )
-
-                    evaluation.setdefault(
-                        "strengths",
-                        []
-                    )
-
-                    evaluation.setdefault(
-                        "weaknesses",
-                        []
-                    )
-
-                    evaluation.setdefault(
-                        "missing_concepts",
-                        []
-                    )
-
-                    evaluation.setdefault(
-                        "feedback",
-                        ""
-                    )
-
+                    evaluation.setdefault("correctness", "Incorrect")
+                    evaluation.setdefault("relevance", "Irrelevant")
+                    evaluation.setdefault("technical_accuracy", "Poor")
+                    evaluation.setdefault("strengths", [])
+                    evaluation.setdefault("weaknesses", [])
+                    evaluation.setdefault("missing_concepts", [])
+                    evaluation.setdefault("feedback", "")
+                    # ==================================================
                     # ENSURE LIST FIELDS ARE LISTS
-                    for field in [
-                        "strengths",
-                        "weaknesses",
-                        "missing_concepts"
-                    ]:
-                        if not isinstance(
-                            evaluation.get(field),
-                            list
-                        ):
+                    # ==================================================
+                    for field in ["strengths", "weaknesses", "missing_concepts"]:
+                        if not isinstance(evaluation.get(field), list):
                             evaluation[field] = []
-
+                    # ==================================================
                     # ADD ORIGINAL QUESTION + ANSWER
-                    evaluation["question"] = (
-                        original["question"]
-                    )
-
-                    evaluation["answer"] = (
-                        original["answer"]
-                    )
-
-                    evaluation["evaluated_at"] = (
-                        datetime.utcnow()
-                    )
-
-                    normalized.append(
-                        evaluation
-                    )
-
+                    # ==================================================
+                    evaluation["question"] = original["question"]
+                    evaluation["answer"] = original["answer"]
+                    evaluation["evaluated_at"] = datetime.utcnow()
+                    normalized.append(evaluation)
+                # ==================================================
                 # QUESTION NUMBER VALIDATION
-                if set(received_numbers) != set(
-                    expected_numbers
-                ):
-                    raise Exception(
-                        "Gemini returned mismatched "
-                        "question numbers."
-                    )
-
+                # ==================================================
+                if set(received_numbers) != set(expected_numbers):
+                    raise Exception("Gemini returned mismatched " "question numbers.")
+                # ==================================================
                 # SORT TO ORIGINAL ORDER
-                normalized_map = {
-                    item["question_number"]: item
-                    for item in normalized
-                }
-
-                normalized = [
-                    normalized_map[number]
-                    for number in expected_numbers
-                ]
-
-                print(
-                    "✅ Gemini evaluation successful "
-                    f"using {model}."
-                )
-
+                # ==================================================
+                normalized_map = {item["question_number"]: item for item in normalized}
+                normalized = [normalized_map[number] for number in expected_numbers]
+                print("✅ Gemini evaluation successful " f"using {model}.")
                 return normalized
-
+            # ======================================================
+            # ERROR HANDLING
+            # ======================================================
             except Exception as e:
                 last_error = e
                 error_message = str(e)
-
-                print(
-                    "⚠️ Gemini evaluation error "
-                    f"with {model}: "
-                    f"{error_message}"
+                print("⚠️ Gemini evaluation error " f"with {model}: {error_message}")
+                # ==================================================
+                # DETECT ERROR TYPE
+                # ==================================================
+                is_503_error = "503" in error_message or "UNAVAILABLE" in error_message
+                is_rate_limit_error = (
+                    "429" in error_message or "RESOURCE_EXHAUSTED" in error_message
                 )
-
-                # TEMPORARY ERROR DETECTION
-                temporary_error = (
-                    "503" in error_message
-                    or "UNAVAILABLE" in error_message
-                    or "429" in error_message
-                    or "RESOURCE_EXHAUSTED"
-                    in error_message
-                    or "deadline" in error_message.lower()
+                is_timeout_error = (
+                    "deadline" in error_message.lower()
                     or "timeout" in error_message.lower()
                 )
-
-                # Retry only temporary errors.
-                if (
-                    temporary_error
-                    and attempt < max_retries - 1
-                ):
-                    wait_time = 2 * (
-                        attempt + 1
-                    )
-
+                # ==================================================
+                # 503 / UNAVAILABLE
+                # ==================================================
+                # Do NOT retry the same model.
+                # Immediately move to fallback model.
+                if is_503_error:
+                    print(f"⚠️ {model} is currently " "unavailable/high demand.")
+                    print(f"➡️ Skipping retry for {model}. " "Moving to next model...")
+                    break
+                # ==================================================
+                # 429 / RESOURCE_EXHAUSTED
+                # ==================================================
+                # Retry once with short delay.
+                if is_rate_limit_error and attempt < max_retries - 1:
+                    wait_time = 2
                     print(
-                        "⏳ Temporary Gemini error. "
-                        f"Retrying in {wait_time} seconds..."
+                        "⏳ Gemini rate limit detected. "
+                        f"Retrying {model} "
+                        f"in {wait_time} seconds..."
                     )
-
-                    time.sleep(
-                        wait_time
-                    )
+                    time.sleep(wait_time)
                     continue
+                # ==================================================
+                # TIMEOUT / DEADLINE
+                # ==================================================
+                # Retry once with short delay.
+                if is_timeout_error and attempt < max_retries - 1:
+                    wait_time = 2
+                    print(
+                        "⏳ Gemini timeout detected. "
+                        f"Retrying {model} "
+                        f"in {wait_time} seconds..."
+                    )
+                    time.sleep(wait_time)
+                    continue
+                # ==================================================
+                # OTHER ERRORS
+                # ==================================================
                 break
-
-        print(
-            f"➡️ {model} failed. "
-            "Trying fallback model..."
-        )
-
+        # ==========================================================
+        # NEXT MODEL
+        # ==========================================================
+        print(f"➡️ {model} failed. " "Trying fallback model...")
+    # ==========================================================
     # ALL MODELS FAILED
+    # ==========================================================
     raise Exception(
         "Unable to evaluate interview with "
         "available Gemini models. "
@@ -687,7 +520,7 @@ IMPORTANT RULES:
     response = gemini_client.models.generate_content(
         model="gemini-3.6-flash",
         contents=prompt,
-        config={"response_mime_type": "application/json"}
+        config={"response_mime_type": "application/json"},
     )
 
     # GET RESPONSE TEXT
@@ -708,7 +541,7 @@ IMPORTANT RULES:
 
     # REMOVE MARKDOWN CODE BLOCK
     if response_text.startswith("```json"):
-        response_text = response_text[len("```json"):]
+        response_text = response_text[len("```json") :]
 
         if response_text.endswith("```"):
             response_text = response_text[:-3]
@@ -757,9 +590,7 @@ IMPORTANT RULES:
     strengths = [str(item).strip() for item in strengths if str(item).strip()]
     weaknesses = [str(item).strip() for item in weaknesses if str(item).strip()]
     recommendations = [
-        str(item).strip()
-        for item in recommendations
-        if str(item).strip()
+        str(item).strip() for item in recommendations if str(item).strip()
     ]
 
     # FALLBACK ANALYSIS
@@ -812,11 +643,13 @@ IMPORTANT RULES:
 
     # FALLBACK RECOMMENDATIONS
     if not recommendations:
-        recommendations.extend([
-            "Review the topics associated with the lower-scoring interview answers.",
-            "Practice explaining technical concepts clearly and with relevant examples.",
-            "Continue practicing interview questions related to the selected job role."
-        ])
+        recommendations.extend(
+            [
+                "Review the topics associated with the lower-scoring interview answers.",
+                "Practice explaining technical concepts clearly and with relevant examples.",
+                "Continue practicing interview questions related to the selected job role.",
+            ]
+        )
 
     # FALLBACK SUMMARY
     if not summary:
@@ -861,7 +694,7 @@ IMPORTANT RULES:
         "weaknesses": weaknesses,
         "recommendations": recommendations,
         "technical_skill_assessment": technical_skill_assessment,
-        "readiness_assessment": readiness_assessment
+        "readiness_assessment": readiness_assessment,
     }
 
     # DEBUG FINAL RESULT
@@ -871,6 +704,7 @@ IMPORTANT RULES:
     print("========================================")
 
     return final_result
+
 
 # ==========================================
 # GENERATE OVERALL RESULT
@@ -885,22 +719,13 @@ def generate_overall_result(interview_id):
         try:
             object_id = ObjectId(interview_id)
         except Exception:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID"
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID"}), 400
 
         # FIND INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found"
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found"}), 404
 
         # CHECK COMPLETED
         current_status = interview.get("status")
@@ -909,20 +734,25 @@ def generate_overall_result(interview_id):
         print("INTERVIEW ID:", interview_id, flush=True)
 
         if current_status != "completed":
-            return jsonify({
-                "success": False,
-                "message": "Interview is not completed yet",
-                "current_status": current_status
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Interview is not completed yet",
+                        "current_status": current_status,
+                    }
+                ),
+                400,
+            )
 
         # GET EVALUATIONS
         evaluations = interview.get("evaluations", [])
 
         if not evaluations:
-            return jsonify({
-                "success": False,
-                "message": "No answer evaluations found"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "No answer evaluations found"}),
+                400,
+            )
 
         # CHECK EXISTING OVERALL RESULT
         existing_overall_result = interview.get("overall_result")
@@ -932,8 +762,7 @@ def generate_overall_result(interview_id):
             existing_strengths = existing_overall_result.get("strengths", [])
             existing_weaknesses = existing_overall_result.get("weaknesses", [])
             existing_recommendations = existing_overall_result.get(
-                "recommendations",
-                []
+                "recommendations", []
             )
 
             needs_ai_regeneration = (
@@ -948,68 +777,53 @@ def generate_overall_result(interview_id):
             print("Existing overall result found.", flush=True)
             print("Existing strengths:", existing_strengths, flush=True)
             print("Existing weaknesses:", existing_weaknesses, flush=True)
-            print(
-                "Existing recommendations:",
-                existing_recommendations,
-                flush=True
-            )
-            print(
-                "AI regeneration required:",
-                needs_ai_regeneration,
-                flush=True
-            )
+            print("Existing recommendations:", existing_recommendations, flush=True)
+            print("AI regeneration required:", needs_ai_regeneration, flush=True)
 
             if not needs_ai_regeneration:
                 print(
-                    "AI analysis already exists. Returning existing result.",
-                    flush=True
+                    "AI analysis already exists. Returning existing result.", flush=True
                 )
 
-                return jsonify({
-                    "success": True,
-                    "message": "Overall result already generated",
-                    "interview_id": interview_id,
-                    "overall_result": existing_overall_result,
-                    "report": {
-                        "pdf_generated": False,
-                        "email_sent": interview.get(
-                            "report_email_sent",
-                            False
-                        ),
-                        "email_error": interview.get(
-                            "report_email_error",
-                            None
-                        )
-                    }
-                }), 200
+                return (
+                    jsonify(
+                        {
+                            "success": True,
+                            "message": "Overall result already generated",
+                            "interview_id": interview_id,
+                            "overall_result": existing_overall_result,
+                            "report": {
+                                "pdf_generated": False,
+                                "email_sent": interview.get("report_email_sent", False),
+                                "email_error": interview.get(
+                                    "report_email_error", None
+                                ),
+                            },
+                        }
+                    ),
+                    200,
+                )
 
         # REGENERATE OLD / INCOMPLETE AI ANALYSIS
         if existing_overall_result and needs_ai_regeneration:
-            print(
-                "REGENERATING INCOMPLETE AI ANALYSIS",
-                flush=True
-            )
+            print("REGENERATING INCOMPLETE AI ANALYSIS", flush=True)
             print("INTERVIEW ID:", interview_id, flush=True)
 
             try:
                 if gemini_client is None:
-                    raise Exception(
-                        "Gemini AI client is not available."
-                    )
+                    raise Exception("Gemini AI client is not available.")
 
                 ai_result = generate_overall_analysis(
                     interview.get("job_role", ""),
                     interview.get("experience_level", ""),
                     interview.get("difficulty", ""),
-                    evaluations
+                    evaluations,
                 )
 
                 print("REGENERATED AI RESULT:", ai_result, flush=True)
 
                 if not isinstance(ai_result, dict):
-                    raise Exception(
-                        "Invalid AI analysis response."
-                    )
+                    raise Exception("Invalid AI analysis response.")
 
                 strengths = ai_result.get("strengths", [])
                 weaknesses = ai_result.get("weaknesses", [])
@@ -1024,69 +838,42 @@ def generate_overall_result(interview_id):
                 if not isinstance(recommendations, list):
                     recommendations = []
 
-                if (
-                    not strengths
-                    or not weaknesses
-                    or not recommendations
-                ):
-                    raise Exception(
-                        "AI returned incomplete analysis."
-                    )
+                if not strengths or not weaknesses or not recommendations:
+                    raise Exception("AI returned incomplete analysis.")
 
                 ai_update_result = interviews.update_one(
-                    {
-                        "_id": object_id,
-                        "user_id": user_id
-                    },
+                    {"_id": object_id, "user_id": user_id},
                     {
                         "$set": {
                             "overall_result.summary": ai_result.get(
-                                "summary",
-                                existing_overall_result.get(
-                                    "summary",
-                                    ""
-                                )
+                                "summary", existing_overall_result.get("summary", "")
                             ),
                             "overall_result.strengths": strengths,
                             "overall_result.weaknesses": weaknesses,
                             "overall_result.recommendations": recommendations,
-                            "overall_result.technical_skill_assessment":
-                                ai_result.get(
-                                    "technical_skill_assessment",
-                                    existing_overall_result.get(
-                                        "technical_skill_assessment",
-                                        ""
-                                    )
+                            "overall_result.technical_skill_assessment": ai_result.get(
+                                "technical_skill_assessment",
+                                existing_overall_result.get(
+                                    "technical_skill_assessment", ""
                                 ),
-                            "overall_result.readiness_assessment":
-                                ai_result.get(
-                                    "readiness_assessment",
-                                    existing_overall_result.get(
-                                        "readiness_assessment",
-                                        ""
-                                    )
-                                ),
-                            "overall_result.ai_regenerated_at":
-                                datetime.utcnow()
+                            ),
+                            "overall_result.readiness_assessment": ai_result.get(
+                                "readiness_assessment",
+                                existing_overall_result.get("readiness_assessment", ""),
+                            ),
+                            "overall_result.ai_regenerated_at": datetime.utcnow(),
                         }
-                    }
+                    },
                 )
 
+                print("AI update matched:", ai_update_result.matched_count, flush=True)
                 print(
-                    "AI update matched:",
-                    ai_update_result.matched_count,
-                    flush=True
-                )
-                print(
-                    "AI update modified:",
-                    ai_update_result.modified_count,
-                    flush=True
+                    "AI update modified:", ai_update_result.modified_count, flush=True
                 )
 
-                updated_interview = interviews.find_one({
-                    "_id": object_id,
-                    "user_id": user_id
-                })
+                updated_interview = interviews.find_one(
+                    {"_id": object_id, "user_id": user_id}
+                )
 
                 if not updated_interview:
                     raise Exception(
@@ -1094,60 +881,60 @@ def generate_overall_result(interview_id):
                     )
 
                 updated_overall_result = updated_interview.get(
-                    "overall_result",
-                    existing_overall_result
+                    "overall_result", existing_overall_result
                 )
 
-                print(
-                    "AI analysis regenerated successfully.",
-                    flush=True
-                )
+                print("AI analysis regenerated successfully.", flush=True)
                 print(
                     "Updated strengths:",
                     updated_overall_result.get("strengths", []),
-                    flush=True
+                    flush=True,
                 )
                 print(
                     "Updated weaknesses:",
                     updated_overall_result.get("weaknesses", []),
-                    flush=True
+                    flush=True,
                 )
                 print(
                     "Updated recommendations:",
                     updated_overall_result.get("recommendations", []),
-                    flush=True
+                    flush=True,
                 )
 
-                return jsonify({
-                    "success": True,
-                    "message": "AI analysis regenerated successfully",
-                    "interview_id": interview_id,
-                    "overall_result": updated_overall_result,
-                    "report": {
-                        "pdf_generated": False,
-                        "email_sent": updated_interview.get(
-                            "report_email_sent",
-                            False
-                        ),
-                        "email_error": updated_interview.get(
-                            "report_email_error",
-                            None
-                        )
-                    }
-                }), 200
+                return (
+                    jsonify(
+                        {
+                            "success": True,
+                            "message": "AI analysis regenerated successfully",
+                            "interview_id": interview_id,
+                            "overall_result": updated_overall_result,
+                            "report": {
+                                "pdf_generated": False,
+                                "email_sent": updated_interview.get(
+                                    "report_email_sent", False
+                                ),
+                                "email_error": updated_interview.get(
+                                    "report_email_error", None
+                                ),
+                            },
+                        }
+                    ),
+                    200,
+                )
 
             except Exception as ai_error:
-                print(
-                    "AI analysis regeneration failed:",
-                    str(ai_error),
-                    flush=True
-                )
+                print("AI analysis regeneration failed:", str(ai_error), flush=True)
 
-                return jsonify({
-                    "success": False,
-                    "message": "AI analysis regeneration failed",
-                    "error": str(ai_error)
-                }), 500
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "AI analysis regeneration failed",
+                            "error": str(ai_error),
+                        }
+                    ),
+                    500,
+                )
 
         # CALCULATE NUMERIC SCORE
         total_score = 0
@@ -1167,22 +954,18 @@ def generate_overall_result(interview_id):
             valid_evaluations += 1
 
         if valid_evaluations == 0:
-            return jsonify({
-                "success": False,
-                "message": "Unable to calculate overall score"
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Unable to calculate overall score"}
+                ),
+                400,
+            )
 
         max_score = valid_evaluations * 10
 
-        overall_score = round(
-            (total_score / max_score) * 100,
-            2
-        )
+        overall_score = round((total_score / max_score) * 100, 2)
 
-        average_score = round(
-            total_score / valid_evaluations,
-            2
-        )
+        average_score = round(total_score / valid_evaluations, 2)
 
         # PERFORMANCE LEVEL
         if overall_score >= 90:
@@ -1211,9 +994,8 @@ def generate_overall_result(interview_id):
                 "received for the evaluated answers."
             ),
             "readiness_assessment": (
-                "Continue practicing the areas where "
-                "your score was lower."
-            )
+                "Continue practicing the areas where " "your score was lower."
+            ),
         }
 
         # TRY GEMINI OVERALL ANALYSIS
@@ -1223,27 +1005,20 @@ def generate_overall_result(interview_id):
                     interview.get("job_role", ""),
                     interview.get("experience_level", ""),
                     interview.get("difficulty", ""),
-                    evaluations
+                    evaluations,
                 )
 
                 if isinstance(ai_result, dict):
                     ai_analysis.update(ai_result)
 
-                    print(
-                        "Gemini overall analysis generated successfully.",
-                        flush=True
-                    )
-                    print(
-                        "AI ANALYSIS:",
-                        ai_result,
-                        flush=True
-                    )
+                    print("Gemini overall analysis generated successfully.", flush=True)
+                    print("AI ANALYSIS:", ai_result, flush=True)
 
             except Exception as e:
-                print("Overall AI analysis failed:", str(e),flush=True)
-                print("Using fallback analysis.",flush=True)
+                print("Overall AI analysis failed:", str(e), flush=True)
+                print("Using fallback analysis.", flush=True)
         else:
-            print("Gemini client is not available.",flush=True)
+            print("Gemini client is not available.", flush=True)
 
         # ENSURE AI ARRAYS ARE NOT EMPTY
         if not isinstance(ai_analysis.get("strengths"), list):
@@ -1260,17 +1035,17 @@ def generate_overall_result(interview_id):
             if average_score >= 8:
                 ai_analysis["strengths"] = [
                     "Demonstrated strong overall interview performance.",
-                    "Provided answers with good understanding of the evaluated topics."
+                    "Provided answers with good understanding of the evaluated topics.",
                 ]
             elif average_score >= 6:
                 ai_analysis["strengths"] = [
                     "Demonstrated a reasonable understanding of the interview topics.",
-                    "Provided answers that addressed several important aspects of the questions."
+                    "Provided answers that addressed several important aspects of the questions.",
                 ]
             else:
                 ai_analysis["strengths"] = [
                     "Attempted the interview questions and demonstrated understanding of some basic concepts.",
-                    "Completed the interview and provided responses for evaluation."
+                    "Completed the interview and provided responses for evaluation.",
                 ]
 
         # FALLBACK WEAKNESSES
@@ -1278,17 +1053,17 @@ def generate_overall_result(interview_id):
             if average_score >= 8:
                 ai_analysis["weaknesses"] = [
                     "Some answers may require more detailed technical explanation.",
-                    "Further practice can improve consistency across different questions."
+                    "Further practice can improve consistency across different questions.",
                 ]
             elif average_score >= 6:
                 ai_analysis["weaknesses"] = [
                     "Some answers lacked sufficient depth or technical detail.",
-                    "Certain concepts require additional practice and clarification."
+                    "Certain concepts require additional practice and clarification.",
                 ]
             else:
                 ai_analysis["weaknesses"] = [
                     "Several answers require stronger technical understanding.",
-                    "More practice is needed to provide complete and accurate responses."
+                    "More practice is needed to provide complete and accurate responses.",
                 ]
 
         # FALLBACK RECOMMENDATIONS
@@ -1296,7 +1071,7 @@ def generate_overall_result(interview_id):
             ai_analysis["recommendations"] = [
                 "Review the concepts related to questions where the score was lower.",
                 "Practice explaining technical concepts clearly using practical examples.",
-                "Complete additional mock interviews to improve answer quality and confidence."
+                "Complete additional mock interviews to improve answer quality and confidence.",
             ]
 
         # FALLBACK SUMMARY
@@ -1313,10 +1088,7 @@ def generate_overall_result(interview_id):
 
         # FALLBACK TECHNICAL ASSESSMENT
         if (
-            not isinstance(
-                ai_analysis.get("technical_skill_assessment"),
-                str
-            )
+            not isinstance(ai_analysis.get("technical_skill_assessment"), str)
             or not ai_analysis.get("technical_skill_assessment").strip()
         ):
             ai_analysis["technical_skill_assessment"] = (
@@ -1327,10 +1099,7 @@ def generate_overall_result(interview_id):
 
         # FALLBACK READINESS ASSESSMENT
         if (
-            not isinstance(
-                ai_analysis.get("readiness_assessment"),
-                str
-            )
+            not isinstance(ai_analysis.get("readiness_assessment"), str)
             or not ai_analysis.get("readiness_assessment").strip()
         ):
             ai_analysis["readiness_assessment"] = (
@@ -1349,33 +1118,29 @@ def generate_overall_result(interview_id):
             "summary": ai_analysis.get("summary", ""),
             "strengths": ai_analysis.get("strengths", []),
             "weaknesses": ai_analysis.get("weaknesses", []),
-            "recommendations": ai_analysis.get("recommendations",[]),
-            "technical_skill_assessment": ai_analysis.get("technical_skill_assessment",""),
-            "readiness_assessment": ai_analysis.get("readiness_assessment",""),
-            "generated_at": datetime.utcnow()
+            "recommendations": ai_analysis.get("recommendations", []),
+            "technical_skill_assessment": ai_analysis.get(
+                "technical_skill_assessment", ""
+            ),
+            "readiness_assessment": ai_analysis.get("readiness_assessment", ""),
+            "generated_at": datetime.utcnow(),
         }
 
         # SAVE OVERALL RESULT
         update_result = interviews.update_one(
-            {
-                "_id": object_id,
-                "user_id": user_id
-            },
-            {
-                "$set": {
-                    "overall_result": overall_result,
-                    "status": "completed"
-                }
-            }
+            {"_id": object_id, "user_id": user_id},
+            {"$set": {"overall_result": overall_result, "status": "completed"}},
         )
 
         if update_result.matched_count == 0:
-            return jsonify({
-                "success": False,
-                "message": "Interview could not be updated"
-            }), 500
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview could not be updated"}
+                ),
+                500,
+            )
 
-        print("Overall result saved successfully.",flush=True)
+        print("Overall result saved successfully.", flush=True)
 
         # PDF + EMAIL
         report_email_sent = False
@@ -1400,71 +1165,60 @@ def generate_overall_result(interview_id):
                 raise Exception("Registered user not found.")
 
             # GET USER NAME
-            recipient_name = (
-                user.get("name")
-                or user.get("username")
-                or "Candidate"
-            )
+            recipient_name = user.get("name") or user.get("username") or "Candidate"
 
             # GET USER EMAIL
             recipient_email = user.get("email") or ""
 
             if not recipient_email:
-                raise Exception(
-                    "Registered user email not found."
-                )
+                raise Exception("Registered user email not found.")
 
             # CREATE REPORT DIRECTORY
-            reports_folder = os.path.join(os.getcwd(),"generated_reports")
-            os.makedirs(reports_folder,exist_ok=True)
+            reports_folder = os.path.join(os.getcwd(), "generated_reports")
+            os.makedirs(reports_folder, exist_ok=True)
 
             # GET UPDATED INTERVIEW
-            updated_interview = interviews.find_one({"_id": object_id,"user_id": user_id})
+            updated_interview = interviews.find_one(
+                {"_id": object_id, "user_id": user_id}
+            )
 
             if not updated_interview:
                 raise Exception(
-                    "Interview could not be loaded "
-                    "after generating result."
+                    "Interview could not be loaded " "after generating result."
                 )
 
             # CREATE PDF FILE NAME
-            interview_code = updated_interview.get( "interview_code", interview_id)
+            interview_code = updated_interview.get("interview_code", interview_id)
             pdf_file_name = f"Result_{interview_code}.pdf"
-            pdf_path = os.path.join(reports_folder,pdf_file_name)
+            pdf_path = os.path.join(reports_folder, pdf_file_name)
 
             # GENERATE PDF
-            generate_interview_pdf(updated_interview,pdf_path)
+            generate_interview_pdf(updated_interview, pdf_path)
 
             pdf_generated = True
-            print("PDF generated:",pdf_path,flush=True)
+            print("PDF generated:", pdf_path, flush=True)
 
             # SEND EMAIL
             send_interview_report_email(
                 recipient_email=recipient_email,
                 recipient_name=recipient_name,
                 pdf_path=pdf_path,
-                job_role=updated_interview.get(
-                    "job_role",
-                    "Interview"
-                )
+                job_role=updated_interview.get("job_role", "Interview"),
             )
 
             report_email_sent = True
-            print("Email sent to:",recipient_email,flush=True)
+            print("Email sent to:", recipient_email, flush=True)
 
             # SAVE EMAIL STATUS
             interviews.update_one(
-                {
-                    "_id": object_id,
-                    "user_id": user_id
-                },
+                {"_id": object_id, "user_id": user_id},
                 {
                     "$set": {
                         "report_email_sent": True,
                         "report_email_sent_at": datetime.utcnow(),
-                        "report_email": recipient_email
+                        "report_email": recipient_email,
                     }
-                }
+                },
             )
 
         except Exception as report_error:
@@ -1473,38 +1227,38 @@ def generate_overall_result(interview_id):
 
             # SAVE REPORT FAILURE STATUS
             interviews.update_one(
-                {
-                    "_id": object_id,
-                    "user_id": user_id
-                },
+                {"_id": object_id, "user_id": user_id},
                 {
                     "$set": {
                         "report_email_sent": False,
-                        "report_email_error": report_email_error
+                        "report_email_error": report_email_error,
                     }
-                }
+                },
             )
 
         # FINAL RESPONSE
-        return jsonify({
-            "success": True,
-            "message": "Overall interview result generated successfully",
-            "interview_id": interview_id,
-            "overall_result": overall_result,
-            "report": {
-                "pdf_generated": pdf_generated,
-                "email_sent": report_email_sent,
-                "email_error": report_email_error
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Overall interview result generated successfully",
+                    "interview_id": interview_id,
+                    "overall_result": overall_result,
+                    "report": {
+                        "pdf_generated": pdf_generated,
+                        "email_sent": report_email_sent,
+                        "email_error": report_email_error,
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
-        print("Overall Result Error:",str(e),flush=True)
+        print("Overall Result Error:", str(e), flush=True)
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # CREATE INTERVIEW SETUP
@@ -1518,10 +1272,7 @@ def setup_interview():
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "JSON body is required."
-            }), 400
+            return jsonify({"success": False, "message": "JSON body is required."}), 400
 
         job_role = data.get("job_role")
         experience_level = data.get("experience_level")
@@ -1531,68 +1282,131 @@ def setup_interview():
         duration = data.get("duration", "No Limit")
 
         if not job_role:
-            return jsonify({
-                "success": False,
-                "message": "Job role is required."
-            }), 400
+            return jsonify({"success": False, "message": "Job role is required."}), 400
 
         if not experience_level:
-            return jsonify({
-                "success": False,
-                "message": "Experience level is required."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Experience level is required."}),
+                400,
+            )
 
         if not interview_type:
-            return jsonify({
-                "success": False,
-                "message": "Interview type is required."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Interview type is required."}),
+                400,
+            )
 
         if not difficulty:
-            return jsonify({
-                "success": False,
-                "message": "Difficulty is required."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Difficulty is required."}),
+                400,
+            )
 
         if number_of_questions is None:
-            return jsonify({
-                "success": False,
-                "message": "Number of questions is required."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Number of questions is required."}
+                ),
+                400,
+            )
 
         try:
             number_of_questions = int(number_of_questions)
         except (ValueError, TypeError):
-            return jsonify({
-                "success": False,
-                "message": "Number of questions must be a number."
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Number of questions must be a number.",
+                    }
+                ),
+                400,
+            )
 
         if number_of_questions < 1:
-            return jsonify({
-                "success": False,
-                "message": "At least 1 question is required."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "At least 1 question is required."}
+                ),
+                400,
+            )
 
         if number_of_questions > 20:
-            return jsonify({
-                "success": False,
-                "message": "Maximum 20 questions are allowed."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Maximum 20 questions are allowed."}
+                ),
+                400,
+            )
 
-        allowed_durations = ["No Limit","10 Minutes","20 Minutes","30 Minutes"]
+        # INTERVIEW DURATION VALIDATION
+        duration = data.get("duration", "No Limit")
 
-        if duration not in allowed_durations:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview duration."
-            }), 400
+        # Make duration safe and consistent
+        if duration is None:
+            duration = "No Limit"
+
+        duration = str(duration).strip()
+
+        # Normalize common variations
+        duration_lower = duration.lower()
+
+        if duration_lower == "no limit":
+            duration = "No Limit"
+
+        elif duration_lower == "10 minutes":
+            duration = "10 Minutes"
+
+        elif duration_lower == "20 minutes":
+            duration = "20 Minutes"
+
+        elif duration_lower == "30 minutes":
+            duration = "30 Minutes"
+
+        elif duration_lower == "custom":
+            duration = "Custom"
+
+        else:
+            return (
+                jsonify({"success": False, "message": "Invalid interview duration."}),
+                400,
+            )
+
+        # CUSTOM DURATION
+        if duration == "Custom":
+            custom_duration = data.get("custom_duration")
+
+            try:
+                custom_duration = int(custom_duration)
+            except (TypeError, ValueError):
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Please enter a valid custom duration.",
+                        }
+                    ),
+                    400,
+                )
+
+            if custom_duration < 3 or custom_duration > 60:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Custom duration must be between 3 and 60 minutes.",
+                        }
+                    ),
+                    400,
+                )
+
+            duration = f"{custom_duration} Minutes"
 
         if interviews is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected."
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
 
         interview_code = generate_interview_code()
 
@@ -1610,68 +1424,88 @@ def setup_interview():
             "evaluations": [],
             "current_question": 0,
             "status": "created",
-            "created_at": datetime.utcnow()
+            "created_at": datetime.utcnow(),
         }
 
         result = interviews.insert_one(interview_data)
 
-        return jsonify({
-            "success": True,
-            "message": "Interview setup created successfully.",
-            "interview_id": str(result.inserted_id),
-            "interview_code": interview_code,
-            "duration": duration
-        }), 201
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Interview setup created successfully.",
+                    "interview_id": str(result.inserted_id),
+                    "interview_code": interview_code,
+                    "duration": duration,
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # GENERATE AI INTERVIEW QUESTIONS
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/generate-questions",
-    methods=["POST"]
-)
+@interview_bp.route("/<interview_id>/generate-questions", methods=["POST"])
 @jwt_required()
 def generate_questions(interview_id):
     try:
         user_id = get_jwt_identity()
 
+        # VALIDATE INTERVIEW ID
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        interview = interviews.find_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        # FIND INTERVIEW
+        interview = interviews.find_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        job_role = interview["job_role"]
-        experience_level = interview["experience_level"]
-        interview_type = interview["interview_type"]
-        difficulty = interview["difficulty"]
-        number_of_questions = interview["number_of_questions"]
+        # GET INTERVIEW DATA
+        job_role = interview.get("job_role")
+        experience_level = interview.get("experience_level")
+        interview_type = interview.get("interview_type")
+        difficulty = interview.get("difficulty")
+        number_of_questions = interview.get("number_of_questions")
 
+        # VALIDATE QUESTION COUNT
+        try:
+            number_of_questions = int(number_of_questions)
+        except (TypeError, ValueError):
+            return (
+                jsonify({"success": False, "message": "Invalid number of questions."}),
+                400,
+            )
+
+        if number_of_questions < 1 or number_of_questions > 20:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("Number of questions must be " "between 1 and 20."),
+                    }
+                ),
+                400,
+            )
+
+        # CHECK GEMINI CLIENT
         if gemini_client is None:
-            return jsonify({
-                "success": False,
-                "message": "GEMINI_API_KEY is not configured."
-            }), 500
+            return (
+                jsonify(
+                    {"success": False, "message": "GEMINI_API_KEY is not configured."}
+                ),
+                500,
+            )
 
+        # GEMINI PROMPT
         prompt = f"""
 You are an expert technical interviewer.
 
@@ -1706,10 +1540,10 @@ Requirements:
 4. Avoid duplicate questions.
 
 5. Include conceptual and practical
-   questions.
+   questions where appropriate.
 
 6. Questions should be suitable for a
-   real technical interview.
+   real professional interview.
 
 7. Do not provide answers.
 
@@ -1733,169 +1567,198 @@ Return exactly:
     ]
 }}
 """
-        # GEMINI REQUEST WITH RETRY + FALLBACK
-        models_to_try = [
-            "gemini-3.6-flash",
-            "gemini-3.5-flash-lite"
-        ]
+
+        # GEMINI MODELS
+        models_to_try = ["gemini-3.6-flash", "gemini-3.5-flash-lite"]
 
         response = None
         last_error = None
 
+        # TRY MODELS
         for model_name in models_to_try:
-
+            # Only retry temporary 503 errors.
+            # NEVER retry quota 429 errors.
             max_retries = 2
 
             for attempt in range(max_retries):
-
                 try:
-
                     print(
-                        f"🤖 Trying Gemini model: {model_name} "
+                        f"🤖 Trying Gemini model: "
+                        f"{model_name} "
                         f"(attempt {attempt + 1}/{max_retries})"
                     )
 
                     response = gemini_client.models.generate_content(
-
                         model=model_name,
-
                         contents=prompt,
-
-                        config={
-                            "response_mime_type":
-                                "application/json"
-                        }
+                        config={"response_mime_type": "application/json"},
                     )
 
+                    # VALID RESPONSE
                     if response and response.text:
-
-                        print(
-                            f"✅ Gemini response received "
-                            f"from {model_name}"
-                        )
-
+                        print(f"✅ Gemini response received " f"from {model_name}")
                         break
 
-                    raise Exception(
-                        "Gemini returned an empty response."
-                    )
+                    # Empty response
+                    raise Exception("Gemini returned an empty response.")
 
                 except Exception as e:
-
                     last_error = e
-
                     error_message = str(e)
 
-                    print(
-                        f"⚠️ Gemini error with {model_name}: "
-                        f"{error_message}"
-                    )
+                    print(f"⚠️ Gemini error with " f"{model_name}: {error_message}")
 
-                    # Retry temporary errors
+                    # QUOTA ERROR
                     if (
-                        (
-                            "503" in error_message
-                            or
-                            "UNAVAILABLE" in error_message
-                            or
-                            "429" in error_message
-                            or
-                            "RESOURCE_EXHAUSTED"
-                            in error_message
-                        )
-                        and
-                        attempt < max_retries - 1
+                        "429" in error_message
+                        or "RESOURCE_EXHAUSTED" in error_message
+                        or "quota" in error_message.lower()
                     ):
-
-                        wait_time = 3 * (
-                            2 ** attempt
-                        )
-
                         print(
-                            f"⏳ Retrying in "
-                            f"{wait_time} seconds..."
+                            f"⚠️ Quota exhausted for "
+                            f"{model_name}. "
+                            f"Skipping retry and "
+                            f"trying next model."
                         )
+                        break
 
-                        time.sleep(
-                            wait_time
-                        )
+                    # TEMPORARY 503 ERROR
+                    if "503" in error_message or "UNAVAILABLE" in error_message:
+                        if attempt < max_retries - 1:
+                            wait_time = 3 * (2**attempt)
 
-                        continue
+                            print(
+                                f"⏳ Temporary Gemini error. "
+                                f"Retrying in {wait_time} seconds..."
+                            )
 
+                            time.sleep(wait_time)
+                            continue
+
+                    # OTHER ERROR
                     break
 
-            # If successful, stop trying models
+            # STOP IF SUCCESSFUL
             if response and response.text:
                 break
 
-            print(
-                f"⚠️ Model {model_name} failed. "
-                f"Trying next model..."
+            print(f"⚠️ Model {model_name} failed. " f"Trying next model...")
+
+        # NO MODEL WORKED
+        if not response or not response.text:
+            # IMPORTANT:
+            # DO NOT DELETE THE INTERVIEW.
+            #
+            # Keep status as "created" so the user
+            # can retry question generation.
+            interviews.update_one(
+                {"_id": interview_object_id, "user_id": user_id},
+                {"$set": {"status": "created"}},
             )
 
-        # No model worked
-        if not response or not response.text:
+            # QUOTA MESSAGE
+            error_text = str(last_error) if last_error else ""
 
-            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+            if (
+                "429" in error_text
+                or "RESOURCE_EXHAUSTED" in error_text
+                or "quota" in error_text.lower()
+            ):
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": (
+                                "Gemini API quota has been exhausted. "
+                                "Please try again later or use another API key."
+                            ),
+                            "error": error_text,
+                        }
+                    ),
+                    429,
+                )
 
-            return jsonify({
+            # GENERAL GEMINI ERROR
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": (
+                            "AI question generation is temporarily "
+                            "unavailable. Please try again later."
+                        ),
+                        "error": (
+                            error_text if error_text else "Unknown Gemini error."
+                        ),
+                    }
+                ),
+                503,
+            )
 
-                "success": False,
-
-                "message":
-                    "AI question generation is temporarily unavailable. "
-                    "Please try again after a few seconds.",
-
-                "error":
-                    str(last_error)
-                    if last_error
-                    else "Unknown Gemini error."
-
-            }), 503
-
-        if not response.text:
-            return jsonify({
-                "success": False,
-                "message": "Gemini returned an empty response."
-            }), 500
-
+        # PARSE GEMINI JSON
         try:
             ai_data = json.loads(response.text.strip())
 
         except json.JSONDecodeError:
-            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+            interviews.update_one(
+                {"_id": interview_object_id, "user_id": user_id},
+                {"$set": {"status": "created"}},
+            )
 
-            return jsonify({
-                "success": False,
-                "message": "Gemini returned invalid JSON.",
-                "ai_response": response.text
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Gemini returned invalid JSON.",
+                        "ai_response": response.text,
+                    }
+                ),
+                500,
+            )
 
+        # GET QUESTIONS
         questions = ai_data.get("questions", [])
 
         if not questions:
-            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+            interviews.update_one(
+                {"_id": interview_object_id, "user_id": user_id},
+                {"$set": {"status": "created"}},
+            )
 
-            return jsonify({
-                "success": False,
-                "message": "Gemini did not generate questions."
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Gemini did not generate any questions.",
+                    }
+                ),
+                500,
+            )
 
+        # VALIDATE QUESTION COUNT
         if len(questions) != number_of_questions:
-            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+            interviews.update_one(
+                {"_id": interview_object_id, "user_id": user_id},
+                {"$set": {"status": "created"}},
+            )
 
-            return jsonify({
-                "success": False,
-                "message": "Gemini generated an unexpected number of questions.",
-                "expected": number_of_questions,
-                "received": len(questions)
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": (
+                            "Gemini generated an unexpected " "number of questions."
+                        ),
+                        "expected": number_of_questions,
+                        "received": len(questions),
+                    }
+                ),
+                500,
+            )
 
+        # SAVE QUESTIONS
         interviews.update_one(
-            {
-                "_id": interview_object_id,
-                "user_id": user_id
-            },
+            {"_id": interview_object_id, "user_id": user_id},
             {
                 "$set": {
                     "questions": questions,
@@ -1903,39 +1766,40 @@ Return exactly:
                     "evaluations": [],
                     "current_question": 0,
                     "status": "ready",
-                    "questions_generated_at": datetime.utcnow()
+                    "questions_generated_at": datetime.utcnow(),
                 }
-            }
+            },
         )
 
-        return jsonify({
-            "success": True,
-            "message": "AI interview questions generated successfully.",
-            "interview_id": interview_id,
-            "job_role": job_role,
-            "experience_level": experience_level,
-            "interview_type": interview_type,
-            "difficulty": difficulty,
-            "number_of_questions": len(questions),
-            "questions": questions
-        }), 200
+        # SUCCESS RESPONSE
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": ("AI interview questions " "generated successfully."),
+                    "interview_id": interview_id,
+                    "job_role": job_role,
+                    "experience_level": experience_level,
+                    "interview_type": interview_type,
+                    "difficulty": difficulty,
+                    "number_of_questions": len(questions),
+                    "questions": questions,
+                }
+            ),
+            200,
+        )
 
+    # UNEXPECTED ERROR
     except Exception as e:
-        if 'interview_object_id' in locals() and interview_object_id:
-            interviews.delete_one({"_id": interview_object_id,"user_id": user_id})
+        print(f"❌ Generate Questions Error: {e}")
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # START INTERVIEW
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/start",
-    methods=["POST"]
-)
+@interview_bp.route("/<interview_id>/start", methods=["POST"])
 @jwt_required()
 def start_interview(interview_id):
 
@@ -1950,182 +1814,138 @@ def start_interview(interview_id):
 
         except Exception:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # FIND INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # QUESTIONS CHECK
-        questions = interview.get(
-            "questions",
-            []
-        )
+        questions = interview.get("questions", [])
 
         if not questions:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview questions are not generated yet."
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Interview questions are not generated yet.",
+                    }
+                ),
+                400,
+            )
 
         # COMPLETED INTERVIEW
         if interview.get("status") == "completed":
 
-            return jsonify({
-                "success": False,
-                "message": "This interview has already been completed."
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "This interview has already been completed.",
+                    }
+                ),
+                400,
+            )
 
         # RESUME EXISTING INTERVIEW
         if interview.get("status") == "in_progress":
 
-            current_index = interview.get(
-                "current_question",
-                0
-            )
+            current_index = interview.get("current_question", 0)
 
             # Safety check
             if current_index >= len(questions):
 
-                return jsonify({
-                    "success": False,
-                    "message": "Interview is already completed."
-                }), 400
+                return (
+                    jsonify(
+                        {"success": False, "message": "Interview is already completed."}
+                    ),
+                    400,
+                )
 
-            current_question = questions[
-                current_index
-            ]
+            current_question = questions[current_index]
 
-            return jsonify({
-
-                "success": True,
-
-                "message":
-                    "Interview resumed successfully.",
-
-                "status":
-                    "in_progress",
-
-                "interview_id":
-                    interview_id,
-
-                "current_question":
-                    current_index + 1,
-
-                "total_questions":
-                    len(questions),
-
-                "question":
-                    current_question
-
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": "Interview resumed successfully.",
+                        "status": "in_progress",
+                        "interview_id": interview_id,
+                        "current_question": current_index + 1,
+                        "total_questions": len(questions),
+                        "question": current_question,
+                    }
+                ),
+                200,
+            )
 
         # FIRST TIME START
-        if interview.get("status") in [
-            "ready",
-            "created"
-        ]:
+        if interview.get("status") in ["ready", "created"]:
 
             current_index = 0
 
             interviews.update_one(
-
-                {
-                    "_id": object_id,
-                    "user_id": user_id
-                },
-
+                {"_id": object_id, "user_id": user_id},
                 {
                     "$set": {
-
-                        "current_question":
-                            current_index,
-
-                        "status":
-                            "in_progress",
-
-                        "started_at":
-                            datetime.utcnow()
-
+                        "current_question": current_index,
+                        "status": "in_progress",
+                        "started_at": datetime.utcnow(),
                     }
-                }
-
+                },
             )
 
-            return jsonify({
-
-                "success": True,
-
-                "message":
-                    "Interview started successfully.",
-
-                "status":
-                    "in_progress",
-
-                "interview_id":
-                    interview_id,
-
-                "current_question":
-                    1,
-
-                "total_questions":
-                    len(questions),
-
-                "question":
-                    questions[0]
-
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": "Interview started successfully.",
+                        "status": "in_progress",
+                        "interview_id": interview_id,
+                        "current_question": 1,
+                        "total_questions": len(questions),
+                        "question": questions[0],
+                    }
+                ),
+                200,
+            )
 
         # INVALID STATUS
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                f"Invalid interview status: "
-                f"{interview.get('status')}"
-
-        }), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"Invalid interview status: "
+                    f"{interview.get('status')}",
+                }
+            ),
+            400,
+        )
 
     except Exception as e:
 
-        print(
-            "Start Interview Error:",
-            str(e)
+        print("Start Interview Error:", str(e))
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to start/resume interview.",
+                    "error": str(e),
+                }
+            ),
+            500,
         )
 
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Unable to start/resume interview.",
-
-            "error":
-                str(e)
-
-        }), 500
 
 # ==========================================
 # RESUME INTERVIEW
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/resume",
-    methods=["GET"]
-)
+@interview_bp.route("/<interview_id>/resume", methods=["GET"])
 @jwt_required()
 def resume_interview(interview_id):
 
@@ -2139,219 +1959,145 @@ def resume_interview(interview_id):
 
         except Exception:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # FIND INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        questions = interview.get(
-            "questions",
-            []
-        )
+        questions = interview.get("questions", [])
 
-        answers = interview.get(
-            "answers",
-            []
-        )
+        answers = interview.get("answers", [])
 
-        evaluations = interview.get(
-            "evaluations",
-            []
-        )
+        evaluations = interview.get("evaluations", [])
 
-        status = interview.get(
-            "status"
-        )
+        status = interview.get("status")
 
-        current_index = interview.get(
-            "current_question",
-            0
-        )
+        current_index = interview.get("current_question", 0)
 
-        total_questions = len(
-            questions
-        )
+        total_questions = len(questions)
 
         # COMPLETED
         if status == "completed":
 
-            return jsonify({
-
-                "success": True,
-
-                "status":
-                    "completed",
-
-                "interview_id":
-                    interview_id,
-
-                "current_question":
-                    total_questions,
-
-                "total_questions":
-                    total_questions,
-
-                "answered_questions":
-                    len(answers),
-
-                "evaluated_questions":
-                    len(evaluations),
-
-                "overall_result":
-                    interview.get(
-                        "overall_result"
-                    ),
-
-                "message":
-                    "Interview already completed."
-
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "status": "completed",
+                        "interview_id": interview_id,
+                        "current_question": total_questions,
+                        "total_questions": total_questions,
+                        "answered_questions": len(answers),
+                        "evaluated_questions": len(evaluations),
+                        "overall_result": interview.get("overall_result"),
+                        "message": "Interview already completed.",
+                    }
+                ),
+                200,
+            )
 
         # EVALUATION PENDING
         elif status == "evaluation_pending":
-            return jsonify({
-                "success": True,
-                "status":"evaluation_pending",
-                "evaluating":interview.get("evaluating",False),
-                "message":"All answers are saved. ""Interview evaluation is pending.",
-                "current_question":len(questions),
-                "current_question_number":len(questions),
-                "total_questions":len(questions),
-                "answered_questions":len(answers),
-                "evaluations":len(interview.get("evaluations",[]))
-            }),200
-        
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "status": "evaluation_pending",
+                        "evaluating": interview.get("evaluating", False),
+                        "message": "All answers are saved. "
+                        "Interview evaluation is pending.",
+                        "current_question": len(questions),
+                        "current_question_number": len(questions),
+                        "total_questions": len(questions),
+                        "answered_questions": len(answers),
+                        "evaluations": len(interview.get("evaluations", [])),
+                    }
+                ),
+                200,
+            )
 
         # NOT STARTED
-        if status in [
-            "created",
-            "ready"
-        ]:
+        if status in ["created", "ready"]:
 
-            return jsonify({
-
-                "success": True,
-
-                "status":
-                    status,
-
-                "interview_id":
-                    interview_id,
-
-                "current_question":
-                    1,
-
-                "total_questions":
-                    total_questions,
-
-                "answered_questions":
-                    len(answers),
-
-                "evaluated_questions":
-                    len(evaluations),
-
-                "message":
-                    "Interview has not started yet."
-
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "status": status,
+                        "interview_id": interview_id,
+                        "current_question": 1,
+                        "total_questions": total_questions,
+                        "answered_questions": len(answers),
+                        "evaluated_questions": len(evaluations),
+                        "message": "Interview has not started yet.",
+                    }
+                ),
+                200,
+            )
 
         # IN PROGRESS
         if status == "in_progress":
 
             if current_index >= total_questions:
 
-                return jsonify({
+                return (
+                    jsonify(
+                        {"success": False, "message": "Invalid current question index."}
+                    ),
+                    400,
+                )
 
-                    "success": False,
+            current_question = questions[current_index]
 
-                    "message":
-                        "Invalid current question index."
-
-                }), 400
-
-            current_question = questions[
-                current_index
-            ]
-
-            return jsonify({
-
-                "success": True,
-
-                "status":
-                    "in_progress",
-
-                "interview_id":
-                    interview_id,
-
-                "current_question":
-                    current_index + 1,
-
-                "total_questions":
-                    total_questions,
-
-                "question":
-                    current_question,
-
-                "answered_questions":
-                    len(answers),
-
-                "evaluated_questions":
-                    len(evaluations),
-
-                "message":
-                    "Interview resumed successfully."
-
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "status": "in_progress",
+                        "interview_id": interview_id,
+                        "current_question": current_index + 1,
+                        "total_questions": total_questions,
+                        "question": current_question,
+                        "answered_questions": len(answers),
+                        "evaluated_questions": len(evaluations),
+                        "message": "Interview resumed successfully.",
+                    }
+                ),
+                200,
+            )
 
         # UNKNOWN STATUS
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                f"Unknown interview status: {status}"
-
-        }), 400
+        return (
+            jsonify(
+                {"success": False, "message": f"Unknown interview status: {status}"}
+            ),
+            400,
+        )
 
     except Exception as e:
 
-        print(
-            "Resume Interview Error:",
-            str(e)
+        print("Resume Interview Error:", str(e))
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to resume interview.",
+                    "error": str(e),
+                }
+            ),
+            500,
         )
 
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Unable to resume interview.",
-
-            "error":
-                str(e)
-
-        }), 500
 
 # ==========================================
 # GET CURRENT QUESTION
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/current-question",
-    methods=["GET"]
-)
+@interview_bp.route("/<interview_id>/current-question", methods=["GET"])
 @jwt_required()
 def get_current_question(interview_id):
     try:
@@ -2360,79 +2106,78 @@ def get_current_question(interview_id):
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        interview = interviews.find_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         status = interview.get("status")
 
         if status == "created":
-            return jsonify({
-                "success": False,
-                "message": "Please generate questions first."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Please generate questions first."}
+                ),
+                400,
+            )
 
         if status == "ready":
-            return jsonify({
-                "success": False,
-                "message": "Please start the interview first."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Please start the interview first."}
+                ),
+                400,
+            )
 
         if status == "completed":
-            return jsonify({
-                "success": False,
-                "message": "Interview is already completed.",
-                "status": "completed"
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Interview is already completed.",
+                        "status": "completed",
+                    }
+                ),
+                400,
+            )
 
         questions = interview.get("questions", [])
         current_question = interview.get("current_question", 0)
 
         if current_question >= len(questions):
-            return jsonify({
-                "success": False,
-                "message": "No more questions available."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "No more questions available."}),
+                400,
+            )
 
-        return jsonify({
-            "success": True,
-            "interview_id": interview_id,
-            "status": status,
-            "current_question": current_question + 1,
-            "total_questions": len(questions),
-            "question": questions[current_question]
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "interview_id": interview_id,
+                    "status": status,
+                    "current_question": current_question + 1,
+                    "total_questions": len(questions),
+                    "question": questions[current_question],
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # GET QUESTION + EXISTING ANSWER
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/question/<int:question_number>",
-    methods=["GET"]
-)
+@interview_bp.route("/<interview_id>/question/<int:question_number>", methods=["GET"])
 @jwt_required()
-def get_interview_question(
-    interview_id,
-    question_number
-):
+def get_interview_question(interview_id, question_number):
 
     try:
         user_id = get_jwt_identity()
@@ -2441,86 +2186,84 @@ def get_interview_question(
         object_id = get_interview_object_id(interview_id)
 
         if object_id is None:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # GET INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # GET QUESTIONS
-        questions = interview.get("questions",[])
+        questions = interview.get("questions", [])
 
         if not questions:
-            return jsonify({
-                "success": False,
-                "message": "Interview questions not found."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview questions not found."}
+                ),
+                400,
+            )
 
         # VALIDATE QUESTION NUMBER
-        if (question_number < 1 or question_number > len(questions)):
+        if question_number < 1 or question_number > len(questions):
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid question number."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Invalid question number."}),
+                400,
+            )
 
         # GET QUESTION
         question_index = question_number - 1
         question = questions[question_index]
 
         # GET EXISTING ANSWERS
-        answers = interview.get("answers",[])
+        answers = interview.get("answers", [])
         existing_answer = ""
 
         for answer_data in answers:
 
-            if (answer_data.get("question_number")==question_number):
-                existing_answer = answer_data.get("answer","")
+            if answer_data.get("question_number") == question_number:
+                existing_answer = answer_data.get("answer", "")
                 break
 
         # RETURN QUESTION
-        return jsonify({
-            "success": True,
-            "question": question,
-            "question_number":question_number,
-            "total_questions":len(questions),
-            "existing_answer":existing_answer,
-            "has_answer":bool(existing_answer.strip())
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "question": question,
+                    "question_number": question_number,
+                    "total_questions": len(questions),
+                    "existing_answer": existing_answer,
+                    "has_answer": bool(existing_answer.strip()),
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
 
-        print("❌ Get Interview Question Error:",str(e))
+        print("❌ Get Interview Question Error:", str(e))
 
-        return jsonify({
-            "success": False,
-            "message":"Unable to load interview question.",
-            "error":str(e)
-        }), 500
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to load interview question.",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
+
 
 # ==========================================
 # UPDATE EXISTING ANSWER
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/answer/<int:question_number>",
-    methods=["PUT"]
-)
+@interview_bp.route("/<interview_id>/answer/<int:question_number>", methods=["PUT"])
 @jwt_required()
-def update_interview_answer(
-    interview_id,
-    question_number
-):
+def update_interview_answer(interview_id, question_number):
 
     try:
         user_id = get_jwt_identity()
@@ -2530,35 +2273,31 @@ def update_interview_answer(
 
         if object_id is None:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # GET INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # ONLY IN-PROGRESS INTERVIEW
         if interview.get("status") != "in_progress":
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "This interview is not currently "
-                    "accepting answer updates."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": (
+                            "This interview is not currently "
+                            "accepting answer updates."
+                        ),
+                        "status": interview.get("status"),
+                    }
                 ),
-                "status": interview.get("status")
-            }), 400
+                400,
+            )
 
         # REQUEST DATA
         data = request.get_json(silent=True) or {}
@@ -2567,417 +2306,301 @@ def update_interview_answer(
 
         if not answer:
 
-            return jsonify({
-                "success": False,
-                "message": "Answer cannot be empty."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Answer cannot be empty."}),
+                400,
+            )
 
         # GET QUESTIONS
-        questions = interview.get("questions",[])
+        questions = interview.get("questions", [])
 
         if not questions:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview questions not found."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview questions not found."}
+                ),
+                400,
+            )
 
         # VALIDATE QUESTION NUMBER
-        if (question_number < 1 or question_number > len(questions)):
+        if question_number < 1 or question_number > len(questions):
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid question number."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Invalid question number."}),
+                400,
+            )
 
         # GET QUESTION
         question_index = question_number - 1
         question = questions[question_index]
-        question_text = question.get("question","")
+        question_text = question.get("question", "")
 
         # FIND EXISTING ANSWER
-        existing_answers = interview.get("answers",[])
+        existing_answers = interview.get("answers", [])
         answer_found = False
 
         for existing_answer in existing_answers:
 
-            if (existing_answer.get("question_number")==question_number):
+            if existing_answer.get("question_number") == question_number:
 
                 existing_answer["answer"] = answer
-                existing_answer["answered_at"] = (datetime.utcnow())
+                existing_answer["answered_at"] = datetime.utcnow()
                 answer_found = True
                 break
 
         # QUESTION MUST ALREADY HAVE AN ANSWER
         if not answer_found:
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "No existing answer found "
-                    "for this question."
-                )
-            }), 404
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("No existing answer found " "for this question."),
+                    }
+                ),
+                404,
+            )
 
         # UPDATE ANSWERS ARRAY
         interviews.update_one(
-
-            {
-                "_id": object_id,
-                "user_id": user_id
-            },
-
-            {
-                "$set": {
-                    "answers": existing_answers
-                }
-            }
+            {"_id": object_id, "user_id": user_id},
+            {"$set": {"answers": existing_answers}},
         )
 
-        print(
-            f"✅ Answer updated for "
-            f"Question {question_number}"
-        )
+        print(f"✅ Answer updated for " f"Question {question_number}")
 
         # RESPONSE
-        return jsonify({
-            "success": True,
-            "message":"Answer updated successfully.",
-            "question_number":question_number,
-            "question":question_text,
-            "answer":answer
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Answer updated successfully.",
+                    "question_number": question_number,
+                    "question": question_text,
+                    "answer": answer,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
-        print("❌ Update Answer Error:",str(e))
-        return jsonify({
-            "success": False,
-            "message":"Unable to update answer.",
-            "error":str(e)
-        }), 500
+        print("❌ Update Answer Error:", str(e))
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to update answer.",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
+
 
 # ==========================================
 # SUBMIT ANSWER , SAVE ANSWER ONLY , GEMINI IS NOT CALLED HERE
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/answer",
-    methods=["POST"]
-)
+@interview_bp.route("/<interview_id>/answer", methods=["POST"])
 @jwt_required()
 def submit_answer(interview_id):
 
     try:
         user_id = get_jwt_identity()
 
-        object_id = get_interview_object_id(
-            interview_id
-        )
+        object_id = get_interview_object_id(interview_id)
 
         if object_id is None:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # GET INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # CHECK STATUS
         if interview.get("status") != "in_progress":
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "This interview is not currently "
-                    "accepting answers."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": (
+                            "This interview is not currently " "accepting answers."
+                        ),
+                        "status": interview.get("status"),
+                    }
                 ),
-                "status": interview.get("status")
-            }), 400
+                400,
+            )
 
         # GET REQUEST DATA
-        data = request.get_json(
-            silent=True
-        ) or {}
+        data = request.get_json(silent=True) or {}
 
-        answer = str(
-            data.get("answer", "")
-        ).strip()
+        answer = str(data.get("answer", "")).strip()
 
         if not answer:
 
-            return jsonify({
-                "success": False,
-                "message": "Answer cannot be empty."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Answer cannot be empty."}),
+                400,
+            )
 
         # GET QUESTIONS
-        questions = interview.get(
-            "questions",
-            []
-        )
+        questions = interview.get("questions", [])
 
         if not questions:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview questions not found."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview questions not found."}
+                ),
+                400,
+            )
 
         # CURRENT QUESTION INDEX
-        current_index = interview.get(
-            "current_question",
-            0
-        )
+        current_index = interview.get("current_question", 0)
 
         try:
 
-            current_index = int(
-                current_index
-            )
+            current_index = int(current_index)
 
-        except (
-            ValueError,
-            TypeError
-        ):
+        except (ValueError, TypeError):
 
             current_index = 0
 
         # VALIDATE QUESTION INDEX
-        if (
-            current_index < 0
-            or
-            current_index >= len(questions)
-        ):
+        if current_index < 0 or current_index >= len(questions):
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid current question."
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Invalid current question."}),
+                400,
+            )
 
         # CURRENT QUESTION
-        current_question = questions[
-            current_index
-        ]
+        current_question = questions[current_index]
 
-        question_number = current_question.get(
-            "question_number",
-            current_index + 1
-        )
+        question_number = current_question.get("question_number", current_index + 1)
 
-        question_text = current_question.get(
-            "question",
-            ""
-        )
+        question_text = current_question.get("question", "")
 
         # CHECK DUPLICATE ANSWER
-        existing_answers = interview.get(
-            "answers",
-            []
-        )
+        existing_answers = interview.get("answers", [])
 
         for existing_answer in existing_answers:
 
-            if (
-                existing_answer.get(
-                    "question_number"
-                )
-                == question_number
-            ):
+            if existing_answer.get("question_number") == question_number:
 
-                return jsonify({
-                    "success": False,
-                    "message": (
-                        "This question has already "
-                        "been answered."
-                    )
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": ("This question has already " "been answered."),
+                        }
+                    ),
+                    400,
+                )
 
         # CREATE ANSWER OBJECT
         answer_data = {
-
-            "question_number":
-                question_number,
-
-            "question":
-                question_text,
-
-            "answer":
-                answer,
-
-            "answered_at":
-                datetime.utcnow()
+            "question_number": question_number,
+            "question": question_text,
+            "answer": answer,
+            "answered_at": datetime.utcnow(),
         }
 
         # CHECK IF FINAL QUESTION
-        is_last_question = (
-            current_index
-            ==
-            len(questions) - 1
-        )
+        is_last_question = current_index == len(questions) - 1
 
         # FINAL QUESTION
         if is_last_question:
 
             interviews.update_one(
-
+                {"_id": object_id, "user_id": user_id},
                 {
-                    "_id": object_id,
-                    "user_id": user_id
-                },
-
-                {
-                    "$push": {
-                        "answers": answer_data
-                    },
-
+                    "$push": {"answers": answer_data},
                     "$set": {
+                        "current_question": len(questions),
+                        "status": "evaluation_pending",
+                        "completed_at": datetime.utcnow(),
+                    },
+                },
+            )
 
-                        "current_question":
-                            len(questions),
+            print("✅ Final answer saved.")
 
-                        "status":
-                            "evaluation_pending",
+            print("⏳ Interview waiting for " "complete Gemini evaluation.")
 
-                        "completed_at":
-                            datetime.utcnow()
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": "Final answer saved successfully.",
+                        "status": "evaluation_pending",
+                        "question_number": question_number,
+                        "total_questions": len(questions),
+                        "next_question": None,
+                        "next_question_number": None,
                     }
-                }
+                ),
+                200,
             )
-
-            print(
-                "✅ Final answer saved."
-            )
-
-            print(
-                "⏳ Interview waiting for "
-                "complete Gemini evaluation."
-            )
-
-            return jsonify({
-
-                "success": True,
-
-                "message":
-                    "Final answer saved successfully.",
-
-                "status":
-                    "evaluation_pending",
-
-                "question_number":
-                    question_number,
-
-                "total_questions":
-                    len(questions),
-
-                "next_question":
-                    None,
-
-                "next_question_number":
-                    None
-            }), 200
 
         # NOT FINAL QUESTION
         next_index = current_index + 1
 
-        next_question = questions[
-            next_index
-        ]
+        next_question = questions[next_index]
 
-        next_question_number = next_question.get(
-            "question_number",
-            next_index + 1
-        )
+        next_question_number = next_question.get("question_number", next_index + 1)
 
         # SAVE ANSWER + MOVE TO NEXT QUESTION
         interviews.update_one(
-
+            {"_id": object_id, "user_id": user_id},
             {
-                "_id": object_id,
-                "user_id": user_id
+                "$push": {"answers": answer_data},
+                "$set": {"current_question": next_index},
             },
-
-            {
-                "$push": {
-                    "answers": answer_data
-                },
-
-                "$set": {
-                    "current_question":
-                        next_index
-                }
-            }
         )
 
-        print(
-            f"✅ Answer saved for "
-            f"Question {question_number}"
-        )
+        print(f"✅ Answer saved for " f"Question {question_number}")
 
-        print(
-            f"➡️ Moving to Question "
-            f"{next_question_number}"
-        )
+        print(f"➡️ Moving to Question " f"{next_question_number}")
 
         # RETURN NEXT QUESTION
-        return jsonify({
-
-            "success": True,
-
-            "message":
-                "Answer saved successfully.",
-
-            "status":
-                "in_progress",
-
-            "question_number":
-                question_number,
-
-            "total_questions":
-                len(questions),
-
-            "next_question":
-                next_question,
-
-            "next_question_number":
-                next_question_number
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Answer saved successfully.",
+                    "status": "in_progress",
+                    "question_number": question_number,
+                    "total_questions": len(questions),
+                    "next_question": next_question,
+                    "next_question_number": next_question_number,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
 
-        print(
-            "❌ Submit Answer Error:",
-            str(e)
+        print("❌ Submit Answer Error:", str(e))
+
+        return (
+            jsonify(
+                {"success": False, "message": "Unable to save answer.", "error": str(e)}
+            ),
+            500,
         )
 
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Unable to save answer.",
-
-            "error":
-                str(e)
-        }), 500
 
 # ==========================================
 # INTERVIEW TIMEOUT
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/timeout",
-    methods=["POST"]
-)
+@interview_bp.route("/<interview_id>/timeout", methods=["POST"])
 @jwt_required()
 def timeout_interview(interview_id):
 
@@ -2985,217 +2608,137 @@ def timeout_interview(interview_id):
 
         user_id = get_jwt_identity()
 
-        object_id = get_interview_object_id(
-            interview_id
-        )
+        object_id = get_interview_object_id(interview_id)
 
         if object_id is None:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # GET INTERVIEW
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # CHECK STATUS
         if interview.get("status") != "in_progress":
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Interview is not currently "
-                    "in progress."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("Interview is not currently " "in progress."),
+                        "status": interview.get("status"),
+                    }
                 ),
-                "status": interview.get("status")
-            }), 400
+                400,
+            )
 
         # GET QUESTIONS
-        questions = interview.get(
-            "questions",
-            []
-        )
+        questions = interview.get("questions", [])
 
         if not questions:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview questions not found."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview questions not found."}
+                ),
+                400,
+            )
 
         # CURRENT QUESTION INDEX
-        current_index = interview.get(
-            "current_question",
-            0
-        )
+        current_index = interview.get("current_question", 0)
 
         try:
 
-            current_index = int(
-                current_index
-            )
+            current_index = int(current_index)
 
-        except (
-            ValueError,
-            TypeError
-        ):
+        except (ValueError, TypeError):
 
             current_index = 0
 
         # GET EXISTING ANSWERS
-        existing_answers = interview.get(
-            "answers",
-            []
-        )
+        existing_answers = interview.get("answers", [])
 
         # SAVE CURRENT QUESTION AS SKIPPED
-        if (
-            0 <= current_index
-            < len(questions)
-        ):
+        if 0 <= current_index < len(questions):
 
-            current_question = questions[
-                current_index
-            ]
+            current_question = questions[current_index]
 
-            question_number = current_question.get(
-                "question_number",
-                current_index + 1
-            )
+            question_number = current_question.get("question_number", current_index + 1)
 
-            question_text = current_question.get(
-                "question",
-                ""
-            )
+            question_text = current_question.get("question", "")
 
             already_answered = any(
-                answer.get("question_number")
-                == question_number
+                answer.get("question_number") == question_number
                 for answer in existing_answers
             )
 
             if not already_answered:
 
                 skipped_answer = {
-
-                    "question_number":
-                        question_number,
-
-                    "question":
-                        question_text,
-
-                    "answer":
-                        "",
-
-                    "status":
-                        "skipped",
-
-                    "answered_at":
-                        datetime.utcnow()
+                    "question_number": question_number,
+                    "question": question_text,
+                    "answer": "",
+                    "status": "skipped",
+                    "answered_at": datetime.utcnow(),
                 }
 
                 interviews.update_one(
-
-                    {
-                        "_id": object_id,
-                        "user_id": user_id
-                    },
-
-                    {
-                        "$push": {
-                            "answers":
-                                skipped_answer
-                        }
-                    }
+                    {"_id": object_id, "user_id": user_id},
+                    {"$push": {"answers": skipped_answer}},
                 )
 
         # MARK INTERVIEW FOR EVALUATION
         interviews.update_one(
-
-            {
-                "_id": object_id,
-                "user_id": user_id
-            },
-
+            {"_id": object_id, "user_id": user_id},
             {
                 "$set": {
-
-                    "current_question":
-                        len(questions),
-
-                    "status":
-                        "evaluation_pending",
-
-                    "completed_at":
-                        datetime.utcnow(),
-
-                    "timeout":
-                        True
+                    "current_question": len(questions),
+                    "status": "evaluation_pending",
+                    "completed_at": datetime.utcnow(),
+                    "timeout": True,
                 }
-            }
+            },
         )
 
-        print(
-            "⏰ Interview time expired."
+        print("⏰ Interview time expired.")
+
+        print("⏳ Interview waiting for " "complete Gemini evaluation.")
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Interview time expired.",
+                    "status": "evaluation_pending",
+                    "total_questions": len(questions),
+                }
+            ),
+            200,
         )
-
-        print(
-            "⏳ Interview waiting for "
-            "complete Gemini evaluation."
-        )
-
-        return jsonify({
-
-            "success": True,
-
-            "message":
-                "Interview time expired.",
-
-            "status":
-                "evaluation_pending",
-
-            "total_questions":
-                len(questions)
-
-        }), 200
 
     except Exception as e:
 
-        print(
-            "❌ Interview Timeout Error:",
-            str(e)
+        print("❌ Interview Timeout Error:", str(e))
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to complete interview timeout.",
+                    "error": str(e),
+                }
+            ),
+            500,
         )
 
-        return jsonify({
 
-            "success": False,
-
-            "message":
-                "Unable to complete interview timeout.",
-
-            "error":
-                str(e)
-
-        }), 500
-    
 # ==========================================
 # EVALUATE COMPLETE INTERVIEW (ONE GEMINI REQUEST FOR ALL ANSWERS)
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/evaluate",
-    methods=["POST"]
-)
+@interview_bp.route("/<interview_id>/evaluate", methods=["POST"])
 @jwt_required()
 def evaluate_interview(interview_id):
 
@@ -3214,97 +2757,80 @@ def evaluate_interview(interview_id):
         # VALIDATE INTERVIEW ID
         # =========================================================
 
-        object_id = get_interview_object_id(
-            interview_id
-        )
+        object_id = get_interview_object_id(interview_id)
 
         if object_id is None:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # =========================================================
         # GET INTERVIEW
         # =========================================================
 
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # =========================================================
         # ALREADY EVALUATED
         # =========================================================
 
-        existing_evaluations = interview.get(
-            "evaluations",
-            []
-        )
+        existing_evaluations = interview.get("evaluations", [])
 
         if existing_evaluations:
 
-            return jsonify({
-                "success": True,
-                "message": (
-                    "Interview is already evaluated."
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": ("Interview is already evaluated."),
+                        "status": interview.get("status", "completed"),
+                        "evaluations": existing_evaluations,
+                        "evaluation_count": len(existing_evaluations),
+                    }
                 ),
-                "status": interview.get(
-                    "status",
-                    "completed"
-                ),
-                "evaluations": existing_evaluations,
-                "evaluation_count": len(
-                    existing_evaluations
-                )
-            }), 200
+                200,
+            )
 
         # =========================================================
         # CHECK QUESTIONS
         # =========================================================
 
-        questions = interview.get(
-            "questions",
-            []
-        )
+        questions = interview.get("questions", [])
 
         if not questions:
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Interview questions not found."
-                )
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": ("Interview questions not found.")}
+                ),
+                400,
+            )
 
         # =========================================================
         # CHECK ANSWERS
         # =========================================================
 
-        answers = interview.get(
-            "answers",
-            []
-        )
+        answers = interview.get("answers", [])
 
         if len(answers) != len(questions):
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "All interview questions must "
-                    "be answered before evaluation."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": (
+                            "All interview questions must "
+                            "be answered before evaluation."
+                        ),
+                        "questions": len(questions),
+                        "answers": len(answers),
+                    }
                 ),
-                "questions": len(questions),
-                "answers": len(answers)
-            }), 400
+                400,
+            )
 
         # =========================================================
         # CHECK GEMINI
@@ -3312,47 +2838,39 @@ def evaluate_interview(interview_id):
 
         if gemini_client is None:
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Gemini client is not available."
-                )
-            }), 500
+            return (
+                jsonify(
+                    {"success": False, "message": ("Gemini client is not available.")}
+                ),
+                500,
+            )
 
         # =========================================================
         # CHECK STATUS
         # =========================================================
 
-        current_status = interview.get(
-            "status"
-        )
+        current_status = interview.get("status")
 
-        if current_status not in [
-            "evaluation_pending",
-            "completed"
-        ]:
+        if current_status not in ["evaluation_pending", "completed"]:
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Interview is not ready "
-                    "for evaluation."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("Interview is not ready " "for evaluation."),
+                        "status": current_status,
+                    }
                 ),
-                "status": current_status
-            }), 400
+                400,
+            )
 
         # =========================================================
         # CHECK EVALUATION LOCK
         # =========================================================
 
-        evaluating = interview.get(
-            "evaluating",
-            False
-        )
+        evaluating = interview.get("evaluating", False)
 
-        evaluation_started_at = interview.get(
-            "evaluation_started_at"
-        )
+        evaluation_started_at = interview.get("evaluation_started_at")
 
         # =========================================================
         # HANDLE EXISTING LOCK
@@ -3374,8 +2892,7 @@ def evaluate_interview(interview_id):
                 try:
 
                     elapsed_seconds = (
-                        datetime.utcnow()
-                        - evaluation_started_at
+                        datetime.utcnow() - evaluation_started_at
                     ).total_seconds()
 
                     # 5 minutes
@@ -3392,37 +2909,31 @@ def evaluate_interview(interview_id):
 
             if not stale_lock:
 
-                return jsonify({
-                    "success": False,
-                    "message": (
-                        "Interview evaluation is "
-                        "already in progress."
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": (
+                                "Interview evaluation is " "already in progress."
+                            ),
+                            "status": "evaluating",
+                        }
                     ),
-                    "status": "evaluating"
-                }), 409
+                    409,
+                )
 
             # -----------------------------------------------------
             # Reset stale lock
             # -----------------------------------------------------
 
-            print(
-                "⚠️ Stale evaluation lock detected. "
-                "Resetting..."
-            )
+            print("⚠️ Stale evaluation lock detected. " "Resetting...")
 
             interviews.update_one(
+                {"_id": object_id, "user_id": user_id},
                 {
-                    "_id": object_id,
-                    "user_id": user_id
+                    "$set": {"evaluating": False},
+                    "$unset": {"evaluation_started_at": ""},
                 },
-                {
-                    "$set": {
-                        "evaluating": False
-                    },
-                    "$unset": {
-                        "evaluation_started_at": ""
-                    }
-                }
             )
 
         # =========================================================
@@ -3430,61 +2941,41 @@ def evaluate_interview(interview_id):
         # =========================================================
 
         lock_result = interviews.update_one(
-            {
-                "_id": object_id,
-                "user_id": user_id,
-                "evaluating": {
-                    "$ne": True
-                }
-            },
+            {"_id": object_id, "user_id": user_id, "evaluating": {"$ne": True}},
             {
                 "$set": {
                     "evaluating": True,
-                    "evaluation_started_at":
-                        datetime.utcnow(),
-                    "status":
-                        "evaluation_pending"
+                    "evaluation_started_at": datetime.utcnow(),
+                    "status": "evaluation_pending",
                 }
-            }
+            },
         )
 
         if lock_result.modified_count == 0:
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Interview evaluation is "
-                    "already in progress."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("Interview evaluation is " "already in progress."),
+                        "status": "evaluating",
+                    }
                 ),
-                "status": "evaluating"
-            }), 409
+                409,
+            )
 
         # =========================================================
         # START GEMINI
         # =========================================================
 
-        print(
-            "🤖 Starting complete interview "
-            "evaluation..."
-        )
+        print("🤖 Starting complete interview " "evaluation...")
 
-        evaluations = (
-            evaluate_all_answers_with_gemini(
-                job_role=interview.get(
-                    "job_role",
-                    ""
-                ),
-                experience_level=interview.get(
-                    "experience_level",
-                    ""
-                ),
-                difficulty=interview.get(
-                    "difficulty",
-                    ""
-                ),
-                questions=questions,
-                answers=answers
-            )
+        evaluations = evaluate_all_answers_with_gemini(
+            job_role=interview.get("job_role", ""),
+            experience_level=interview.get("experience_level", ""),
+            difficulty=interview.get("difficulty", ""),
+            questions=questions,
+            answers=answers,
         )
 
         # =========================================================
@@ -3494,27 +2985,22 @@ def evaluate_interview(interview_id):
         if not evaluations:
 
             interviews.update_one(
+                {"_id": object_id, "user_id": user_id},
                 {
-                    "_id": object_id,
-                    "user_id": user_id
+                    "$set": {"evaluating": False},
+                    "$unset": {"evaluation_started_at": ""},
                 },
-                {
-                    "$set": {
-                        "evaluating": False
-                    },
-                    "$unset": {
-                        "evaluation_started_at": ""
-                    }
-                }
             )
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Gemini did not return "
-                    "any evaluations."
-                )
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("Gemini did not return " "any evaluations."),
+                    }
+                ),
+                500,
+            )
 
         # =========================================================
         # CHECK COUNT
@@ -3523,51 +3009,40 @@ def evaluate_interview(interview_id):
         if len(evaluations) != len(questions):
 
             interviews.update_one(
+                {"_id": object_id, "user_id": user_id},
                 {
-                    "_id": object_id,
-                    "user_id": user_id
+                    "$set": {"evaluating": False},
+                    "$unset": {"evaluation_started_at": ""},
                 },
-                {
-                    "$set": {
-                        "evaluating": False
-                    },
-                    "$unset": {
-                        "evaluation_started_at": ""
-                    }
-                }
             )
 
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Gemini did not evaluate "
-                    "all questions."
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": ("Gemini did not evaluate " "all questions."),
+                        "expected": len(questions),
+                        "received": len(evaluations),
+                    }
                 ),
-                "expected": len(questions),
-                "received": len(evaluations)
-            }), 500
+                500,
+            )
 
         # =========================================================
         # SAVE FINAL EVALUATION
         # =========================================================
 
         update_result = interviews.update_one(
-            {
-                "_id": object_id,
-                "user_id": user_id
-            },
+            {"_id": object_id, "user_id": user_id},
             {
                 "$set": {
                     "evaluations": evaluations,
                     "status": "completed",
                     "evaluating": False,
-                    "evaluated_at":
-                        datetime.utcnow()
+                    "evaluated_at": datetime.utcnow(),
                 },
-                "$unset": {
-                    "evaluation_started_at": ""
-                }
-            }
+                "$unset": {"evaluation_started_at": ""},
+            },
         )
 
         # =========================================================
@@ -3576,31 +3051,26 @@ def evaluate_interview(interview_id):
 
         if update_result.modified_count == 0:
 
-            print(
-                "⚠️ Evaluation data was not modified."
-            )
+            print("⚠️ Evaluation data was not modified.")
 
         # =========================================================
         # SUCCESS
         # =========================================================
 
-        print(
-            "✅ Complete interview evaluation "
-            "saved successfully."
-        )
+        print("✅ Complete interview evaluation " "saved successfully.")
 
-        return jsonify({
-            "success": True,
-            "message": (
-                "Complete interview evaluated "
-                "successfully."
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": ("Complete interview evaluated " "successfully."),
+                    "status": "completed",
+                    "evaluations": evaluations,
+                    "evaluation_count": len(evaluations),
+                }
             ),
-            "status": "completed",
-            "evaluations": evaluations,
-            "evaluation_count": len(
-                evaluations
-            )
-        }), 200
+            200,
+        )
 
     # =============================================================
     # ERROR
@@ -3608,68 +3078,49 @@ def evaluate_interview(interview_id):
 
     except Exception as e:
 
-        print(
-            "❌ Complete Interview Evaluation Error:",
-            str(e)
-        )
+        print("❌ Complete Interview Evaluation Error:", str(e))
 
         # ---------------------------------------------------------
         # RESET LOCK
         # ---------------------------------------------------------
 
-        if (
-            object_id is not None
-            and user_id is not None
-        ):
+        if object_id is not None and user_id is not None:
 
             try:
 
                 interviews.update_one(
+                    {"_id": object_id, "user_id": user_id},
                     {
-                        "_id": object_id,
-                        "user_id": user_id
+                        "$set": {"evaluating": False},
+                        "$unset": {"evaluation_started_at": ""},
                     },
-                    {
-                        "$set": {
-                            "evaluating": False
-                        },
-                        "$unset": {
-                            "evaluation_started_at": ""
-                        }
-                    }
                 )
 
-                print(
-                    "🔓 Evaluation lock reset."
-                )
+                print("🔓 Evaluation lock reset.")
 
             except Exception as reset_error:
 
-                print(
-                    "⚠️ Unable to reset "
-                    "evaluation lock:",
-                    str(reset_error)
-                )
+                print("⚠️ Unable to reset " "evaluation lock:", str(reset_error))
 
         # ---------------------------------------------------------
         # DO NOT RETURN INTERNAL ERROR TO FRONTEND
         # ---------------------------------------------------------
 
-        return jsonify({
-            "success": False,
-            "message": (
-                "Unable to evaluate "
-                "complete interview."
-            )
-        }), 500
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": ("Unable to evaluate " "complete interview."),
+                }
+            ),
+            500,
+        )
+
 
 # ==========================================
 # GET INTERVIEW RESULT
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/result",
-    methods=["GET"]
-)
+@interview_bp.route("/<interview_id>/result", methods=["GET"])
 @jwt_required()
 def get_interview_result(interview_id):
     try:
@@ -3678,49 +3129,45 @@ def get_interview_result(interview_id):
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        interview = interviews.find_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        return jsonify({
-            "success": True,
-            "interview": {
-                "interview_id": str(interview["_id"]),
-                "job_role": interview.get("job_role"),
-                "experience_level": interview.get("experience_level"),
-                "interview_type": interview.get("interview_type"),
-                "difficulty": interview.get("difficulty"),
-                "number_of_questions": interview.get("number_of_questions"),
-                "status": interview.get("status"),
-                "questions": interview.get("questions", []),
-                "answers": interview.get("answers", []),
-                "evaluations": interview.get("evaluations", []),
-                "overall_result": interview.get("overall_result",None)
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "interview": {
+                        "interview_id": str(interview["_id"]),
+                        "job_role": interview.get("job_role"),
+                        "experience_level": interview.get("experience_level"),
+                        "interview_type": interview.get("interview_type"),
+                        "difficulty": interview.get("difficulty"),
+                        "number_of_questions": interview.get("number_of_questions"),
+                        "status": interview.get("status"),
+                        "questions": interview.get("questions", []),
+                        "answers": interview.get("answers", []),
+                        "evaluations": interview.get("evaluations", []),
+                        "overall_result": interview.get("overall_result", None),
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # INTERVIEW RESULT DASHBOARD
 # ==========================================
-@interview_bp.route("/<interview_id>/dashboard",methods=["GET"])
+@interview_bp.route("/<interview_id>/dashboard", methods=["GET"])
 @jwt_required()
 def interview_dashboard(interview_id):
 
@@ -3731,22 +3178,13 @@ def interview_dashboard(interview_id):
         try:
             object_id = ObjectId(interview_id)
         except Exception:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID"
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID"}), 400
 
         # Find interview owned by logged-in user
-        interview = interviews.find_one({
-            "_id": object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found"
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found"}), 404
 
         evaluations = interview.get("evaluations", [])
         answers = interview.get("answers", [])
@@ -3755,10 +3193,15 @@ def interview_dashboard(interview_id):
 
         # Overall result is required
         if not overall_result:
-            return jsonify({
-                "success": False,
-                "message": "Overall result has not been generated yet"
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Overall result has not been generated yet",
+                    }
+                ),
+                400,
+            )
 
         # Question-wise performance
         question_performance = []
@@ -3766,204 +3209,107 @@ def interview_dashboard(interview_id):
         answer_map = {}
 
         for answer in answers:
-            question_number = answer.get(
-                "question_number"
-            )
+            question_number = answer.get("question_number")
 
             answer_map[question_number] = answer
 
         evaluation_map = {}
 
         for evaluation in evaluations:
-            question_number = evaluation.get(
-                "question_number"
-            )
+            question_number = evaluation.get("question_number")
 
             evaluation_map[question_number] = evaluation
 
         for index, question in enumerate(questions):
 
-            question_number = question.get(
-                "question_number",
-                index + 1
+            question_number = question.get("question_number", index + 1)
+
+            answer = answer_map.get(question_number)
+
+            evaluation = evaluation_map.get(question_number)
+
+            question_performance.append(
+                {
+                    "question_number": question_number,
+                    "question": question.get("question", ""),
+                    "answer": (answer.get("answer", "") if answer else None),
+                    "score": (evaluation.get("score", 0) if evaluation else 0),
+                    "correctness": (
+                        evaluation.get("correctness", "")
+                        if evaluation
+                        else "Not Evaluated"
+                    ),
+                    "relevance": (
+                        evaluation.get("relevance", "")
+                        if evaluation
+                        else "Not Evaluated"
+                    ),
+                    "technical_accuracy": (
+                        evaluation.get("technical_accuracy", "")
+                        if evaluation
+                        else "Not Evaluated"
+                    ),
+                    "strengths": (
+                        evaluation.get("strengths", []) if evaluation else []
+                    ),
+                    "weaknesses": (
+                        evaluation.get("weaknesses", []) if evaluation else []
+                    ),
+                    "missing_concepts": (
+                        evaluation.get("missing_concepts", []) if evaluation else []
+                    ),
+                    "feedback": (evaluation.get("feedback", "") if evaluation else ""),
+                }
             )
-
-            answer = answer_map.get(
-                question_number
-            )
-
-            evaluation = evaluation_map.get(
-                question_number
-            )
-
-            question_performance.append({
-                "question_number": question_number,
-
-                "question": question.get(
-                    "question",
-                    ""
-                ),
-
-                "answer": (
-                    answer.get("answer", "")
-                    if answer
-                    else None
-                ),
-
-                "score": (
-                    evaluation.get("score", 0)
-                    if evaluation
-                    else 0
-                ),
-
-                "correctness": (
-                    evaluation.get("correctness", "")
-                    if evaluation
-                    else "Not Evaluated"
-                ),
-
-                "relevance": (
-                    evaluation.get("relevance", "")
-                    if evaluation
-                    else "Not Evaluated"
-                ),
-
-                "technical_accuracy": (
-                    evaluation.get(
-                        "technical_accuracy",
-                        ""
-                    )
-                    if evaluation
-                    else "Not Evaluated"
-                ),
-
-                "strengths": (
-                    evaluation.get("strengths", [])
-                    if evaluation
-                    else []
-                ),
-
-                "weaknesses": (
-                    evaluation.get("weaknesses", [])
-                    if evaluation
-                    else []
-                ),
-
-                "missing_concepts": (
-                    evaluation.get(
-                        "missing_concepts",
-                        []
-                    )
-                    if evaluation
-                    else []
-                ),
-
-                "feedback": (
-                    evaluation.get("feedback", "")
-                    if evaluation
-                    else ""
-                )
-            })
 
         # Dashboard response
         dashboard_data = {
-
             "interview": {
                 "interview_id": interview_id,
-                "job_role": interview.get(
-                    "job_role",
-                    ""
-                ),
-                "experience_level": interview.get(
-                    "experience_level",
-                    ""
-                ),
-                "interview_type": interview.get(
-                    "interview_type",
-                    ""
-                ),
-                "difficulty": interview.get(
-                    "difficulty",
-                    ""
-                ),
+                "job_role": interview.get("job_role", ""),
+                "experience_level": interview.get("experience_level", ""),
+                "interview_type": interview.get("interview_type", ""),
+                "difficulty": interview.get("difficulty", ""),
                 "number_of_questions": interview.get(
-                    "number_of_questions",
-                    len(questions)
+                    "number_of_questions", len(questions)
                 ),
-                "status": interview.get(
-                    "status",
-                    ""
-                )
+                "status": interview.get("status", ""),
             },
-
             "overall_performance": {
-                "overall_score": overall_result.get(
-                    "overall_score",
-                    0
-                ),
-                "average_score": overall_result.get(
-                    "average_score",
-                    0
-                ),
-                "total_score": overall_result.get(
-                    "total_score",
-                    0
-                ),
-                "max_score": overall_result.get(
-                    "max_score",
-                    0
-                ),
-                "performance_level": overall_result.get(
-                    "performance_level",
-                    ""
-                )
+                "overall_score": overall_result.get("overall_score", 0),
+                "average_score": overall_result.get("average_score", 0),
+                "total_score": overall_result.get("total_score", 0),
+                "max_score": overall_result.get("max_score", 0),
+                "performance_level": overall_result.get("performance_level", ""),
             },
-
             "ai_analysis": {
-                "summary": overall_result.get(
-                    "summary",
-                    ""
+                "summary": overall_result.get("summary", ""),
+                "strengths": overall_result.get("strengths", []),
+                "weaknesses": overall_result.get("weaknesses", []),
+                "recommendations": overall_result.get("recommendations", []),
+                "technical_skill_assessment": overall_result.get(
+                    "technical_skill_assessment", ""
                 ),
-                "strengths": overall_result.get(
-                    "strengths",
-                    []
-                ),
-                "weaknesses": overall_result.get(
-                    "weaknesses",
-                    []
-                ),
-                "recommendations": overall_result.get(
-                    "recommendations",
-                    []
-                ),
-                "technical_skill_assessment":
-                    overall_result.get(
-                        "technical_skill_assessment",
-                        ""
-                    ),
-                "readiness_assessment":
-                    overall_result.get(
-                        "readiness_assessment",
-                        ""
-                    )
+                "readiness_assessment": overall_result.get("readiness_assessment", ""),
             },
-
-            "question_performance":
-                question_performance
+            "question_performance": question_performance,
         }
 
-        return jsonify({
-            "success": True,
-            "message": "Interview dashboard retrieved successfully",
-            "data": dashboard_data
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Interview dashboard retrieved successfully",
+                    "data": dashboard_data,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # INTERVIEW HISTORY
@@ -3976,75 +3322,66 @@ def interview_history():
         user_id = get_jwt_identity()
 
         if interviews is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected."
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
 
         interview_cursor = interviews.find(
             {
                 "user_id": user_id,
                 "status": {
-                    "$in": [
-                        "ready",
-                        "in_progress",
-                        "evaluation_pending",
-                        "completed"
-                    ]
-                }
+                    "$in": ["ready", "in_progress", "evaluation_pending", "completed"]
+                },
             }
-        ).sort(
-            "created_at",
-            -1
-        )
+        ).sort("created_at", -1)
 
         history = []
 
         for interview in interview_cursor:
 
-            overall_result = interview.get(
-                "overall_result",
-                {}
+            overall_result = interview.get("overall_result", {})
+
+            history.append(
+                {
+                    "interview_id": str(interview["_id"]),
+                    "interview_code": interview.get("interview_code", None),
+                    "job_role": interview.get("job_role", ""),
+                    "experience_level": interview.get("experience_level", ""),
+                    "interview_type": interview.get("interview_type", ""),
+                    "difficulty": interview.get("difficulty", ""),
+                    "number_of_questions": interview.get("number_of_questions", 0),
+                    "overall_score": overall_result.get("overall_score", None),
+                    "performance_level": overall_result.get("performance_level", None),
+                    "status": interview.get("status", ""),
+                    "created_at": (
+                        interview["created_at"].isoformat()
+                        if interview.get("created_at")
+                        else None
+                    ),
+                }
             )
 
-            history.append({
-                "interview_id": str(interview["_id"]),
-                "interview_code": interview.get("interview_code", None),
-                "job_role": interview.get("job_role", ""),
-                "experience_level": interview.get("experience_level", ""),
-                "interview_type": interview.get("interview_type", ""),
-                "difficulty": interview.get("difficulty", ""),
-                "number_of_questions": interview.get("number_of_questions", 0),
-                "overall_score": overall_result.get("overall_score", None),
-                "performance_level": overall_result.get("performance_level", None),
-                "status": interview.get("status", ""),
-                "created_at": (interview["created_at"].isoformat()
-                               if interview.get("created_at")
-                               else None
-                               )
-            })
-
-
-        return jsonify({
-            "success": True,
-            "total_interviews": len(history),
-            "interviews": history
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "total_interviews": len(history),
+                    "interviews": history,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # DELETE INTERVIEW
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>",
-    methods=["DELETE"]
-)
+@interview_bp.route("/<interview_id>", methods=["DELETE"])
 @jwt_required()
 def delete_interview(interview_id):
 
@@ -4053,64 +3390,64 @@ def delete_interview(interview_id):
         user_id = get_jwt_identity()
 
         # VALIDATE INTERVIEW ID
-        interview_object_id = get_interview_object_id(
-            interview_id
-        )
+        interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
 
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # CHECK INTERVIEW EXISTS
         # AND BELONGS TO CURRENT USER
-        interview = interviews.find_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         if not interview:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # DELETE INTERVIEW
-        delete_result = interviews.delete_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        delete_result = interviews.delete_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         # CHECK DELETE RESULT
         if delete_result.deleted_count == 0:
 
-            return jsonify({
-                "success": False,
-                "message": "Interview could not be deleted."
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview could not be deleted."}
+                ),
+                400,
+            )
 
         # SUCCESS
-        return jsonify({
-            "success": True,
-            "message": "Interview deleted successfully.",
-            "interview_id": interview_id
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Interview deleted successfully.",
+                    "interview_id": interview_id,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
 
-        print(
-            "Delete Interview Error:",
-            str(e)
+        print("Delete Interview Error:", str(e))
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Something went wrong while deleting interview.",
+                    "error": str(e),
+                }
+            ),
+            500,
         )
 
-        return jsonify({
-            "success": False,
-            "message": "Something went wrong while deleting interview.",
-            "error": str(e)
-        }), 500
 
 # ==========================================
 # INTERVIEW DETAILS
@@ -4125,22 +3462,15 @@ def interview_details(interview_id):
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # FIND INTERVIEW
-        interview = interviews.find_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        interview = interviews.find_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         if not interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # GET DATA
         questions = interview.get("questions", [])
@@ -4170,55 +3500,39 @@ def interview_details(interview_id):
             answer = answer_map.get(question_number)
             evaluation = evaluation_map.get(question_number)
 
-            question_details.append({
-                "question_number": question_number,
-                "question": question.get("question", ""),
-                "answer": (
-                    answer.get("answer", "")
-                    if answer
-                    else None
-                ),
-                "score": (
-                    evaluation.get("score", 0)
-                    if evaluation
-                    else 0
-                ),
-                "correctness": (
-                    evaluation.get("correctness", "")
-                    if evaluation
-                    else "Not Evaluated"
-                ),
-                "relevance": (
-                    evaluation.get("relevance", "")
-                    if evaluation
-                    else "Not Evaluated"
-                ),
-                "technical_accuracy": (
-                    evaluation.get("technical_accuracy", "")
-                    if evaluation
-                    else "Not Evaluated"
-                ),
-                "strengths": (
-                    evaluation.get("strengths", [])
-                    if evaluation
-                    else []
-                ),
-                "weaknesses": (
-                    evaluation.get("weaknesses", [])
-                    if evaluation
-                    else []
-                ),
-                "missing_concepts": (
-                    evaluation.get("missing_concepts", [])
-                    if evaluation
-                    else []
-                ),
-                "feedback": (
-                    evaluation.get("feedback", "")
-                    if evaluation
-                    else ""
-                )
-            })
+            question_details.append(
+                {
+                    "question_number": question_number,
+                    "question": question.get("question", ""),
+                    "answer": (answer.get("answer", "") if answer else None),
+                    "score": (evaluation.get("score", 0) if evaluation else 0),
+                    "correctness": (
+                        evaluation.get("correctness", "")
+                        if evaluation
+                        else "Not Evaluated"
+                    ),
+                    "relevance": (
+                        evaluation.get("relevance", "")
+                        if evaluation
+                        else "Not Evaluated"
+                    ),
+                    "technical_accuracy": (
+                        evaluation.get("technical_accuracy", "")
+                        if evaluation
+                        else "Not Evaluated"
+                    ),
+                    "strengths": (
+                        evaluation.get("strengths", []) if evaluation else []
+                    ),
+                    "weaknesses": (
+                        evaluation.get("weaknesses", []) if evaluation else []
+                    ),
+                    "missing_concepts": (
+                        evaluation.get("missing_concepts", []) if evaluation else []
+                    ),
+                    "feedback": (evaluation.get("feedback", "") if evaluation else ""),
+                }
+            )
 
         # DATE INFORMATION
         created_at = interview.get("created_at")
@@ -4226,86 +3540,60 @@ def interview_details(interview_id):
         completed_at = interview.get("completed_at")
 
         # FINAL RESPONSE
-        return jsonify({
-            "success": True,
-
-            "interview": {
-                "interview_id": str(interview["_id"]),
-                "job_role": interview.get("job_role", ""),
-                "experience_level": interview.get("experience_level", ""),
-                "interview_type": interview.get("interview_type", ""),
-                "difficulty": interview.get("difficulty", ""),
-                "number_of_questions": interview.get(
-                    "number_of_questions",
-                    len(questions)
-                ),
-                "status": interview.get("status", ""),
-                "created_at": (
-                    created_at.isoformat()
-                    if created_at
-                    else None
-                ),
-                "started_at": (
-                    started_at.isoformat()
-                    if started_at
-                    else None
-                ),
-                "completed_at": (
-                    completed_at.isoformat()
-                    if completed_at
-                    else None
-                )
-            },
-
-            # SUMMARY
-            "summary": {
-                "total_questions": len(questions),
-                "answered_questions": len(answers),
-                "evaluated_questions": len(evaluations),
-
-                # Overall result values
-                # directly inside summary
-                "overall_score": overall_result.get(
-                    "overall_score",
-                    None
-                ),
-                "average_score": overall_result.get(
-                    "average_score",
-                    None
-                ),
-                "total_score": overall_result.get(
-                    "total_score",
-                    None
-                ),
-                "max_score": overall_result.get(
-                    "max_score",
-                    None
-                ),
-                "performance_level": overall_result.get(
-                    "performance_level",
-                    ""
-                ),
-
-                # Keep complete result also
-                "overall_result": overall_result
-            },
-
-            # QUESTION DETAILS
-            "question_details": question_details
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "interview": {
+                        "interview_id": str(interview["_id"]),
+                        "job_role": interview.get("job_role", ""),
+                        "experience_level": interview.get("experience_level", ""),
+                        "interview_type": interview.get("interview_type", ""),
+                        "difficulty": interview.get("difficulty", ""),
+                        "number_of_questions": interview.get(
+                            "number_of_questions", len(questions)
+                        ),
+                        "status": interview.get("status", ""),
+                        "created_at": (created_at.isoformat() if created_at else None),
+                        "started_at": (started_at.isoformat() if started_at else None),
+                        "completed_at": (
+                            completed_at.isoformat() if completed_at else None
+                        ),
+                    },
+                    # SUMMARY
+                    "summary": {
+                        "total_questions": len(questions),
+                        "answered_questions": len(answers),
+                        "evaluated_questions": len(evaluations),
+                        # Overall result values
+                        # directly inside summary
+                        "overall_score": overall_result.get("overall_score", None),
+                        "average_score": overall_result.get("average_score", None),
+                        "total_score": overall_result.get("total_score", None),
+                        "max_score": overall_result.get("max_score", None),
+                        "performance_level": overall_result.get(
+                            "performance_level", ""
+                        ),
+                        # Keep complete result also
+                        "overall_result": overall_result,
+                    },
+                    # QUESTION DETAILS
+                    "question_details": question_details,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         print("Interview Details Error:", repr(e))
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # RETAKE INTERVIEW
 # ==========================================
-@interview_bp.route("/<interview_id>/retake",methods=["POST"])
+@interview_bp.route("/<interview_id>/retake", methods=["POST"])
 @jwt_required()
 def retake_interview(interview_id):
 
@@ -4313,27 +3601,18 @@ def retake_interview(interview_id):
         user_id = get_jwt_identity()
 
         # Validate interview ID
-        interview_object_id = get_interview_object_id(
-            interview_id
-        )
+        interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
-            return jsonify({
-                "success": False,
-                "message": "Invalid interview ID."
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # Find original interview
-        original_interview = interviews.find_one({
-            "_id": interview_object_id,
-            "user_id": user_id
-        })
+        original_interview = interviews.find_one(
+            {"_id": interview_object_id, "user_id": user_id}
+        )
 
         if not original_interview:
-            return jsonify({
-                "success": False,
-                "message": "Interview not found."
-            }), 404
+            return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # Find root interview
         root_interview_id = original_interview.get("root_interview_id")
@@ -4341,17 +3620,15 @@ def retake_interview(interview_id):
             root_interview_id = str(original_interview["_id"])
 
         # Count previous attempts
-        previous_attempts = interviews.count_documents({
-            "user_id": user_id,
-            "$or": [
-                {
-                    "_id": ObjectId(root_interview_id)
-                },
-                {
-                    "root_interview_id": root_interview_id
-                }
-            ]
-        })
+        previous_attempts = interviews.count_documents(
+            {
+                "user_id": user_id,
+                "$or": [
+                    {"_id": ObjectId(root_interview_id)},
+                    {"root_interview_id": root_interview_id},
+                ],
+            }
+        )
 
         attempt_number = previous_attempts + 1
 
@@ -4359,13 +3636,12 @@ def retake_interview(interview_id):
         new_interview = {
             "user_id": user_id,
             "interview_code": f"INT{random.randint(100000, 999999)}",
-            "job_role": original_interview.get("job_role",""),
-            "experience_level": original_interview.get("experience_level","Fresher"),
-            "interview_type": original_interview.get("interview_type","Technical"),
-            "difficulty": original_interview.get("difficulty","Medium"),
-            "number_of_questions": original_interview.get("number_of_questions",5),
+            "job_role": original_interview.get("job_role", ""),
+            "experience_level": original_interview.get("experience_level", "Fresher"),
+            "interview_type": original_interview.get("interview_type", "Technical"),
+            "difficulty": original_interview.get("difficulty", "Medium"),
+            "number_of_questions": original_interview.get("number_of_questions", 5),
             "duration": original_interview.get("duration", "No Limit"),
-
             # New attempt starts with empty questions
             "questions": [],
             "answers": [],
@@ -4375,42 +3651,42 @@ def retake_interview(interview_id):
             "created_at": datetime.utcnow(),
             "retake_of": str(original_interview["_id"]),
             "root_interview_id": root_interview_id,
-            "attempt_number": attempt_number
+            "attempt_number": attempt_number,
         }
 
         result = interviews.insert_one(new_interview)
         new_interview_id = str(result.inserted_id)
 
-        return jsonify({
-            "success": True,
-            "message": "New interview created successfully.",
-            "interview_id": new_interview_id,
-            "retake_of": str(original_interview["_id"]),
-            "interview": {
-                "interview_code": new_interview["interview_code"],
-                "job_role": new_interview["job_role"],
-                "experience_level": new_interview["experience_level"],
-                "interview_type": new_interview["interview_type"],
-                "difficulty": new_interview["difficulty"],
-                "number_of_questions": new_interview["number_of_questions"],
-                "status": new_interview["status"],
-                "attempt_number": new_interview["attempt_number"]
-            }
-        }), 201
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "New interview created successfully.",
+                    "interview_id": new_interview_id,
+                    "retake_of": str(original_interview["_id"]),
+                    "interview": {
+                        "interview_code": new_interview["interview_code"],
+                        "job_role": new_interview["job_role"],
+                        "experience_level": new_interview["experience_level"],
+                        "interview_type": new_interview["interview_type"],
+                        "difficulty": new_interview["difficulty"],
+                        "number_of_questions": new_interview["number_of_questions"],
+                        "status": new_interview["status"],
+                        "attempt_number": new_interview["attempt_number"],
+                    },
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==========================================
 # DOWNLOAD INTERVIEW PDF REPORT
 # ==========================================
-@interview_bp.route(
-    "/<interview_id>/download-report",
-    methods=["GET"]
-)
+@interview_bp.route("/<interview_id>/download-report", methods=["GET"])
 @jwt_required()
 def download_interview_report(interview_id):
 
@@ -4429,235 +3705,141 @@ def download_interview_report(interview_id):
         # VALIDATE INTERVIEW ID
         try:
 
-            object_id = ObjectId(
-                interview_id
-            )
+            object_id = ObjectId(interview_id)
 
         except Exception:
 
             print("❌ Invalid Interview ID")
 
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Invalid interview ID"
-
-            }), 400
+            return jsonify({"success": False, "message": "Invalid interview ID"}), 400
 
         # FIND INTERVIEW
-        interview = interviews.find_one({
-
-            "_id": object_id,
-
-            "user_id": user_id
-
-        })
+        interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         # INTERVIEW NOT FOUND
         if not interview:
 
             print("❌ INTERVIEW NOT FOUND")
 
-            print(
-                "Searching with:"
+            print("Searching with:")
+
+            print("_id:", object_id)
+
+            print("user_id:", user_id)
+
+            return (
+                jsonify(
+                    {"success": False, "message": "Interview not found for this user"}
+                ),
+                404,
             )
-
-            print(
-                "_id:",
-                object_id
-            )
-
-            print(
-                "user_id:",
-                user_id
-            )
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Interview not found for this user"
-
-            }), 404
 
         print("✅ Interview found")
 
-        print(
-            "Interview user_id:",
-            interview.get("user_id")
-        )
+        print("Interview user_id:", interview.get("user_id"))
 
-        print(
-            "Interview status:",
-            interview.get("status")
-        )
+        print("Interview status:", interview.get("status"))
 
-        print(
-            "Overall result exists:",
-            bool(
-                interview.get(
-                    "overall_result"
-                )
-            )
-        )
+        print("Overall result exists:", bool(interview.get("overall_result")))
 
         # CHECK OVERALL RESULT
-        if not interview.get(
-            "overall_result"
-        ):
+        if not interview.get("overall_result"):
 
-            print(
-                "❌ Overall result does not exist"
+            print("❌ Overall result does not exist")
+
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Interview result has not been generated yet",
+                    }
+                ),
+                400,
             )
 
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Interview result has not been generated yet"
-
-            }), 400
-
         # CREATE REPORT DIRECTORY
-        reports_folder = os.path.join(
+        reports_folder = os.path.join(os.getcwd(), "generated_reports")
 
-            os.getcwd(),
+        os.makedirs(reports_folder, exist_ok=True)
 
-            "generated_reports"
-
-        )
-
-        os.makedirs(
-
-            reports_folder,
-
-            exist_ok=True
-
-        )
-
-        print(
-            "Reports folder:",
-            reports_folder
-        )
+        print("Reports folder:", reports_folder)
 
         # PDF FILE NAME
-        pdf_file_name = (
+        pdf_file_name = f"interview_report_" f"{interview_id}.pdf"
 
-            f"interview_report_"
-            f"{interview_id}.pdf"
+        pdf_path = os.path.join(reports_folder, pdf_file_name)
 
-        )
-
-        pdf_path = os.path.join(
-
-            reports_folder,
-
-            pdf_file_name
-
-        )
-
-        print(
-            "Expected PDF path:",
-            pdf_path
-        )
-
+        print("Expected PDF path:", pdf_path)
 
         # ALWAYS GENERATE FRESH PDF
         print("📄 Generating fresh PDF report...")
 
         try:
-            generate_interview_pdf(interview,pdf_path)
+            generate_interview_pdf(interview, pdf_path)
             print("✅ Fresh PDF generated")
 
         except Exception as pdf_error:
             print("❌ PDF GENERATION ERROR:")
             print(repr(pdf_error))
 
-            return jsonify({
-                "success": False,
-                "message": "Unable to generate PDF report",
-                "error": str(pdf_error)
-            }), 500
-
-        # FINAL FILE CHECK
-        if not os.path.isfile(
-            pdf_path
-        ):
-
-            print(
-                "❌ PDF FILE DOES NOT EXIST AFTER GENERATION"
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Unable to generate PDF report",
+                        "error": str(pdf_error),
+                    }
+                ),
+                500,
             )
 
-            return jsonify({
+        # FINAL FILE CHECK
+        if not os.path.isfile(pdf_path):
 
-                "success": False,
+            print("❌ PDF FILE DOES NOT EXIST AFTER GENERATION")
 
-                "message":
-                    "PDF file could not be created",
-
-                "path":
-                    pdf_path
-
-            }), 404
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "PDF file could not be created",
+                        "path": pdf_path,
+                    }
+                ),
+                404,
+            )
 
         # DOWNLOAD PDF
-        print(
-            "✅ Sending PDF to browser"
-        )
+        print("✅ Sending PDF to browser")
 
-        print(
-            "File:",
-            pdf_path
-        )
+        print("File:", pdf_path)
 
-        print(
-            "=========================================="
-        )
+        print("==========================================")
 
         return send_file(
-
             pdf_path,
-
             as_attachment=True,
-
-            download_name=
-                pdf_file_name,
-
-            mimetype=
-                "application/pdf"
-
+            download_name=pdf_file_name,
+            mimetype="application/pdf",
         )
 
     except Exception as e:
 
-        print(
-            "=========================================="
+        print("==========================================")
+
+        print("❌ PDF DOWNLOAD ERROR")
+
+        print(repr(e))
+
+        print("==========================================")
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to download PDF report",
+                    "error": str(e),
+                }
+            ),
+            500,
         )
-
-        print(
-            "❌ PDF DOWNLOAD ERROR"
-        )
-
-        print(
-            repr(e)
-        )
-
-        print(
-            "=========================================="
-        )
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Unable to download PDF report",
-
-            "error":
-                str(e)
-
-        }), 500

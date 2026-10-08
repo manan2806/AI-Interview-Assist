@@ -25,6 +25,9 @@ function InterviewSetup() {
     const [difficulty, setDifficulty] = useState("Medium");
     const [questionCount, setQuestionCount] = useState(10);
     const [duration, setDuration] = useState("No Limit");
+    const [customDuration, setCustomDuration] = useState("");
+    const [customDurationApplied, setCustomDurationApplied] = useState(false);
+    const [customDurationError, setCustomDurationError] = useState("");
 
     // ==========================================
     // LOADING / ERROR STATES
@@ -39,12 +42,9 @@ function InterviewSetup() {
     const handleStartInterview = async (e) => {
         e.preventDefault();
 
-        // Clear previous error
         setError("");
 
-        // ==========================================
         // VALIDATION
-        // ==========================================
         if (!field) {
             setError("Please select an interview field.");
             return;
@@ -55,12 +55,27 @@ function InterviewSetup() {
             return;
         }
 
+        // CUSTOM DURATION VALIDATION
+        if (duration === "Custom") {
+            const minutes = Number(customDuration);
+
+            if (!customDuration || Number.isNaN(minutes)) {
+                setError("Please enter a custom duration.");
+                return;
+            }
+
+            if (minutes < 3 || minutes > 60) {
+                setError(
+                    "Custom duration must be between 3 and 60 minutes."
+                );
+                return;
+            }
+        }
+
         try {
             setLoading(true);
 
-            // ==========================================
             // CREATE INTERVIEW
-            // ==========================================
             setLoadingStep("Creating your interview...");
 
             const interviewData = {
@@ -69,9 +84,14 @@ function InterviewSetup() {
                 interview_type: interviewType,
                 difficulty: difficulty,
                 number_of_questions: Number(questionCount),
-                duration: duration
+                duration: duration,
+                custom_duration:
+                    duration === "Custom"
+                        ? Number(customDuration)
+                        : null
             };
 
+            console.log("INTERVIEW SETUP PAYLOAD:", interviewData);
             const createData = await createInterview(
                 interviewData
             );
@@ -110,6 +130,10 @@ function InterviewSetup() {
                 difficulty,
                 question_count: Number(questionCount),
                 duration,
+                custom_duration:
+                    duration === "Custom"
+                        ? Number(customDuration)
+                        : null,
                 interview_id: interviewId
             };
 
@@ -118,9 +142,7 @@ function InterviewSetup() {
                 JSON.stringify(interviewSetup)
             );
 
-            // ==========================================
             // GENERATE AI QUESTIONS
-            // ==========================================
             setLoadingStep(
                 "Generating AI interview questions..."
             );
@@ -138,9 +160,7 @@ function InterviewSetup() {
                 return;
             }
 
-            // ==========================================
             // SUCCESS
-            // ==========================================
             setLoadingStep(
                 "Interview ready! Starting..."
             );
@@ -149,6 +169,7 @@ function InterviewSetup() {
             setTimeout(() => {
                 navigate("/interview/start");
             }, 500);
+
         } catch (error) {
             console.error(
                 "Interview Setup Error:",
@@ -169,6 +190,7 @@ function InterviewSetup() {
                     "Unable to prepare interview. Please try again."
                 );
             }
+
         } finally {
             setLoading(false);
             setLoadingStep("");
@@ -269,12 +291,24 @@ function InterviewSetup() {
                                 Software Engineering
                             </option>
 
-                            <option value="Nursing">
-                                Nursing
+                            <option value="Data Science">
+                                Data Science
                             </option>
 
-                            <option value="Chemical Engineering">
-                                Chemical Engineering
+                            <option value="Artificial Intelligence">
+                                Artificial Intelligence
+                            </option>
+
+                            <option value="Cybersecurity">
+                                Cybersecurity
+                            </option>
+
+                            <option value="Cloud Computing">
+                                Cloud Computing
+                            </option>
+
+                            <option value="Information Technology">
+                                Information Technology
                             </option>
 
                             <option value="Mechanical Engineering">
@@ -289,24 +323,48 @@ function InterviewSetup() {
                                 Electrical Engineering
                             </option>
 
-                            <option value="Data Science">
-                                Data Science
+                            <option value="Chemical Engineering">
+                                Chemical Engineering
                             </option>
 
-                            <option value="Artificial Intelligence">
-                                Artificial Intelligence
+                            <option value="Electronics & Communication">
+                                Electronics & Communication
                             </option>
 
-                            <option value="Marketing">
-                                Marketing
+                            <option value="Nursing">
+                                Nursing
                             </option>
 
-                            <option value="Finance">
-                                Finance
+                            <option value="Medical & Healthcare">
+                                Medical & Healthcare
+                            </option>
+
+                            <option value="Pharmacy">
+                                Pharmacy
+                            </option>
+
+                            <option value="Finance & Accounting">
+                                Finance & Accounting
+                            </option>
+
+                            <option value="Banking">
+                                Banking
+                            </option>
+
+                            <option value="Marketing & Sales">
+                                Marketing & Sales
                             </option>
 
                             <option value="Human Resources">
                                 Human Resources
+                            </option>
+
+                            <option value="Business & Management">
+                                Business & Management
+                            </option>
+
+                            <option value="Education & Teaching">
+                                Education & Teaching
                             </option>
 
                             <option value="Other">
@@ -481,7 +539,8 @@ function InterviewSetup() {
                                 "No Limit",
                                 "10 Minutes",
                                 "20 Minutes",
-                                "30 Minutes"
+                                "30 Minutes",
+                                "Custom"
                             ].map((time) => (
                                 <button
                                     type="button"
@@ -492,14 +551,102 @@ function InterviewSetup() {
                                             ? "option-button active"
                                             : "option-button"
                                     }
-                                    onClick={() =>
-                                        setDuration(time)
-                                    }
+                                    onClick={() => {
+                                        setDuration(time);
+
+                                        if (time === "Custom") {
+                                            setCustomDurationApplied(false);
+                                        } else {
+                                            setCustomDuration("");
+                                            setCustomDurationApplied(false);
+                                        }
+                                    }}
                                 >
-                                    {time}
+                                    {time === "Custom" && customDuration
+                                        ? `${customDuration} Minutes`
+                                        : time}
                                 </button>
                             ))}
                         </div>
+
+                        {duration === "Custom" && !customDurationApplied && (
+                            <div className="custom-duration-wrapper">
+                                <label htmlFor="customDuration">
+                                    Custom Duration
+                                </label>
+
+                                <div className="custom-duration-input">
+                                    <input
+                                        id="customDuration"
+                                        type="number"
+                                        min="3"
+                                        max="60"
+                                        value={customDuration}
+                                        onChange={(e) => {
+                                            setCustomDuration(e.target.value);
+                                            setCustomDurationError("");
+                                        }}
+                                        placeholder="Enter minutes"
+                                        disabled={loading}
+                                    />
+
+                                    <span>Minutes</span>
+                                </div>
+
+                                <small>
+                                    Enter a duration between 3 and 60 minutes.
+                                </small>
+
+                                {customDurationError && (
+                                    <p className="custom-duration-error">
+                                        {customDurationError}
+                                    </p>
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="apply-duration-button"
+                                    disabled={loading}
+                                    onClick={() => {
+                                        const minutes = Number(customDuration);
+
+                                        if (!customDuration) {
+                                            setCustomDurationError(
+                                                "Please enter a duration."
+                                            );
+                                            return;
+                                        }
+
+                                        if (Number.isNaN(minutes)) {
+                                            setCustomDurationError(
+                                                "Please enter a valid number."
+                                            );
+                                            return;
+                                        }
+
+                                        if (minutes < 3) {
+                                            setCustomDurationError(
+                                                "Minimum duration is 3 minutes."
+                                            );
+                                            return;
+                                        }
+
+                                        if (minutes > 60) {
+                                            setCustomDurationError(
+                                                "Maximum duration is 60 minutes."
+                                            );
+                                            return;
+                                        }
+
+                                        setCustomDurationError("");
+                                        setError("");
+                                        setCustomDurationApplied(true);
+                                    }}
+                                >
+                                    Apply Duration
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* SUMMARY */}
@@ -561,7 +708,9 @@ function InterviewSetup() {
                                 <span>Duration</span>
 
                                 <strong>
-                                    {duration}
+                                    {duration === "Custom"
+                                        ? `${customDuration || "Custom"} Minutes`
+                                        : duration}
                                 </strong>
                             </div>
                         </div>
