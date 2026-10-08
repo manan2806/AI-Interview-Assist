@@ -248,9 +248,7 @@ function Dashboard() {
                 {/* ==========================================
                     MOBILE HAMBURGER
                 ========================================== */}
-
                 <div className="dashboard-mobile-nav">
-
                     <button
                         className="dashboard-menu-button"
                         onClick={() =>
@@ -264,7 +262,6 @@ function Dashboard() {
 
                     {mobileMenuOpen && (
                         <div className="dashboard-mobile-dropdown">
-
                             <Link
                                 to="/profile"
                                 onClick={() =>
@@ -273,6 +270,16 @@ function Dashboard() {
                             >
                                 <span>👤</span>
                                 <span>Profile</span>
+                            </Link>
+
+                            <Link
+                                to="/settings"
+                                onClick={() =>
+                                    setMobileMenuOpen(false)
+                                }
+                            >
+                                <span>⚙️</span>
+                                <span>Settings</span>
                             </Link>
 
                             <Link
@@ -294,12 +301,9 @@ function Dashboard() {
                                 <span>🚪</span>
                                 <span>Logout</span>
                             </button>
-
                         </div>
                     )}
-
                 </div>
-
             </nav>
 
             {/* MAIN */}
