@@ -11573,24 +11573,87 @@ html {
 
 @media (max-width: 600px) {
   .change-password-overlay {
-    padding: 15px;
+    position: fixed;
+    inset: 0;
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .change-password-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100vh - 24px);
     padding: 22px 18px;
     border-radius: 18px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .change-password-header {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .change-password-label {
+    margin-bottom: 6px;
+    padding: 5px 8px;
+    font-size: 9px;
   }
 
   .change-password-header h2 {
     font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .change-password-header p {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .change-password-close {
+    width: 32px;
+    height: 32px;
+    font-size: 21px;
+  }
+
+  .change-password-form {
+    gap: 14px;
+  }
+
+  .change-password-group {
+    gap: 6px;
+  }
+
+  .change-password-group label {
+    font-size: 12px;
+  }
+
+  .change-password-group input {
+    height: 43px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .change-password-error,
+  .change-password-success {
+    padding: 10px 11px;
+    font-size: 11px;
   }
 
   .change-password-actions {
     flex-direction: column-reverse;
+    gap: 9px;
+    margin-top: 5px;
   }
 
   .change-password-cancel,
   .change-password-submit {
     width: 100%;
+    min-width: 0;
+    height: 42px;
   }
 }
