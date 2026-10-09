@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { forgotPassword } from "../services/authService";
 import AuthLayout from "../components/AuthLayout";
+import "../context/ForgotPassword.css"
+
 
 function ForgotPassword() {
 

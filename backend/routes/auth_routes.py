@@ -1005,7 +1005,7 @@ def update_settings():
         # VALIDATION
         allowed_interview_types = ["Technical", "HR", "Mixed"]
         allowed_difficulties = ["Easy", "Medium", "Hard"]
-        allowed_themes = ["Light", "Dark", "System"]
+        allowed_themes = ["Light", "Dark"]
 
         if interview_type not in allowed_interview_types:
             return jsonify({"success": False, "message": "Invalid interview type"}), 400

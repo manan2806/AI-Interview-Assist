@@ -4,7 +4,7 @@ import {
     useNavigate,
     useSearchParams
 } from "react-router-dom";
-
+import "../context/ForgotPassword.css"
 import { verifyOTP } from "../services/authService";
 import AuthLayout from "../components/AuthLayout";
 

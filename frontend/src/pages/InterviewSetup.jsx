@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getUser } from "../utils/auth";
 import { getSettings } from "../services/api";
-
+import "../context/InterviewSetup.css"
 import {
     createInterview,
     generateQuestions

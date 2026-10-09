@@ -1,0 +1,1175 @@
+/* =========================================================
+   SUPPORT PAGE
+========================================================= */
+.support-page {
+    min-height: 100vh;
+    padding: 50px 7% 70px;
+
+    background:
+        radial-gradient(circle at 5% 10%,
+            rgba(113, 103, 239, 0.16),
+            transparent 30%),
+        radial-gradient(circle at 95% 15%,
+            rgba(59, 130, 246, 0.14),
+            transparent 30%),
+        radial-gradient(circle at 90% 90%,
+            rgba(52, 168, 83, 0.12),
+            transparent 28%),
+        radial-gradient(circle at 10% 90%,
+            rgba(217, 154, 50, 0.11),
+            transparent 26%),
+        #eef1f7;
+
+    color: #182033;
+}
+
+/* HEADER */
+.support-header {
+    max-width: 1200px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 28px;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(247, 246, 255, 0.96));
+    border: 1px solid #dddff0;
+    border-radius: 18px;
+    box-shadow:
+        0 10px 28px rgba(47, 55, 85, 0.07);
+}
+
+.support-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #6258dc;
+}
+
+.support-header h1 {
+    margin: 0 0 10px;
+    font-size: 34px;
+    line-height: 1.2;
+    color: #182033;
+}
+
+.support-header>div>p:last-child {
+    max-width: 650px;
+    margin: 0;
+    color: #667085;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* DASHBOARD BUTTON */
+.support-header .result-back-btn {
+    flex-shrink: 0;
+    padding: 11px 20px;
+    border: 1px solid #d8d3ff;
+    border-radius: 10px;
+    background: linear-gradient(135deg,
+            #f0eeff,
+            #eef5ff);
+    color: #6258dc;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.support-header .result-back-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg,
+            #e9e6ff,
+            #e8f2ff);
+    box-shadow:
+        0 8px 18px rgba(98, 88, 220, 0.13);
+}
+
+/* SUPPORT CARDS */
+.support-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.support-card {
+    min-height: 280px;
+    padding: 24px 24px;
+    border-radius: 18px;
+    border: 1px solid #e1e4ec;
+    box-shadow: 0 8px 22px rgba(23, 32, 51, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+/* PURPLE - FAQ / HELP */
+.support-card:nth-child(1) {
+    background:
+        linear-gradient(145deg,
+            #ffffff,
+            #eeeaff);
+    border-color: #d8d1ff;
+}
+
+/* BLUE - CONTACT SUPPORT */
+.support-card:nth-child(2) {
+    background:
+        linear-gradient(145deg,
+            #ffffff,
+            #e8f3ff);
+    border-color: #cce2ff;
+}
+
+/* GREEN - QUICK ASSISTANCE */
+.support-card:nth-child(3) {
+    background:
+        linear-gradient(145deg,
+            #ffffff,
+            #e5f8ee);
+    border-color: #c9ecd9;
+}
+
+.support-card:hover {
+    transform: translateY(-7px);
+    box-shadow:
+        0 18px 38px rgba(47, 55, 85, 0.11);
+}
+
+/* CARD ICONS */
+.support-card-icon {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    margin-bottom: 22px;
+    font-size: 26px;
+}
+
+/* PURPLE */
+.problem-icon {
+    background: linear-gradient(135deg,
+            #eeeaff,
+            #ddd7ff);
+    border: 1px solid #d4ccff;
+}
+
+/* BLUE */
+.faq-icon {
+    background: linear-gradient(135deg,
+            #e8f3ff,
+            #d2e8ff);
+    border: 1px solid #c6dfff;
+}
+
+/* GREEN */
+.contact-icon {
+    background: linear-gradient(135deg,
+            #e5f8ee,
+            #d0f2df);
+    border: 1px solid #c6ead5;
+}
+
+/* CARD CONTENT */
+.support-card-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.support-card-content h2 {
+    margin: 0 0 12px;
+    font-size: 21px;
+    color: #202737;
+}
+
+.support-card-content p {
+    margin: 0 0 25px;
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.7;
+    flex: 1;
+}
+
+/* SUPPORT BUTTONS */
+.support-button {
+    width: 100%;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg,
+            #7167ef,
+            #594fd0);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow:
+        0 7px 18px rgba(98, 88, 220, 0.18);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.support-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 10px 22px rgba(98, 88, 220, 0.25);
+}
+
+/* PASTEL SECONDARY */
+.support-button.secondary {
+    background: linear-gradient(135deg,
+            #e8e4ff,
+            #dfeaff);
+    border: 1px solid #c8c3eb;
+    color: #554bc4;
+    box-shadow: 0 4px 12px rgba(98, 88, 220, 0.08);
+}
+
+.support-button.secondary:hover {
+    background: linear-gradient(135deg,
+            #ece9ff,
+            #e8f2ff);
+    box-shadow:
+        0 7px 18px rgba(98, 88, 220, 0.10);
+}
+
+/* MODAL OVERLAY */
+.support-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(28, 34, 52, 0.48);
+    backdrop-filter: blur(7px);
+}
+
+/* MODAL */
+.support-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 26px;
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 0% 0%,
+            rgba(113, 103, 239, 0.28),
+            transparent 38%),
+        radial-gradient(circle at 100% 0%,
+            rgba(59, 130, 246, 0.24),
+            transparent 38%),
+        radial-gradient(circle at 100% 100%,
+            rgba(52, 168, 83, 0.22),
+            transparent 35%),
+        radial-gradient(circle at 0% 100%,
+            rgba(217, 154, 50, 0.20),
+            transparent 35%),
+        #ffffff;
+    border: 1px solid #d9dbea;
+    box-shadow:
+        0 20px 55px rgba(28, 34, 52, 0.18);
+    animation: supportModalIn 0.25s ease;
+}
+
+/* MODAL ANIMATION */
+@keyframes supportModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* MODAL HEADER */
+.support-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+/* Label */
+.support-modal-header .support-label {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: linear-gradient(135deg,
+            #eeeaff,
+            #e8f3ff);
+    border: 1px solid #d8d1ff;
+    color: #6258dc;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+/* Heading */
+.support-modal-header h2 {
+    margin: 8px 0 5px;
+    font-size: 21px;
+    color: #202737;
+}
+
+/* Description */
+.support-modal-header p {
+    margin: 0;
+    color: #7a8495;
+    font-size: 13px;
+}
+
+/* CLOSE BUTTON */
+.support-close-button {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 1px solid #dcd9f4;
+    border-radius: 9px;
+    background: linear-gradient(135deg,
+            #f5f3ff,
+            #eef5ff);
+    color: #6258dc;
+    font-size: 21px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.support-close-button:hover {
+    background: linear-gradient(135deg,
+            #e8e4ff,
+            #dfeaff);
+    color: #5147c9;
+    transform: rotate(3deg);
+    box-shadow:
+        0 4px 12px rgba(98, 88, 220, 0.10);
+}
+
+/* FAQ */
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.faq-item {
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* 1 - Purple */
+.faq-item:nth-child(1) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #eeeaff);
+    border-color: #d8d1ff;
+}
+
+/* 2 - Blue */
+.faq-item:nth-child(2) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #e8f3ff);
+    border-color: #cce2ff;
+}
+
+/* 3 - Green */
+.faq-item:nth-child(3) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #e5f8ee);
+    border-color: #c9ecd9;
+}
+
+/* 4 - Orange */
+.faq-item:nth-child(4) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #fff0da);
+    border-color: #f1ddbd;
+}
+
+/* 5 - Pink */
+.faq-item:nth-child(5) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #ffeaf2);
+    border-color: #f3cedc;
+}
+
+/* 6 - Cyan */
+.faq-item:nth-child(6) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #e5f7f8);
+    border-color: #c5e5e7;
+}
+
+/* Same text color for ALL FAQ cards */
+.faq-item h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #302b69;
+}
+
+.faq-item p {
+    margin: 0;
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.faq-item strong {
+    color: #6258dc;
+}
+
+/* Hover */
+.faq-item:hover {
+    transform: translateX(3px);
+    box-shadow:
+        0 6px 18px rgba(98, 88, 220, 0.07);
+}
+
+/* CONTACT SUPPORT */
+.contact-support-content {
+    text-align: center;
+}
+
+/* Main Contact Icon */
+.contact-support-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: linear-gradient(135deg,
+            #ffffff,
+            #e8f3ff);
+    border: 1px solid #cce2ff;
+    font-size: 28px;
+}
+
+/* Heading */
+.contact-support-content h3 {
+    margin: 0 0 8px;
+    font-size: 19px;
+    color: #302b69;
+}
+
+/* Description */
+.contact-support-content>p {
+    margin: 0 auto 20px;
+    max-width: 500px;
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+/* Contact Info */
+.contact-support-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.contact-info-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 16px;
+    border-radius: 13px;
+    border: 1px solid transparent;
+    text-align: left;
+}
+
+/* Email - Blue */
+.contact-info-item:nth-child(1) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #e8f3ff);
+    border-color: #cce2ff;
+}
+
+/* Support For - Green */
+.contact-info-item:nth-child(2) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #e5f8ee);
+    border-color: #c9ecd9;
+}
+
+/* Response Time - Orange */
+.contact-info-item:nth-child(3) {
+    background: linear-gradient(135deg,
+            #ffffff,
+            #fff0da);
+
+    border-color: #f1ddbd;
+}
+
+/* Icons */
+.contact-info-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #ffffff;
+    font-size: 19px;
+}
+
+/* Same text color */
+.contact-info-item small {
+    display: block;
+    margin-bottom: 3px;
+    color: #667085;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.contact-info-item strong {
+    display: block;
+    color: #302b69;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* View FAQs */
+.contact-faq-button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Report Button */
+.contact-report-button {
+    width: 100%;
+}
+
+/* REPORT FORM */
+.support-form-group {
+    margin-bottom: 19px;
+}
+
+.support-form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #394150;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.support-form-group input,
+.support-form-group select,
+.support-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #dce1ea;
+    border-radius: 10px;
+    background: #fafbfe;
+    color: #202737;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.support-form-group input:focus,
+.support-form-group select:focus,
+.support-form-group textarea:focus {
+    background: #ffffff;
+    border-color: #aaa2ed;
+    box-shadow:
+        0 0 0 3px rgba(113, 103, 239, 0.10);
+}
+
+.support-form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.support-form-group input::placeholder,
+.support-form-group textarea::placeholder {
+    color: #a0a7b4;
+}
+
+/* ERROR / SUCCESS */
+.support-error {
+    margin-bottom: 16px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: #fff0f0;
+    border: 1px solid #ffd1d1;
+    color: #c53b3b;
+    font-size: 13px;
+}
+
+.support-success {
+    margin-bottom: 16px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: #eaf8f0;
+    border: 1px solid #c9ecd9;
+    color: #198754;
+    font-size: 13px;
+}
+
+/* FORM ACTIONS */
+.support-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.support-cancel-button,
+.support-submit-button {
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.support-cancel-button {
+    background: #f5f6f9;
+    border: 1px solid #dfe2e9;
+    color: #667085;
+}
+
+.support-cancel-button:hover {
+    background: #eceef3;
+    transform: translateY(-1px);
+}
+
+.support-submit-button {
+    background: linear-gradient(135deg,
+            #7167ef,
+            #594fd0);
+    border: 1px solid #6258dc;
+    color: #ffffff;
+    box-shadow:
+        0 6px 16px rgba(98, 88, 220, 0.18);
+}
+
+.support-submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 9px 20px rgba(98, 88, 220, 0.25);
+}
+
+.support-submit-button:disabled,
+.support-cancel-button:disabled,
+.support-close-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+    .support-page {
+        padding: 35px 5% 50px;
+    }
+
+    .support-header {
+        padding: 26px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .support-header h1 {
+        font-size: 29px;
+    }
+
+    .support-header .result-back-btn {
+        width: 100%;
+    }
+
+    .support-container {
+        grid-template-columns: 1fr;
+    }
+
+    .support-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .support-page {
+        padding: 25px 16px 40px;
+    }
+
+    .support-header {
+        padding: 23px 20px;
+        border-radius: 18px;
+        margin-bottom: 25px;
+    }
+
+    .support-header h1 {
+        font-size: 25px;
+    }
+
+    .support-header>div>p:last-child {
+        font-size: 13px;
+    }
+
+    .support-container {
+        gap: 17px;
+    }
+
+    .support-card {
+        padding: 23px;
+        border-radius: 17px;
+    }
+
+    .support-card-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 23px;
+    }
+
+    .support-card-content h2 {
+        font-size: 19px;
+    }
+
+    .support-modal-overlay {
+        padding: 15px;
+    }
+
+    .support-modal {
+        max-height: 92vh;
+        padding: 23px 19px;
+        border-radius: 18px;
+    }
+
+    .support-modal-header {
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .support-modal-header h2 {
+        font-size: 20px;
+    }
+
+    .faq-item {
+        padding: 15px;
+    }
+
+    .faq-item h3 {
+        font-size: 14px;
+    }
+
+    .faq-item p {
+        font-size: 12.5px;
+    }
+
+    .contact-support-content h3 {
+        font-size: 19px;
+    }
+
+    .contact-info-item {
+        align-items: flex-start;
+    }
+
+    .support-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .support-cancel-button,
+    .support-submit-button {
+        width: 100%;
+    }
+}
+
+/* ==========================================
+   SUPPORT PAGE - COLORFUL DARK MODE
+========================================== */
+html[data-theme="dark"] .support-page {
+    background:
+        radial-gradient(circle at 5% 10%, rgba(113, 103, 239, 0.17), transparent 30%),
+        radial-gradient(circle at 95% 15%, rgba(59, 130, 246, 0.15), transparent 30%),
+        radial-gradient(circle at 90% 90%, rgba(52, 168, 83, 0.10), transparent 28%),
+        radial-gradient(circle at 10% 90%, rgba(217, 154, 50, 0.09), transparent 26%),
+        #0b1120;
+    color: #e5eaf5;
+}
+
+/* HEADER */
+html[data-theme="dark"] .support-header {
+    background: linear-gradient(135deg, #1b2340, #191a30);
+    border-color: #363d5c;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .support-label {
+    color: #b7aaff;
+}
+
+html[data-theme="dark"] .support-header h1 {
+    color: #f1f3ff;
+}
+
+html[data-theme="dark"] .support-header>div>p:last-child {
+    color: #b1bdd2;
+}
+
+/* DASHBOARD BUTTON */
+html[data-theme="dark"] .support-header .result-back-btn {
+    background: linear-gradient(135deg, #352d61, #203955);
+    border-color: #6558a7;
+    color: #e0d9ff;
+}
+
+html[data-theme="dark"] .support-header .result-back-btn:hover {
+    background: linear-gradient(135deg, #493b7d, #294b70);
+    box-shadow: 0 8px 18px rgba(98, 88, 220, 0.2);
+}
+
+/* SUPPORT CARDS */
+html[data-theme="dark"] .support-card {
+    border-color: #363e59;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .support-card:nth-child(1) {
+    background: linear-gradient(145deg, #242044, #1b1c33);
+    border-color: #51457d;
+}
+
+html[data-theme="dark"] .support-card:nth-child(2) {
+    background: linear-gradient(145deg, #1c304a, #191f35);
+    border-color: #365b83;
+}
+
+html[data-theme="dark"] .support-card:nth-child(3) {
+    background: linear-gradient(145deg, #1c3a35, #192a30);
+    border-color: #326653;
+}
+
+html[data-theme="dark"] .support-card:hover {
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3);
+}
+
+/* CARD ICONS */
+html[data-theme="dark"] .problem-icon {
+    background: linear-gradient(135deg, #453775, #302850);
+    border-color: #6555a2;
+}
+
+html[data-theme="dark"] .faq-icon {
+    background: linear-gradient(135deg, #294b70, #203653);
+    border-color: #416b97;
+}
+
+html[data-theme="dark"] .contact-icon {
+    background: linear-gradient(135deg, #285a49, #203e38);
+    border-color: #39785d;
+}
+
+/* CARD CONTENT */
+html[data-theme="dark"] .support-card-content h2 {
+    color: #f0edff;
+}
+
+html[data-theme="dark"] .support-card-content p {
+    color: #b4bfd3;
+}
+
+/* SUPPORT BUTTONS */
+html[data-theme="dark"] .support-button {
+    background: linear-gradient(135deg, #796df5, #5a4bd0);
+    color: #ffffff;
+    box-shadow: 0 7px 18px rgba(98, 88, 220, 0.23);
+}
+
+html[data-theme="dark"] .support-button:hover {
+    box-shadow: 0 10px 22px rgba(98, 88, 220, 0.32);
+}
+
+html[data-theme="dark"] .support-button.secondary {
+    background: linear-gradient(135deg, #393264, #263b5c);
+    border-color: #5a5290;
+    color: #e4deff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme="dark"] .support-button.secondary:hover {
+    background: linear-gradient(135deg, #4a3c7a, #2e4b70);
+}
+
+/* MODAL OVERLAY */
+html[data-theme="dark"] .support-modal-overlay {
+    background: rgba(3, 7, 18, 0.78);
+}
+
+/* MODAL */
+html[data-theme="dark"] .support-modal {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(113, 103, 239, 0.18), transparent 38%),
+        radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.14), transparent 38%),
+        radial-gradient(circle at 100% 100%, rgba(52, 168, 83, 0.10), transparent 35%),
+        linear-gradient(145deg, #1b2238, #151a2b);
+    border-color: #414866;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
+}
+
+/* MODAL HEADER */
+html[data-theme="dark"] .support-modal-header .support-label {
+    background: linear-gradient(135deg, #393264, #263b5c);
+    border-color: #5a5290;
+    color: #c8bdff;
+}
+
+html[data-theme="dark"] .support-modal-header h2 {
+    color: #f1f3ff;
+}
+
+html[data-theme="dark"] .support-modal-header p {
+    color: #aab6cc;
+}
+
+/* CLOSE BUTTON */
+html[data-theme="dark"] .support-close-button {
+    background: linear-gradient(135deg, #352d61, #203955);
+    border-color: #51477f;
+    color: #d6ceff;
+}
+
+html[data-theme="dark"] .support-close-button:hover {
+    background: linear-gradient(135deg, #51418a, #304e75);
+    color: #ffffff;
+}
+
+/* FAQ ITEMS */
+html[data-theme="dark"] .faq-item:nth-child(1) {
+    background: linear-gradient(135deg, #292348, #211d38);
+    border-color: #51457d;
+}
+
+html[data-theme="dark"] .faq-item:nth-child(2) {
+    background: linear-gradient(135deg, #20364f, #1b293e);
+    border-color: #365b83;
+}
+
+html[data-theme="dark"] .faq-item:nth-child(3) {
+    background: linear-gradient(135deg, #203d35, #1a302d);
+    border-color: #326653;
+}
+
+html[data-theme="dark"] .faq-item:nth-child(4) {
+    background: linear-gradient(135deg, #473523, #30271f);
+    border-color: #785534;
+}
+
+html[data-theme="dark"] .faq-item:nth-child(5) {
+    background: linear-gradient(135deg, #47283d, #302033);
+    border-color: #75425f;
+}
+
+html[data-theme="dark"] .faq-item:nth-child(6) {
+    background: linear-gradient(135deg, #1e3c43, #192d37);
+    border-color: #35646c;
+}
+
+html[data-theme="dark"] .faq-item h3 {
+    color: #e6e0ff;
+}
+
+html[data-theme="dark"] .faq-item p {
+    color: #bac5d8;
+}
+
+html[data-theme="dark"] .faq-item strong {
+    color: #b8aaff;
+}
+
+html[data-theme="dark"] .faq-item:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+/* CONTACT SUPPORT */
+html[data-theme="dark"] .contact-support-icon {
+    background: linear-gradient(135deg, #294b70, #203653);
+    border-color: #416b97;
+}
+
+html[data-theme="dark"] .contact-support-content h3 {
+    color: #e3dcff;
+}
+
+html[data-theme="dark"] .contact-support-content>p {
+    color: #b4bfd3;
+}
+
+/* CONTACT INFO ITEMS */
+html[data-theme="dark"] .contact-info-item:nth-child(1) {
+    background: linear-gradient(135deg, #20364f, #1b293e);
+    border-color: #365b83;
+}
+
+html[data-theme="dark"] .contact-info-item:nth-child(2) {
+    background: linear-gradient(135deg, #203d35, #1a302d);
+    border-color: #326653;
+}
+
+html[data-theme="dark"] .contact-info-item:nth-child(3) {
+    background: linear-gradient(135deg, #473523, #30271f);
+    border-color: #785534;
+}
+
+html[data-theme="dark"] .contact-info-icon {
+    background: #202941;
+    color: #e0e7ff;
+}
+
+html[data-theme="dark"] .contact-info-item small {
+    color: #b1bdd2;
+}
+
+html[data-theme="dark"] .contact-info-item strong {
+    color: #f0edff;
+    overflow-wrap: anywhere;
+}
+
+/* REPORT FORM */
+html[data-theme="dark"] .support-form-group label {
+    color: #dce4f5;
+}
+
+html[data-theme="dark"] .support-form-group input,
+html[data-theme="dark"] .support-form-group select,
+html[data-theme="dark"] .support-form-group textarea {
+    background: #11182a;
+    border-color: #414b67;
+    color: #edf1ff;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] .support-form-group input:focus,
+html[data-theme="dark"] .support-form-group select:focus,
+html[data-theme="dark"] .support-form-group textarea:focus {
+    background: #151e33;
+    border-color: #8b7cf6;
+    box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.18);
+}
+
+html[data-theme="dark"] .support-form-group input::placeholder,
+html[data-theme="dark"] .support-form-group textarea::placeholder {
+    color: #8794ad;
+}
+
+html[data-theme="dark"] .support-form-group select option {
+    background: #1b2237;
+    color: #edf1ff;
+}
+
+/* ERROR / SUCCESS */
+html[data-theme="dark"] .support-error {
+    background: #3b202b;
+    border-color: #713441;
+    color: #ffb8c1;
+}
+
+html[data-theme="dark"] .support-success {
+    background: #19372f;
+    border-color: #2c6953;
+    color: #8ce2b6;
+}
+
+/* FORM ACTIONS */
+html[data-theme="dark"] .support-cancel-button {
+    background: #252d41;
+    border-color: #414b63;
+    color: #d0d8e8;
+}
+
+html[data-theme="dark"] .support-cancel-button:hover {
+    background: #303a52;
+}
+
+html[data-theme="dark"] .support-submit-button {
+    background: linear-gradient(135deg, #796df5, #5a4bd0);
+    border-color: #7668e8;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .support-submit-button:hover {
+    box-shadow: 0 9px 20px rgba(98, 88, 220, 0.3);
+}
+
+/* DISABLED BUTTONS */
+html[data-theme="dark"] .support-submit-button:disabled,
+html[data-theme="dark"] .support-cancel-button:disabled,
+html[data-theme="dark"] .support-close-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ACCESSIBILITY */
+html[data-theme="dark"] .support-page button:focus-visible,
+html[data-theme="dark"] .support-page input:focus-visible,
+html[data-theme="dark"] .support-page select:focus-visible,
+html[data-theme="dark"] .support-page textarea:focus-visible {
+    outline: 2px solid #a99cff;
+    outline-offset: 3px;
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+
+    html[data-theme="dark"] .support-page *,
+    html[data-theme="dark"] .support-page *::before,
+    html[data-theme="dark"] .support-page *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

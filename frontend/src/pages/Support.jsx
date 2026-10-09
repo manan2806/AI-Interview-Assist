@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { submitProblemReport } from "../services/interviewService";
+import "../context/Support.css"
 
 function Support() {
     const [showProblemForm, setShowProblemForm] = useState(false);

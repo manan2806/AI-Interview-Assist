@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { resetPassword } from "../services/authService";
 import AuthLayout from "../components/AuthLayout";
+import "../context/ForgotPassword.css"
 
 function ResetPassword() {
 
