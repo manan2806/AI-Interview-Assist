@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { getUser, logout } from "../utils/auth";
 import { getInterviewHistory } from "../services/interviewService";
+import "../context/Dashboard.css";
 
 function Dashboard() {
     const navigate = useNavigate();

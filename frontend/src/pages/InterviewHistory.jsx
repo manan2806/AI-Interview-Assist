@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import "../context/InterviewHistory.css";
 import {
     getInterviewHistory,
     deleteInterview

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-    getSettings,
-    updateSettings,
-} from "../services/api";
-
+import { getSettings, updateSettings, } from "../services/api";
+import { useTheme } from "../context/ThemeContext.jsx";
 import { changePassword, deleteAccount } from "../services/authService";
+import "../context/Settings.css"
+
 
 function Settings() {
     const navigate = useNavigate();
+    const { theme: globalTheme, setTheme, } = useTheme();
     const [activeSection, setActiveSection] = useState("account");
 
     const [showChangePassword, setShowChangePassword] = useState(false);
@@ -84,17 +84,22 @@ function Settings() {
                 const data = await getSettings();
 
                 if (data?.success && data?.settings) {
+                    const savedTheme = ["Light", "Dark", "System",
+                    ].includes(data.settings.theme)
+                        ? data.settings.theme
+                        : "Light";
+
                     setSettings({
-                        interview_type:
-                            data.settings.interview_type || "Technical",
-                        difficulty:
-                            data.settings.difficulty || "Medium",
-                        number_of_questions:
-                            Number(data.settings.number_of_questions) || 10,
-                        theme:
-                            data.settings.theme || "Light",
+                        interview_type: data.settings.interview_type || "Technical",
+                        difficulty: data.settings.difficulty || "Medium",
+                        number_of_questions: Number(data.settings.number_of_questions) || 10,
+                        theme: savedTheme,
                     });
+
+                    // Sync saved preference with the global theme
+                    setTheme(savedTheme);
                 }
+
             } catch (error) {
                 console.error("Load Settings Error:", error);
 
@@ -114,16 +119,18 @@ function Settings() {
     // ==========================================
     // HANDLE SETTINGS CHANGE
     // ==========================================
-
     const handleSettingChange = (field, value) => {
         setSettings((previousSettings) => ({
-            ...previousSettings,
-            [field]:
+            ...previousSettings, [field]:
                 field === "number_of_questions"
                     ? Number(value)
                     : value,
         }));
 
+        // Apply appearance changes immediately
+        if (field === "theme" && ["Light", "Dark", "System"].includes(value)) {
+            setTheme(value);
+        }
         setSuccessMessage("");
         setErrorMessage("");
     };
@@ -139,6 +146,14 @@ function Settings() {
             setErrorMessage("");
 
             const data = await updateSettings(settings);
+
+            if (!data?.success) {
+                setErrorMessage(data?.message || "Unable to save settings.");
+                return;
+            }
+
+            // Keep the global theme synchronized after a successful save
+            setTheme(settings.theme);
 
             if (!data?.success) {
                 setErrorMessage(
