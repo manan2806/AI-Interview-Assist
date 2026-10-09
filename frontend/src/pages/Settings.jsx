@@ -631,128 +631,70 @@ function Settings() {
                         {/* ==========================================
                             APPEARANCE
                         ========================================== */}
+                        {activeSection === "appearance" && (<div className="settings-section"> <div className="settings-section-header">
+                            <span className="settings-section-badge">
+                                🎨 Appearance
+                            </span>
 
-                        {activeSection === "appearance" && (
-                            <div className="settings-section">
-                                <div className="settings-section-header">
-                                    <span className="settings-section-badge">
-                                        🎨 Appearance
-                                    </span>
+                            <h2>Appearance</h2>
+                            <p>Customize how Interview Assist looks on your device.</p>
+                        </div>
 
-                                    <h2>Appearance</h2>
-
-                                    <p>
-                                        Customize how Interview Assist
-                                        looks on your device.
-                                    </p>
-                                </div>
-
-                                <div className="theme-selection">
-                                    {/* LIGHT */}
-
+                            <div className="theme-selection">
+                                {[
+                                    {
+                                        value: "Light",
+                                        icon: "☀️",
+                                        description: "Clean and bright",
+                                        previewClass: "light-preview",
+                                    },
+                                    {
+                                        value: "Dark",
+                                        icon: "🌙",
+                                        description: "Easy on the eyes",
+                                        previewClass: "dark-preview",
+                                    },
+                                    {
+                                        value: "System",
+                                        icon: "💻",
+                                        description: "Follow device settings",
+                                        previewClass: "system-preview",
+                                    },
+                                ].map((theme) => (
                                     <button
+                                        key={theme.value}
                                         type="button"
-                                        className={
-                                            settings.theme === "Light"
-                                                ? "theme-card selected"
-                                                : "theme-card"
-                                        }
+                                        className={`theme-card ${settings.theme === theme.value
+                                            ? "selected"
+                                            : ""
+                                            }`}
                                         onClick={() =>
-                                            handleSettingChange(
-                                                "theme",
-                                                "Light"
-                                            )
+                                            handleSettingChange("theme", theme.value)
                                         }
                                     >
-                                        <div className="theme-preview light-preview">
-                                            ☀️
+                                        <div
+                                            className={`theme-preview ${theme.previewClass}`}
+                                        >
+                                            {theme.icon}
                                         </div>
 
                                         <div className="theme-info">
-                                            <h3>Light</h3>
-                                            <p>Clean and bright</p>
+                                            <h3>{theme.value}</h3>
+                                            <p>{theme.description}</p>
                                         </div>
 
-                                        {settings.theme === "Light" && (
-                                            <span className="theme-check">
-                                                ✓
-                                            </span>
+                                        {settings.theme === theme.value && (
+                                            <span className="theme-check">✓</span>
                                         )}
                                     </button>
-
-                                    {/* DARK */}
-
-                                    <button
-                                        type="button"
-                                        className={
-                                            settings.theme === "Dark"
-                                                ? "theme-card selected"
-                                                : "theme-card"
-                                        }
-                                        onClick={() =>
-                                            handleSettingChange(
-                                                "theme",
-                                                "Dark"
-                                            )
-                                        }
-                                    >
-                                        <div className="theme-preview dark-preview">
-                                            🌙
-                                        </div>
-
-                                        <div className="theme-info">
-                                            <h3>Dark</h3>
-                                            <p>Easy on the eyes</p>
-                                        </div>
-
-                                        {settings.theme === "Dark" && (
-                                            <span className="theme-check">
-                                                ✓
-                                            </span>
-                                        )}
-                                    </button>
-
-                                    {/* SYSTEM */}
-
-                                    <button
-                                        type="button"
-                                        className={
-                                            settings.theme === "System"
-                                                ? "theme-card selected"
-                                                : "theme-card"
-                                        }
-                                        onClick={() =>
-                                            handleSettingChange(
-                                                "theme",
-                                                "System"
-                                            )
-                                        }
-                                    >
-                                        <div className="theme-preview system-preview">
-                                            💻
-                                        </div>
-
-                                        <div className="theme-info">
-                                            <h3>System</h3>
-                                            <p>
-                                                Follow device settings
-                                            </p>
-                                        </div>
-
-                                        {settings.theme === "System" && (
-                                            <span className="theme-check">
-                                                ✓
-                                            </span>
-                                        )}
-                                    </button>
-                                </div>
+                                ))}
                             </div>
+                        </div>
                         )}
 
                         {/* ==========================================
                             SECURITY
                         ========================================== */}
-
                         {activeSection === "security" && (
                             <div className="settings-section">
                                 <div className="settings-section-header">
