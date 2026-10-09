@@ -901,14 +901,19 @@ function InterviewStart() {
                                 "Fresher"}
                         </span>
 
-                        <div className="interview-timer">
-                            <span>⏱️</span>
 
-                            <strong>
-                                {remainingTime === null
-                                    ? "No Limit"
-                                    : formatTime(remainingTime)}
-                            </strong>
+                        <div className="interview-timer">
+                            <span className="timer-icon">⏱️</span>
+
+                            <div className="timer-content">
+                                <span className="timer-label">Time Remaining</span>
+
+                                <strong className="timer-value">
+                                    {remainingTime === null
+                                        ? "No Limit"
+                                        : formatTime(remainingTime)}
+                                </strong>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -2,16 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend
+    Chart as ChartJS, CategoryScale, LinearScale,
+    PointElement, LineElement, BarElement,
+    ArcElement, Title, Tooltip, Legend
 } from "chart.js";
 
 import { Line, Bar, Doughnut } from "react-chartjs-2";
@@ -76,6 +69,10 @@ function PerformanceChart() {
                         : [];
 
                 setInterviews(completedInterviews);
+                console.log(
+                    "FIRST COMPLETED INTERVIEW:",
+                    JSON.stringify(completedInterviews[0], null, 2)
+                );
             } catch (err) {
                 console.error(
                     "Performance Chart Error:",
@@ -508,6 +505,218 @@ function PerformanceChart() {
                 }
             }
         }
+    };
+
+
+    // ==========================================
+    // COMPARISON HELPERS
+    // ==========================================
+    const getEvaluation = (interview, field) => {
+        if (!interview) return null;
+
+        const fieldAliases = {
+            strengths: [
+                "strengths",
+                "strength",
+                "key_strengths",
+                "positive_points"
+            ],
+            weaknesses: [
+                "weaknesses",
+                "weakness",
+                "areas_to_improve",
+                "improvements",
+                "areas_for_improvement"
+            ]
+        };
+
+        const fields = fieldAliases[field] || [field];
+
+        const sources = [
+            interview.overall_result,
+            interview.overall_evaluation,
+            interview.overallResult,
+            interview.evaluation,
+            interview.result,
+            interview.overall_feedback,
+            interview
+        ];
+
+        for (const source of sources) {
+            if (!source || typeof source !== "object") {
+                continue;
+            }
+
+            for (const key of fields) {
+                const value = source[key];
+
+                if (
+                    value !== undefined &&
+                    value !== null &&
+                    value !== ""
+                ) {
+                    if (Array.isArray(value) && value.length === 0) {
+                        continue;
+                    }
+
+                    return value;
+                }
+            }
+        }
+
+        // Check individual question evaluations.
+        if (Array.isArray(interview.evaluations)) {
+            const collected = interview.evaluations.flatMap(
+                (evaluation) => {
+                    if (!evaluation || typeof evaluation !== "object") {
+                        return [];
+                    }
+
+                    for (const key of fields) {
+                        const value = evaluation[key];
+
+                        if (
+                            value !== undefined &&
+                            value !== null &&
+                            value !== ""
+                        ) {
+                            if (Array.isArray(value)) {
+                                return value;
+                            }
+
+                            return [value];
+                        }
+                    }
+
+                    return [];
+                }
+            );
+
+            if (collected.length > 0) {
+                return [...new Set(
+                    collected.map((item) =>
+                        typeof item === "string"
+                            ? item
+                            : JSON.stringify(item)
+                    )
+                )];
+            }
+        }
+
+        return null;
+    };
+
+    const renderEvaluation = (value) => {
+        if (value === null || value === undefined || value === "") {
+            return <p className="comparison-no-data">Not available</p>;
+        }
+
+        if (Array.isArray(value)) {
+            if (!value.length) {
+                return <p className="comparison-no-data">No data available</p>;
+            }
+
+            return (
+                <ul>
+                    {value.map((item, index) => (
+                        <li key={index}>
+                            {typeof item === "object" && item !== null
+                                ? Object.entries(item)
+                                    .map(([key, val]) =>
+                                        `${key.replace(/_/g, " ")}: ${Array.isArray(val)
+                                            ? val.join(", ")
+                                            : typeof val === "object" && val !== null
+                                                ? JSON.stringify(val)
+                                                : String(val ?? "")
+                                        }`
+                                    )
+                                    .join(" • ")
+                                : String(item)}
+                        </li>
+                    ))}
+                </ul>
+            );
+        }
+
+        if (typeof value === "object") {
+            return (
+                <ul>
+                    {Object.entries(value).map(([key, val]) => (
+                        <li key={key}>
+                            <strong>
+                                {key.replace(/_/g, " ")}:
+                            </strong>{" "}
+                            {typeof val === "object" && val !== null
+                                ? JSON.stringify(val)
+                                : String(val ?? "N/A")}
+                        </li>
+                    ))}
+                </ul>
+            );
+        }
+
+        return <p>{String(value)}</p>;
+    };
+
+    const renderInterviewComparisonCard = (interview, label) => {
+        const score = Number(interview?.overall_score || 0);
+
+        return (
+            <div className="comparison-detail-card">
+                <div className="comparison-detail-heading">
+                    <span>{label}</span>
+                    <h3>{interview?.interview_code || label}</h3>
+                    <strong className="comparison-detail-score">
+                        {score.toFixed(1)}%
+                    </strong>
+
+                    <div className="comparison-score-track">
+                        <div
+                            className="comparison-score-fill"
+                            style={{
+                                width: `${Math.max(0, Math.min(100, score))}%`
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="comparison-info-grid">
+                    <div>
+                        <span>Job Role</span>
+                        <strong>{interview?.job_role || "N/A"}</strong>
+                    </div>
+
+                    <div>
+                        <span>Experience</span>
+                        <strong>{interview?.experience_level || "N/A"}</strong>
+                    </div>
+
+                    <div>
+                        <span>Difficulty</span>
+                        <strong>{interview?.difficulty || "N/A"}</strong>
+                    </div>
+
+                    <div>
+                        <span>Date</span>
+                        <strong>
+                            {interview?.created_at
+                                ? new Date(interview.created_at).toLocaleDateString()
+                                : "N/A"}
+                        </strong>
+                    </div>
+                </div>
+
+                <div className="comparison-evaluation-section comparison-strengths">
+                    <h4>💪 Strengths</h4>
+                    {renderEvaluation(getEvaluation(interview, "strengths"))}
+                </div>
+
+                <div className="comparison-evaluation-section comparison-weaknesses">
+                    <h4>🎯 Areas to Improve</h4>
+                    {renderEvaluation(getEvaluation(interview, "weaknesses"))}
+                </div>
+            </div>
+        );
     };
 
     // ==========================================
@@ -973,129 +1182,75 @@ function PerformanceChart() {
 
                                 {selectedInterview1 && selectedInterview2 ? (
                                     <div className="interview-comparison-result">
-                                        <div className="interview-comparison-card">
-                                            <span className="interview-comparison-card-label">
-                                                Interview 1
-                                            </span>
+                                        {(() => {
+                                            const score1 = Number(selectedInterview1.overall_score || 0);
+                                            const score2 = Number(selectedInterview2.overall_score || 0);
+                                            const difference = score2 - score1;
 
-                                            <h4>
-                                                {selectedInterview1.interview_code ||
-                                                    "Interview 1"}
-                                            </h4>
+                                            return (
+                                                <div className="comparison-verdict">
+                                                    <span>PERFORMANCE RESULT</span>
 
-                                            <div className="interview-comparison-score">
-                                                {Number(
-                                                    selectedInterview1.overall_score || 0
-                                                ).toFixed(1)}
-                                                %
-                                            </div>
+                                                    <h3>
+                                                        {difference > 0
+                                                            ? `🎉 Interview ${chartInterviews.findIndex(
+                                                                (interview) => interview === selectedInterview2
+                                                            ) + 1
+                                                            } scored higher`
+                                                            : difference < 0
+                                                                ? `🏆 Interview ${chartInterviews.findIndex(
+                                                                    (interview) => interview === selectedInterview1
+                                                                ) + 1
+                                                                } scored higher`
+                                                                : "🤝 Both interviews have equal scores"}
+                                                    </h3>
 
-                                            <div className="interview-comparison-details">
-                                                <div>
-                                                    <span>Role</span>
-                                                    <strong>
-                                                        {selectedInterview1.job_role || "N/A"}
-                                                    </strong>
+                                                    <p>
+                                                        Score difference:{" "}
+                                                        <strong
+                                                            className={
+                                                                difference > 0
+                                                                    ? "comparison-positive"
+                                                                    : difference < 0
+                                                                        ? "comparison-negative"
+                                                                        : "comparison-neutral"
+                                                            }
+                                                        >
+                                                            {difference > 0 ? "+" : ""}
+                                                            {difference.toFixed(1)}%
+                                                        </strong>
+                                                    </p>
                                                 </div>
+                                            );
+                                        })()}
 
-                                                <div>
-                                                    <span>Experience</span>
-                                                    <strong>
-                                                        {selectedInterview1.experience_level ||
-                                                            "N/A"}
-                                                    </strong>
-                                                </div>
+                                        <div className="comparison-cards-grid">
+                                            {renderInterviewComparisonCard(
+                                                selectedInterview1,
+                                                `Interview ${chartInterviews.findIndex(
+                                                    (interview) =>
+                                                        interview === selectedInterview1
+                                                ) + 1
+                                                }`
+                                            )}
 
-                                                <div>
-                                                    <span>Date</span>
-                                                    <strong>
-                                                        {selectedInterview1.created_at
-                                                            ? new Date(
-                                                                selectedInterview1.created_at
-                                                            ).toLocaleDateString()
-                                                            : "N/A"}
-                                                    </strong>
-                                                </div>
-                                            </div>
+                                            <div className="comparison-center-vs">VS</div>
+
+                                            {renderInterviewComparisonCard(
+                                                selectedInterview2,
+                                                `Interview ${chartInterviews.findIndex(
+                                                    (interview) =>
+                                                        interview === selectedInterview2
+                                                ) + 1
+                                                }`
+                                            )}
                                         </div>
 
-                                        <div className="interview-comparison-middle">
-                                            <span>VS</span>
-
-                                            {(() => {
-                                                const score1 = Number(selectedInterview1.overall_score || 0);
-                                                const score2 = Number(selectedInterview2.overall_score || 0);
-                                                const difference = score2 - score1;
-
-                                                return (
-                                                    <strong
-                                                        className={
-                                                            difference > 0
-                                                                ? "comparison-positive"
-                                                                : difference < 0
-                                                                    ? "comparison-negative"
-                                                                    : "comparison-neutral"
-                                                        }
-                                                    >
-                                                        {difference > 0 ? "+" : ""}
-                                                        {difference.toFixed(1)}%
-                                                    </strong>
-                                                );
-                                            })()}
-                                        </div>
-
-                                        <div className="interview-comparison-card">
-                                            <span className="interview-comparison-card-label">
-                                                Interview 2
-                                            </span>
-
-                                            <h4>
-                                                {selectedInterview2.interview_code ||
-                                                    "Interview 2"}
-                                            </h4>
-
-                                            <div className="interview-comparison-score">
-                                                {Number(
-                                                    selectedInterview2.overall_score || 0
-                                                ).toFixed(1)}
-                                                %
-                                            </div>
-
-                                            <div className="interview-comparison-details">
-                                                <div>
-                                                    <span>Role</span>
-                                                    <strong>
-                                                        {selectedInterview2.job_role || "N/A"}
-                                                    </strong>
-                                                </div>
-
-                                                <div>
-                                                    <span>Experience</span>
-                                                    <strong>
-                                                        {selectedInterview2.experience_level ||
-                                                            "N/A"}
-                                                    </strong>
-                                                </div>
-
-                                                <div>
-                                                    <span>Date</span>
-                                                    <strong>
-                                                        {selectedInterview2.created_at
-                                                            ? new Date(
-                                                                selectedInterview2.created_at
-                                                            ).toLocaleDateString()
-                                                            : "N/A"}
-                                                    </strong>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 ) : (
                                     <div className="interview-comparison-empty">
                                         <span>📊</span>
-                                        <p>
-                                            Select two interviews to compare their performance.
-                                        </p>
+                                        <p>Select two interviews to compare their performance.</p>
                                     </div>
                                 )}
                             </div>

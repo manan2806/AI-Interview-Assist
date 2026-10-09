@@ -44,19 +44,56 @@
 
 .interview-meta {
     display: flex;
-    gap: 8px;
+    align-items: center;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    gap: 10px;
 }
 
-.interview-meta span {
+.interview-meta>span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 7px 12px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #eeeaff, #e8f3ff);
-    border: 1px solid #d8d1ff;
-    color: #554bc4;
+    border-radius: 8px;
+    background: #eeecff;
+    color: #5548c8;
+    border: 1px solid #dcd6ff;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* TIMER */
+.interview-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    border-radius: 10px;
+    background: #f0efff;
+    border: 1px solid #d8d1ff;
+}
+
+.timer-icon {
+    font-size: 17px;
+}
+
+.timer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.interview-timer .timer-label {
+    font-size: 10px;
+    color: #6b659b;
+}
+
+.interview-timer .timer-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #5147c9;
+    font-family: monospace;
 }
 
 /* PROGRESS */
@@ -471,6 +508,11 @@
         justify-content: flex-start;
     }
 
+    .interview-timer {
+        min-width: 170px;
+        padding: 10px 12px;
+    }
+
     .question-card {
         padding: 22px;
     }
@@ -498,6 +540,36 @@
     }
 }
 
+@media (max-width: 480px) {
+    .interview-meta {
+        gap: 7px;
+    }
+
+    .interview-meta>span {
+        padding: 6px 9px;
+        font-size: 11px;
+    }
+
+    .interview-timer {
+        padding: 6px 9px;
+    }
+
+    .interview-timer .timer-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+
+    .interview-timer .timer-value {
+        font-size: 16px;
+        letter-spacing: 0;
+    }
+
+    .interview-timer .timer-label {
+        font-size: 10px;
+    }
+}
+
 /* ==========================================
    INTERVIEW START - COLORFUL DARK MODE
 ========================================== */
@@ -522,10 +594,27 @@ html[data-theme="dark"] .interview-start-header p {
 }
 
 /* INTERVIEW META BADGES */
-html[data-theme="dark"] .interview-meta span {
-    background: linear-gradient(135deg, #302951, #203852);
-    border-color: #514b80;
-    color: #d8d0ff;
+html[data-theme="dark"] .interview-meta>span {
+    background: #292345;
+    color: #c4baff;
+    border-color: #49416f;
+}
+
+html[data-theme="dark"] .interview-timer {
+    background: #292345;
+    border-color: #49416f;
+}
+
+html[data-theme="dark"] .interview-timer .timer-icon {
+    background: #38305f;
+}
+
+html[data-theme="dark"] .interview-timer .timer-label {
+    color: #b5afd7;
+}
+
+html[data-theme="dark"] .interview-timer .timer-value {
+    color: #c4baff;
 }
 
 /* PROGRESS */
