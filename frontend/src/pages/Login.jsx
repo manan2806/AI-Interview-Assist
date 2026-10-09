@@ -14,6 +14,7 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
+        setLoading(false);
 
         if (!email.trim()) {
             setError("Please enter your email address.");
@@ -55,10 +56,18 @@ function Login() {
         } catch (err) {
             console.error("Login Error:", err);
 
-            setError(
+            const message =
                 err.response?.data?.message ||
-                "Unable to login. Please try again."
-            );
+                err.response?.data?.error ||
+                (err.response?.status === 401
+                    ? "Invalid email or password."
+                    : err.response?.status === 404
+                        ? "Login service not found. Please try again."
+                        : err.code === "ERR_NETWORK"
+                            ? "Unable to connect to server. Please try again."
+                            : "Unable to login. Please try again.");
+
+            setError(message);
         } finally {
             setLoading(false);
         }

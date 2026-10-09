@@ -25,16 +25,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const requestUrl = error.config?.url || "";
+
+        // Login aur registration ke errors par redirect mat karo
+        const isPublicAuthRequest =
+            requestUrl.includes("/api/login") ||
+            requestUrl.includes("/api/register");
+
+        if (error.response?.status === 401 && !isPublicAuthRequest) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
-
             window.location.href = "/login";
         }
-
         return Promise.reject(error);
     }
 );
+
 
 export const getSettings = async () => {
     const response = await api.get("/api/settings");
