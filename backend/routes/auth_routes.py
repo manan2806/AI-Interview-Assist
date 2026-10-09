@@ -1358,6 +1358,7 @@ def delete_account():
 
         users = database.db["users"]
         interviews = database.db["interviews"]
+        problem_reports = database.db["problem_reports"]
 
         # Find user
         user = users.find_one({"user_id": user_id})
@@ -1391,6 +1392,9 @@ def delete_account():
         # Delete all interviews belonging to this user
         interview_delete_result = interviews.delete_many({"user_id": user_id})
 
+        # Delete all problem report belonging to this user
+        problem_report_delete_result = problem_reports.delete_many({"user_id": user_id})
+
         # Delete user account
         user_delete_result = users.delete_one({"user_id": user_id})
 
@@ -1402,14 +1406,15 @@ def delete_account():
 
         print(
             f"Account deleted successfully: {user_id} | "
-            f"Interviews deleted: {interview_delete_result.deleted_count}"
+            f"Interviews deleted: {interview_delete_result.deleted_count} | "
+            f"Problem reports deleted: {problem_report_delete_result.deleted_count}"
         )
 
         return (
             jsonify(
                 {
                     "success": True,
-                    "message": "Account and all associated interview data deleted successfully.",
+                    "message": "Account, interviews, and associated problem reports deleted successfully.",
                 }
             ),
             200,

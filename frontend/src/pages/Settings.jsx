@@ -1027,6 +1027,12 @@ function Settings() {
                             </div>
                         </div>
 
+                        {deleteError && (
+                            <div className="delete-account-error" role="alert">
+                                ⚠ {deleteError}
+                            </div>
+                        )}
+
                         <div className="delete-account-group">
                             <label htmlFor="delete-account-password">
                                 Current Password

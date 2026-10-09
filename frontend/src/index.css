@@ -11823,6 +11823,20 @@ html {
   line-height: 1.5;
 }
 
+.delete-account-error {
+  display: block;
+  width: 100%;
+  margin-bottom: 17px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fff0f0, #fff8f8);
+  border: 1px solid #ffd0d0;
+  color: #c03939;
+  font-size: 13px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
 .delete-account-group {
   display: flex;
   flex-direction: column;
