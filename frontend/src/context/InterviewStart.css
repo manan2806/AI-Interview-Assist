@@ -465,10 +465,66 @@
 }
 
 /* RESULT GENERATION WAIT MESSAGE */
-.result-wait-message {
+.interview-loading-card {
+    width: 100%;
+    max-width: 480px;
     box-sizing: border-box;
-    padding: 0 12px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 22px;
+    box-shadow: 0 15px 40px rgba(45, 55, 100, 0.10);
+}
+
+.interview-loading-card h2 {
+    margin: 22px 0 10px;
+    color: #1e293b;
+    font-size: 25px;
+    line-height: 1.4;
+}
+
+.interview-loading-card>p {
+    margin: 0;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.7;
     overflow-wrap: anywhere;
+}
+
+.loading-progress-track {
+    width: 100%;
+    height: 6px;
+    margin-top: 26px;
+    overflow: hidden;
+    background: #e9e7f8;
+    border-radius: 20px;
+}
+
+.loading-progress-bar {
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, #6d5bc4, #438ed4);
+    border-radius: 20px;
+    animation: loadingProgress 1.5s ease-in-out infinite alternate;
+}
+
+.loading-note {
+    display: block;
+    margin-top: 16px;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+@keyframes loadingProgress {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(150%);
+    }
 }
 
 /* MOBILE */
@@ -573,9 +629,18 @@
         overflow-wrap: anywhere;
     }
 
-    .result-wait-message {
-        margin-top: 12px;
-        padding: 0;
+    .interview-loading-card {
+        max-width: 100%;
+        padding: 30px 20px;
+        border-radius: 18px;
+    }
+
+    .interview-loading-card h2 {
+        font-size: 22px;
+    }
+
+    .interview-loading-card>p {
+        font-size: 14px;
     }
 }
 
@@ -907,8 +972,26 @@ html[data-theme="dark"] .interview-start-container .setup-error p {
 }
 
 /* RESULT GENERATION WAIT MESSAGE */
-html[data-theme="dark"] .result-wait-message {
+html[data-theme="dark"] .interview-loading-card {
+    background: linear-gradient(145deg, #1f2937, #25213d);
+    border-color: #46516e;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] .interview-loading-card h2 {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .interview-loading-card>p {
     color: #cbd5e1;
+}
+
+html[data-theme="dark"] .loading-progress-track {
+    background: #374151;
+}
+
+html[data-theme="dark"] .loading-note {
+    color: #9caec3;
 }
 
 /* KEYBOARD ACCESSIBILITY */

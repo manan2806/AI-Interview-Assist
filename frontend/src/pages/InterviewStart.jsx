@@ -786,19 +786,25 @@ function InterviewStart() {
     if (loading) {
         return (
             <div className="interview-start-page">
-                <div className="interview-loading">
+                <div className="interview-loading-card">
                     <div className="loading-spinner">
                         <span></span>
                     </div>
 
-                    <h2>
-                        Preparing Your Interview...
-                    </h2>
+                    <h2>Preparing Your Interview...</h2>
 
                     <p>
                         {loadingStep ||
                             "Please wait while we start your interview."}
                     </p>
+
+                    <div className="loading-progress-track">
+                        <div className="loading-progress-bar"></div>
+                    </div>
+
+                    <span className="loading-note">
+                        Please wait, this may take a few moments.
+                    </span>
                 </div>
             </div>
         );
