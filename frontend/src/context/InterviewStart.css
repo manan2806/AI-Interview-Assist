@@ -464,6 +464,13 @@
     opacity: .8;
 }
 
+/* RESULT GENERATION WAIT MESSAGE */
+.result-wait-message {
+    box-sizing: border-box;
+    padding: 0 12px;
+    overflow-wrap: anywhere;
+}
+
 /* MOBILE */
 @media (max-width: 768px) {
     .interview-loading {
@@ -537,6 +544,38 @@
 
     .interview-info-card {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .interview-start-page {
+        box-sizing: border-box;
+        padding: 20px 14px;
+    }
+
+    .interview-loading {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        padding: 28px 18px;
+        text-align: center;
+    }
+
+    .interview-loading h2 {
+        font-size: clamp(20px, 5.5vw, 26px);
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .interview-loading p {
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .result-wait-message {
+        margin-top: 12px;
+        padding: 0;
     }
 }
 
@@ -865,6 +904,11 @@ html[data-theme="dark"] .interview-start-container .setup-error strong {
 
 html[data-theme="dark"] .interview-start-container .setup-error p {
     color: #e9bfc5;
+}
+
+/* RESULT GENERATION WAIT MESSAGE */
+html[data-theme="dark"] .result-wait-message {
+    color: #cbd5e1;
 }
 
 /* KEYBOARD ACCESSIBILITY */

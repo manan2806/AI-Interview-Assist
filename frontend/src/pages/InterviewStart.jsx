@@ -830,6 +830,35 @@ function InterviewStart() {
     }
 
     // ==========================================
+    // FINAL RESULT GENERATION LOADING SCREEN
+    // ==========================================
+    if (
+        submitting &&
+        currentQuestion === totalQuestions &&
+        editingQuestion === null
+    ) {
+        return (
+            <div className="interview-start-page">
+                <div className="interview-loading">
+                    <div className="loading-spinner">
+                        <span></span>
+                    </div>
+                    <h2>
+                        Generating Your Interview Result
+                    </h2>
+                    <p>
+                        {loadingStep || "Please wait while we submit your final answer..."}
+                    </p>
+                    <p className="result-wait-message">
+                        Please wait while we evaluate your answers
+                        and prepare your final report.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // ==========================================
     // INITIAL ERROR
     // ==========================================
     if (error && !question) {
@@ -900,7 +929,6 @@ function InterviewStart() {
                             {setup?.experience_level ||
                                 "Fresher"}
                         </span>
-
 
                         <div className="interview-timer">
                             <span className="timer-icon">⏱️</span>

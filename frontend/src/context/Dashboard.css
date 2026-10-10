@@ -1323,41 +1323,6 @@
     }
 }
 
-/* FORCE SHOW MOBILE MENU */
-@media screen and (max-width: 640px) {
-    .dashboard-navbar .dashboard-mobile-nav {
-        display: block !important;
-        position: relative !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        flex-shrink: 0 !important;
-        z-index: 99999 !important;
-    }
-
-    .dashboard-navbar .dashboard-menu-button {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 44px !important;
-        height: 44px !important;
-        background: #ffffff !important;
-        color: #5148d8 !important;
-        border: 1px solid #e2e8f0 !important;
-        font-size: 27px !important;
-    }
-
-    .dashboard-navbar {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-    }
-
-    .dashboard-navbar .dashboard-nav-right {
-        display: none !important;
-    }
-}
 
 /* ==========================================
    DASHBOARD - COLORFUL DARK THEME
@@ -1414,7 +1379,7 @@ html[data-theme="dark"] .welcome-label {
     color: #c4b5fd;
 }
 
-/* PROFILE OVERVIEW CARDS (Multi-Colour) */
+/* PROFILE OVERVIEW CARDS - MULTI-COLOUR */
 html[data-theme="dark"] .dashboard-card {
     color: #f1f5f9;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -1565,7 +1530,7 @@ html[data-theme="dark"] .recent-view-button:hover {
     background: linear-gradient(135deg, #8170df, #5a4ca4);
 }
 
-/* Empty interview state */
+/* EMPTY INTERVIEW STATE */
 html[data-theme="dark"] .empty-interviews {
     background: linear-gradient(135deg, #202a40, #24223c);
     border-color: #46516e;
@@ -1588,7 +1553,7 @@ html[data-theme="dark"] .empty-start-button {
     color: #ffffff;
 }
 
-/* ACTION CARDS (Multi-colour) */
+/* ACTION CARDS - MULTI-COLOUR */
 html[data-theme="dark"] .action-card {
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -1683,26 +1648,127 @@ html[data-theme="dark"] .dashboard-login-button {
     color: #ffffff;
 }
 
-/* MOBILE DROPDOWN */
-html[data-theme="dark"] .dashboard-mobile-dropdown {
-    background: #1f2937;
-    border-color: #46516e;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+/* MOBILE MENU - DARK THEME*/
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-nav {
+    color: #f1f5f9;
 }
 
-html[data-theme="dark"] .dashboard-mobile-dropdown a,
-html[data-theme="dark"] .dashboard-mobile-dropdown button {
-    color: #e2e8f0;
+/* Hamburger button */
+html[data-theme="dark"] .dashboard-navbar .dashboard-menu-button {
+    background: linear-gradient(135deg, #302752, #25213d) !important;
+    color: #c4b5fd !important;
+    border: 1px solid #6552a3 !important;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background 0.2s ease, border-color 0.2s ease,
+        color 0.2s ease, transform 0.2s ease;
 }
 
-html[data-theme="dark"] .dashboard-mobile-dropdown a:hover,
-html[data-theme="dark"] .dashboard-mobile-dropdown button:hover {
-    background: #374151;
-    color: #c4baff;
+html[data-theme="dark"] .dashboard-navbar .dashboard-menu-button:hover {
+    background: linear-gradient(135deg, #493879, #34305e) !important;
+    border-color: #8b7be8 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .dashboard-navbar .dashboard-menu-button:active {
+    transform: scale(0.96);
+}
+
+/* Mobile dropdown container */
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown {
+    background: #1f2937 !important;
+    color: #f1f5f9;
+    border: 1px solid #46516e !important;
+    border-radius: 14px;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile dropdown links and buttons */
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown a,
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button {
+    background: transparent;
+    color: #e2e8f0 !important;
+    border: none;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Hover and focus */
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown a:hover,
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button:hover {
+    background: #374151 !important;
+    color: #c4b5fd !important;
+}
+
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown a:focus-visible,
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button:focus-visible {
+    outline: 2px solid #8b7be8;
+    outline-offset: 2px;
+}
+
+/* Logout button in mobile menu */
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button:last-child {
+    color: #fca5a5 !important;
+}
+
+html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button:last-child:hover {
+    background: #452727 !important;
+    color: #fca5a5 !important;
 }
 
 /* FOOTER */
 html[data-theme="dark"] .dashboard-footer {
     color: #9caec3;
     border-top-color: #374151;
+}
+
+/* MOBILE MENU - RESPONSIVE DARK THEME */
+@media screen and (max-width: 640px) {
+    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-nav {
+        display: block !important;
+        position: relative !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        flex-shrink: 0 !important;
+        z-index: 99999 !important;
+    }
+
+    html[data-theme="dark"] .dashboard-navbar .dashboard-menu-button {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        visibility: visible !important;
+        opacity: 1 !important;
+        cursor: pointer;
+    }
+
+    html[data-theme="dark"] .dashboard-navbar {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    html[data-theme="dark"] .dashboard-navbar .dashboard-nav-right {
+        display: none !important;
+    }
+
+    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        z-index: 99999;
+        min-width: 200px;
+        max-width: calc(100vw - 32px);
+        padding: 8px;
+    }
+
+    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown a,
+    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        text-align: left;
+    }
 }
