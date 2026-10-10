@@ -29,7 +29,6 @@ def create_app():
             r"/api/*": {
                 "origins": [
                     "http://localhost:5173",
-                    "https://ai-interview-assist-two.vercel.app",
                     "https://interview78.vercel.app",
                 ],
                 "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
