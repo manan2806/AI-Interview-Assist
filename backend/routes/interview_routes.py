@@ -3345,14 +3345,16 @@ def interview_history():
             history.append(
                 {
                     "interview_id": str(interview["_id"]),
-                    "interview_code": interview.get("interview_code", None),
+                    "interview_code": interview.get("interview_code"),
                     "job_role": interview.get("job_role", ""),
                     "experience_level": interview.get("experience_level", ""),
                     "interview_type": interview.get("interview_type", ""),
                     "difficulty": interview.get("difficulty", ""),
                     "number_of_questions": interview.get("number_of_questions", 0),
-                    "overall_score": overall_result.get("overall_score", None),
-                    "performance_level": overall_result.get("performance_level", None),
+                    "overall_score": overall_result.get("overall_score"),
+                    "performance_level": overall_result.get("performance_level"),
+                    # Complete overall evaluation
+                    "overall_result": overall_result,
                     "status": interview.get("status", ""),
                     "created_at": (
                         interview["created_at"].isoformat()

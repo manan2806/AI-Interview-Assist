@@ -511,96 +511,20 @@ function PerformanceChart() {
     // ==========================================
     // COMPARISON HELPERS
     // ==========================================
+
     const getEvaluation = (interview, field) => {
-        if (!interview) return null;
-
-        const fieldAliases = {
-            strengths: [
-                "strengths",
-                "strength",
-                "key_strengths",
-                "positive_points"
-            ],
-            weaknesses: [
-                "weaknesses",
-                "weakness",
-                "areas_to_improve",
-                "improvements",
-                "areas_for_improvement"
-            ]
-        };
-
-        const fields = fieldAliases[field] || [field];
-
-        const sources = [
-            interview.overall_result,
-            interview.overall_evaluation,
-            interview.overallResult,
-            interview.evaluation,
-            interview.result,
-            interview.overall_feedback,
-            interview
-        ];
-
-        for (const source of sources) {
-            if (!source || typeof source !== "object") {
-                continue;
-            }
-
-            for (const key of fields) {
-                const value = source[key];
-
-                if (
-                    value !== undefined &&
-                    value !== null &&
-                    value !== ""
-                ) {
-                    if (Array.isArray(value) && value.length === 0) {
-                        continue;
-                    }
-
-                    return value;
-                }
-            }
+        if (!interview?.overall_result) {
+            return null;
         }
 
-        // Check individual question evaluations.
-        if (Array.isArray(interview.evaluations)) {
-            const collected = interview.evaluations.flatMap(
-                (evaluation) => {
-                    if (!evaluation || typeof evaluation !== "object") {
-                        return [];
-                    }
+        const value = interview.overall_result[field];
 
-                    for (const key of fields) {
-                        const value = evaluation[key];
+        if (Array.isArray(value)) {
+            return value.length > 0 ? value : null;
+        }
 
-                        if (
-                            value !== undefined &&
-                            value !== null &&
-                            value !== ""
-                        ) {
-                            if (Array.isArray(value)) {
-                                return value;
-                            }
-
-                            return [value];
-                        }
-                    }
-
-                    return [];
-                }
-            );
-
-            if (collected.length > 0) {
-                return [...new Set(
-                    collected.map((item) =>
-                        typeof item === "string"
-                            ? item
-                            : JSON.stringify(item)
-                    )
-                )];
-            }
+        if (value !== undefined && value !== null && value !== "") {
+            return value;
         }
 
         return null;
