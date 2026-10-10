@@ -30,6 +30,7 @@ def create_app():
                 "origins": [
                     "http://localhost:5173",
                     "https://ai-interview-assist-two.vercel.app",
+                    "https://interview78.vercel.app",
                 ],
                 "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
                 "allow_headers": ["Content-Type", "Authorization"],
