@@ -44,8 +44,9 @@
 
 .details-header-actions {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -1015,6 +1016,21 @@ html[data-theme="dark"] .details-history-button:hover {
     color: #ffffff;
 }
 
+/* BACK TO HISTORY - DARK MODE */
+html[data-theme="dark"] .details-page .result-back-btn {
+    background: linear-gradient(135deg, #202b40, #1a2034);
+    border: 1px solid #39465e;
+    color: #d3dced;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme="dark"] .details-page .result-back-btn:hover {
+    background: linear-gradient(135deg, #2c3852, #252c45);
+    border-color: #596a89;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
 /* INFORMATION CARD */
 html[data-theme="dark"] .details-info-card {
     background:
@@ -1386,5 +1402,109 @@ html[data-theme="dark"] .details-page a:focus-visible {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================
+   INTERVIEW DETAILS - MOBILE BUTTON ALIGNMENT
+========================================== */
+
+/* Header action buttons */
+.details-header-actions {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.details-header-actions button {
+    min-height: 44px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+/* Make Back to History button match */
+.details-header-actions .result-back-btn {
+    padding: 11px 17px;
+    border: 1px solid #d9dde5;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #f7f8fb, #eef1f6);
+    color: #475467;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.details-header-actions .result-back-btn:hover {
+    background: linear-gradient(135deg, #eef0f5, #e7eaf0);
+    transform: translateY(-1px);
+}
+
+/* Tablet and mobile */
+@media (max-width: 600px) {
+    .details-header {
+        width: 100%;
+        align-items: stretch;
+        gap: 18px;
+    }
+
+    .details-header>div:first-child {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .details-header-actions {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .details-header-actions button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        margin: 0;
+        padding: 12px 14px;
+        box-sizing: border-box;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.4;
+        font-size: 14px;
+    }
+
+    .details-header-actions .details-result-button,
+    .details-header-actions .details-retake-button,
+    .details-header-actions .result-back-btn {
+        width: 100%;
+        flex: none;
+    }
+}
+
+/* Extra-small phones */
+@media (max-width: 360px) {
+    .details-page {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .details-header-actions {
+        gap: 8px;
+    }
+
+    .details-header-actions button {
+        min-height: 44px;
+        padding: 10px;
+        font-size: 13px;
     }
 }

@@ -1281,3 +1281,190 @@ html[data-theme="dark"] .interview-comparison-container select:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ==========================================
+   FINAL FIX - MOBILE INTERVIEW COMPARISON
+========================================== */
+.interview-comparison-container,
+.interview-comparison-result,
+.comparison-verdict,
+.comparison-cards-grid,
+.comparison-detail-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.interview-comparison-container {
+    overflow: hidden;
+}
+
+.interview-comparison-result {
+    display: block !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding-top: 20px;
+}
+
+.comparison-verdict {
+    margin-bottom: 20px;
+}
+
+.comparison-cards-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+}
+
+.comparison-detail-card {
+    overflow-wrap: anywhere;
+}
+
+.comparison-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.comparison-detail-heading h3,
+.comparison-info-grid strong,
+.comparison-evaluation-section p,
+.comparison-evaluation-section li {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Tablet and mobile */
+@media (max-width: 768px) {
+    .interview-comparison-container {
+        padding: 18px;
+    }
+
+    .interview-comparison-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .interview-comparison-selectors {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .interview-comparison-select-group {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .interview-comparison-select-group select {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    /* Show Interview 1, VS, Interview 2 vertically */
+    .comparison-cards-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 14px;
+    }
+
+    .comparison-detail-card {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .comparison-center-vs {
+        margin: 0;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .comparison-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .comparison-verdict {
+        padding: 15px;
+    }
+
+    .comparison-verdict h3 {
+        font-size: 17px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .interview-comparison-container {
+        padding: 13px;
+        border-radius: 13px;
+    }
+
+    .interview-comparison-header h3 {
+        font-size: 18px;
+    }
+
+    .interview-comparison-header p {
+        font-size: 13px;
+    }
+
+    .comparison-detail-card {
+        padding: 11px;
+    }
+
+    .comparison-detail-heading {
+        padding: 12px 8px;
+    }
+
+    .comparison-detail-heading h3 {
+        font-size: 15px;
+    }
+
+    .comparison-detail-score {
+        font-size: 26px;
+    }
+
+    .comparison-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .comparison-info-grid>div {
+        padding: 8px;
+    }
+
+    .comparison-info-grid span {
+        font-size: 10px;
+    }
+
+    .comparison-info-grid strong {
+        font-size: 11px;
+    }
+
+    .comparison-evaluation-section {
+        padding: 10px;
+    }
+
+    .comparison-evaluation-section p,
+    .comparison-evaluation-section li {
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .comparison-verdict h3 {
+        font-size: 15px;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 360px) {
+    .comparison-info-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .comparison-detail-card {
+        padding: 9px;
+    }
+}
