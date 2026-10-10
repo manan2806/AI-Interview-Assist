@@ -1323,6 +1323,42 @@
     }
 }
 
+/* FORCE SHOW MOBILE MENU */
+@media screen and (max-width: 640px) {
+    .dashboard-navbar .dashboard-mobile-nav {
+        display: block !important;
+        position: relative !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        flex-shrink: 0 !important;
+        z-index: 99999 !important;
+    }
+
+    .dashboard-navbar .dashboard-menu-button {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        height: 44px !important;
+        background: #ffffff !important;
+        color: #5148d8 !important;
+        border: 1px solid #e2e8f0 !important;
+        font-size: 27px !important;
+    }
+
+    .dashboard-navbar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .dashboard-navbar .dashboard-nav-right {
+        display: none !important;
+    }
+}
+
 /* ==========================================
    DASHBOARD - COLORFUL DARK THEME
 ========================================== */
