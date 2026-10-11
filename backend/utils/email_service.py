@@ -4,40 +4,25 @@ from email.message import EmailMessage
 from utils.gmail_service import get_gmail_service
 
 
-def send_interview_report_email(
-    recipient_email,
-    recipient_name,
-    pdf_path,
-    job_role
-):
-
+# ==========================================
+# INTERVIEW REPORT EMAIL
+# ==========================================
+def send_interview_report_email(recipient_email, recipient_name, pdf_path, job_role):
     # VALIDATION
     if not recipient_email:
-        raise Exception(
-            "Recipient email is missing."
-        )
+        raise Exception("Recipient email is missing.")
 
     if not pdf_path:
-        raise Exception(
-            "PDF path is missing."
-        )
+        raise Exception("PDF path is missing.")
 
     if not os.path.exists(pdf_path):
-        raise Exception(
-            "PDF file was not found."
-        )
+        raise Exception("PDF file was not found.")
 
     # EMAIL DETAILS
     name = recipient_name or "Candidate"
+    subject = f"Interview Report - {job_role}"
 
-    subject = (
-        f"AI Interview Report - {job_role}"
-    )
-
-    # ==========================================
     # HTML EMAIL
-    # ==========================================
-
     html_content = f"""
 <!DOCTYPE html>
 
@@ -180,22 +165,13 @@ def send_interview_report_email(
 </html>
 """
 
-    # ==========================================
     # CREATE EMAIL
-    # ==========================================
-
     message = EmailMessage()
-
     message["To"] = recipient_email
-
     message["Subject"] = subject
 
-    # ==========================================
     # PLAIN TEXT VERSION
-    # ==========================================
-
-    message.set_content(
-        f"""
+    message.set_content(f"""
 Hello {name},
 
 Your AI Interview has been completed successfully.
@@ -225,133 +201,68 @@ Thank you for using AI Interview Assist.
 
 Best Regards,
 AI Interview Assist
-"""
-    )
+""")
 
-    # ==========================================
     # HTML VERSION
-    # ==========================================
+    message.add_alternative(html_content, subtype="html")
 
-    message.add_alternative(
-        html_content,
-        subtype="html"
-    )
-
-    # ==========================================
     # ATTACH PDF
-    # ==========================================
-
     try:
-
-        with open(
-            pdf_path,
-            "rb"
-        ) as pdf_file:
-
+        with open(pdf_path, "rb") as pdf_file:
             pdf_data = pdf_file.read()
-
         message.add_attachment(
             pdf_data,
             maintype="application",
             subtype="pdf",
-            filename=os.path.basename(pdf_path)
+            filename=os.path.basename(pdf_path),
         )
 
     except Exception as error:
+        print("❌ PDF Attachment Error:", str(error))
+        raise Exception(f"Unable to attach PDF: {str(error)}")
 
-        print(
-            "❌ PDF Attachment Error:",
-            str(error)
-        )
-
-        raise Exception(
-            f"Unable to attach PDF: {str(error)}"
-        )
-
-    # ==========================================
     # GMAIL API SEND
-    # ==========================================
-
     print("==========================================")
     print("📧 Sending interview report using Gmail API...")
     print(f"RECIPIENT EMAIL: {recipient_email}")
-    print("PDF FILE:",os.path.basename(pdf_path))
+    print("PDF FILE:", os.path.basename(pdf_path))
     print(f"PDF SIZE: {len(pdf_data)} bytes")
     print("==========================================")
 
     try:
-
         # Get Gmail API service
         gmail_service = get_gmail_service()
 
         # Convert email to Gmail API format
-        encoded_message = (
-            base64.urlsafe_b64encode(
-                message.as_bytes()
-            )
-            .decode()
-        )
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
         # Send email
         result = (
-            gmail_service
-            .users()
+            gmail_service.users()
             .messages()
-            .send(
-                userId="me",
-                body={
-                    "raw": encoded_message
-                }
-            )
+            .send(userId="me", body={"raw": encoded_message})
             .execute()
         )
 
-        print(
-            "=========================================="
-        )
-
-        print(
-            "✅ INTERVIEW REPORT EMAIL SENT SUCCESSFULLY"
-        )
-
-        print(
-            "📨 Gmail Message ID:",
-            result.get("id")
-        )
-
-        print(
-            "=========================================="
-        )
-
+        print("==========================================")
+        print("✅ INTERVIEW REPORT EMAIL SENT SUCCESSFULLY")
+        print("📨 Gmail Message ID:", result.get("id"))
+        print("==========================================")
         return True
 
     except Exception as error:
+        print("==========================================")
+        print("❌ GMAIL API REPORT ERROR:", str(error))
+        print("==========================================")
+        raise Exception(f"Gmail API email sending failed: {str(error)}")
 
-        print(
-            "=========================================="
-        )
 
-        print(
-            "❌ GMAIL API REPORT ERROR:",
-            str(error)
-        )
-
-        print(
-            "=========================================="
-        )
-
-        raise Exception(
-            f"Gmail API email sending failed: {str(error)}"
-        )
-
+# ==========================================
+# PROBLEM REPORT EMAIL
+# ==========================================
 def send_problem_report_email(
-    sender_name,
-    sender_email,
-    problem_type,
-    subject,
-    description
+    sender_name, sender_email, problem_type, subject, description
 ):
-    # VALIDATION
     if not sender_email:
         raise Exception("User email is missing.")
 
@@ -361,17 +272,13 @@ def send_problem_report_email(
     if not description:
         raise Exception("Problem report description is missing.")
 
-    # USER DETAILS
     name = sender_name or "User"
     problem = problem_type or "Other"
 
     # EMAIL DETAILS
-    email_subject = (f"AI Interview Assist - Problem Report: {subject}")
+    email_subject = f"AI Interview Assist - Problem Report: {subject}"
 
-    # ==========================================
     # HTML EMAIL
-    # ==========================================
-
     html_content = f"""
 <!DOCTYPE html>
 
@@ -502,23 +409,16 @@ def send_problem_report_email(
 </html>
 """
 
-    # ==========================================
     # CREATE EMAIL
-    # ==========================================
     message = EmailMessage()
-
-    # Problem Report recipient
     message["To"] = "my.project.service78@gmail.com"
 
     # User email for direct reply
     message["Reply-To"] = sender_email
     message["Subject"] = email_subject
 
-    # ==========================================
     # PLAIN TEXT VERSION
-    # ==========================================
-    message.set_content(
-        f"""
+    message.set_content(f"""
 New Problem Report - AI Interview Assist
 
 User Name:
@@ -543,13 +443,10 @@ the Help & Support section of AI Interview Assist.
 
 You can reply directly to this email to
 contact the user.
-"""
-    )
+""")
 
-    # ==========================================
     # HTML VERSION
-    # ==========================================
-    message.add_alternative(html_content,subtype="html")
+    message.add_alternative(html_content, subtype="html")
 
     # GMAIL API SEND
     print("==========================================")
@@ -564,23 +461,22 @@ contact the user.
         gmail_service = get_gmail_service()
 
         # Convert email to Gmail API format
-        encoded_message = (base64.urlsafe_b64encode(message.as_bytes()).decode())
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
         # Send email
         result = (
-            gmail_service
-            .users()
+            gmail_service.users()
             .messages()
-            .send(userId="me",body={"raw": encoded_message})
+            .send(userId="me", body={"raw": encoded_message})
             .execute()
         )
         print("==========================================")
         print("✅ PROBLEM REPORT EMAIL SENT SUCCESSFULLY")
-        print("📨 Gmail Message ID:",result.get("id"))
+        print("📨 Gmail Message ID:", result.get("id"))
         print("==========================================")
         return True
 
     except Exception as error:
         print("==========================================")
-        print("❌ GMAIL API PROBLEM REPORT ERROR:",str(error))
+        print("❌ GMAIL API PROBLEM REPORT ERROR:", str(error))
         raise Exception(f"Gmail API Problem Report failed: {str(error)}")

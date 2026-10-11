@@ -33,7 +33,6 @@ GMAIL_REDIRECT_URI = (
 def register():
 
     try:
-        # Get JSON safely
         data = request.get_json(silent=True)
 
         if not data:
@@ -42,12 +41,10 @@ def register():
                 400,
             )
 
-        # GET DATA
         name = data.get("name")
         email = data.get("email")
         password = data.get("password")
 
-        # VALIDATION
         if not name or not email or not password:
             return (
                 jsonify(
@@ -65,7 +62,6 @@ def register():
                 jsonify({"success": False, "message": "Database is not connected"}),
                 500,
             )
-
         users = database.db["users"]
 
         # CLEAN EMAIL
@@ -73,7 +69,6 @@ def register():
 
         # CHECK EXISTING USER
         existing_user = users.find_one({"email": email})
-
         if existing_user:
             return (
                 jsonify({"success": False, "message": "Email already registered"}),
@@ -111,7 +106,6 @@ def register():
         )
 
     except Exception as e:
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -122,7 +116,6 @@ def register():
 def login():
 
     try:
-        # GET JSON
         data = request.get_json(silent=True)
 
         if not data:
@@ -144,20 +137,16 @@ def login():
                 400,
             )
 
-        print("🔍 LOGIN DATABASE OBJECT:", database.db)
-        print("🔍 LOGIN DATABASE TYPE:", type(database.db))
         # CHECK DATABASE
         if database.db is None:
             return (
                 jsonify({"success": False, "message": "Database is not connected"}),
                 500,
             )
-
         users = database.db["users"]
 
         # FIND USER
         user = users.find_one({"email": email.strip().lower()})
-
         if not user:
             return (
                 jsonify({"success": False, "message": "Invalid email or password"}),
@@ -166,7 +155,6 @@ def login():
 
         # VERIFY PASSWORD
         password_correct = bcrypt.check_password_hash(user["password"], password)
-
         if not password_correct:
             return (
                 jsonify({"success": False, "message": "Invalid email or password"}),
@@ -197,7 +185,6 @@ def login():
         )
 
     except Exception as e:
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -205,11 +192,9 @@ def login():
 # SEND PASSWORD RESET OTP EMAIL
 # ==========================================
 def send_otp_email(recipient_email, otp):
-
     # VALIDATION
     if not recipient_email:
         raise Exception("Recipient email is missing.")
-
     if not otp:
         raise Exception("OTP is missing.")
 
@@ -592,7 +577,6 @@ def send_otp_email(recipient_email, otp):
 
     # CREATE HTML EMAIL
     message = EmailMessage()
-
     message["To"] = recipient_email
     message["Subject"] = subject
 
@@ -600,37 +584,24 @@ def send_otp_email(recipient_email, otp):
     message.set_content(html_body, subtype="html")
 
     # GMAIL API SEND
-    print("==========================================")
-    print("📧 Sending password reset OTP using Gmail API...")
-    print(f"RECIPIENT EMAIL: {recipient_email}")
-    print("==========================================")
-
     try:
-
         gmail_service = get_gmail_service()
-
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
-
         result = (
             gmail_service.users()
             .messages()
             .send(userId="me", body={"raw": encoded_message})
             .execute()
         )
-
         print("==========================================")
         print("✅ OTP EMAIL SENT SUCCESSFULLY")
-        print("📨 Gmail Message ID:", result.get("id"))
         print("==========================================")
-
         return True
 
     except Exception as error:
-
         print("==========================================")
         print("❌ GMAIL API OTP ERROR:", str(error))
         print("==========================================")
-
         return False
 
 
@@ -647,12 +618,10 @@ def forgot_password():
                 jsonify({"success": False, "message": "Please send valid JSON data"}),
                 400,
             )
-
         email = data.get("email")
 
         if not email:
             return jsonify({"success": False, "message": "Email is required"}), 400
-
         email = email.strip().lower()
 
         if database.db is None:
@@ -662,7 +631,6 @@ def forgot_password():
             )
 
         users = database.db["users"]
-
         user = users.find_one({"email": email})
 
         if not user:
@@ -674,11 +642,8 @@ def forgot_password():
             )
 
         otp = f"{secrets.randbelow(1000000):06d}"
-
         otp_hash = hashlib.sha256(otp.encode()).hexdigest()
-
         otp_expiry = datetime.utcnow() + timedelta(minutes=10)
-
         users.update_one(
             {"_id": user["_id"]},
             {
@@ -699,7 +664,6 @@ def forgot_password():
                 {"_id": user["_id"]},
                 {"$unset": {"reset_otp": "", "reset_otp_expiry": ""}},
             )
-
             return (
                 jsonify({"success": False, "message": "Unable to send OTP email"}),
                 500,
@@ -714,7 +678,6 @@ def forgot_password():
 
     except Exception as e:
         print("Forgot password error:", e)
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -785,11 +748,8 @@ def verify_otp():
             return jsonify({"success": False, "message": "Invalid OTP"}), 400
 
         reset_token = secrets.token_urlsafe(32)
-
         reset_token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
-
         reset_token_expiry = datetime.utcnow() + timedelta(minutes=10)
-
         users.update_one(
             {"_id": user["_id"]},
             {
@@ -815,7 +775,6 @@ def verify_otp():
 
     except Exception as e:
         print("OTP verification error:", e)
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -849,7 +808,6 @@ def reset_password():
             )
 
         email = email.strip().lower()
-
         if len(new_password) < 6:
             return (
                 jsonify(
@@ -868,7 +826,6 @@ def reset_password():
             )
 
         users = database.db["users"]
-
         user = users.find_one({"email": email})
 
         if not user:
@@ -902,14 +859,12 @@ def reset_password():
                 jsonify({"success": False, "message": "Reset session has expired"}),
                 400,
             )
-
         token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
 
         if token_hash != stored_token:
             return jsonify({"success": False, "message": "Invalid reset token"}), 400
 
         hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
-
         users.update_one(
             {"_id": user["_id"]},
             {
@@ -929,7 +884,6 @@ def reset_password():
 
     except Exception as e:
         print("Reset password error:", e)
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -939,7 +893,6 @@ def reset_password():
 @auth_bp.route("/api/settings", methods=["GET"])
 @jwt_required()
 def get_settings():
-
     try:
         user_id = get_jwt_identity()
         if database.db is None:
@@ -1074,9 +1027,7 @@ def update_settings():
 # ==========================================
 @auth_bp.route("/gmail-authorize", methods=["GET"])
 def gmail_authorize():
-
     try:
-
         if not os.path.exists(GMAIL_CREDENTIALS_FILE):
             return (
                 jsonify(
@@ -1091,25 +1042,17 @@ def gmail_authorize():
         flow = Flow.from_client_secrets_file(
             GMAIL_CREDENTIALS_FILE, scopes=GMAIL_SCOPES
         )
-
         flow.redirect_uri = "http://localhost:5000/oauth2callback"
-
         authorization_url, state = flow.authorization_url(
             access_type="offline", include_granted_scopes="true", prompt="consent"
         )
 
-        # Save OAuth state
         session["gmail_oauth_state"] = state
-
-        # Save PKCE code verifier
         session["gmail_code_verifier"] = flow.code_verifier
-
         return redirect(authorization_url)
 
     except Exception as e:
-
         print("Gmail authorization error:", str(e))
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -1118,9 +1061,7 @@ def gmail_authorize():
 # ==========================================
 @auth_bp.route("/oauth2callback", methods=["GET"])
 def oauth2callback():
-
     try:
-
         if not os.path.exists(GMAIL_CREDENTIALS_FILE):
             return (
                 jsonify(
@@ -1132,10 +1073,7 @@ def oauth2callback():
                 500,
             )
 
-        # Get saved OAuth state
         saved_state = session.get("gmail_oauth_state")
-
-        # Get saved PKCE verifier
         code_verifier = session.get("gmail_code_verifier")
 
         if not saved_state:
@@ -1161,29 +1099,21 @@ def oauth2callback():
 
         # Restore PKCE verifier
         flow.code_verifier = code_verifier
-
         authorization_response = request.url
-
         flow.fetch_token(authorization_response=authorization_response)
-
         credentials = flow.credentials
 
         # Save Gmail token
         with open("gmail_token.json", "w") as token_file:
-
             token_file.write(credentials.to_json())
 
         # Remove temporary OAuth session data
         session.pop("gmail_oauth_state", None)
-
         session.pop("gmail_code_verifier", None)
 
         print("==========================================")
-
         print("✅ GMAIL OAUTH AUTHORIZATION SUCCESSFUL")
-
         print("✅ gmail_token.json CREATED")
-
         print("==========================================")
 
         return """
@@ -1204,7 +1134,6 @@ def oauth2callback():
 def change_password():
     try:
         user_id = get_jwt_identity()
-
         data = request.get_json(silent=True)
 
         if not data:
@@ -1389,13 +1318,9 @@ def delete_account():
                 400,
             )
 
-        # Delete all interviews belonging to this user
+        # Delete all interviews, problem report, belonging to this user then Delete user account
         interview_delete_result = interviews.delete_many({"user_id": user_id})
-
-        # Delete all problem report belonging to this user
         problem_report_delete_result = problem_reports.delete_many({"user_id": user_id})
-
-        # Delete user account
         user_delete_result = users.delete_one({"user_id": user_id})
 
         if user_delete_result.deleted_count == 0:
@@ -1403,12 +1328,6 @@ def delete_account():
                 jsonify({"success": False, "message": "Account could not be deleted."}),
                 500,
             )
-
-        print(
-            f"Account deleted successfully: {user_id} | "
-            f"Interviews deleted: {interview_delete_result.deleted_count} | "
-            f"Problem reports deleted: {problem_report_delete_result.deleted_count}"
-        )
 
         return (
             jsonify(

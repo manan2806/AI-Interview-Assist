@@ -18,7 +18,6 @@ def get_profile(current_user):
             }), 500
 
         users = db["users"]
-
         user = users.find_one({
             "user_id": current_user["user_id"]
         })
@@ -55,7 +54,6 @@ def get_profile(current_user):
 @token_required
 def update_profile(current_user):
     try:
-        # Get JSON data
         data = request.get_json(silent=True)
 
         if not data:
@@ -64,7 +62,6 @@ def update_profile(current_user):
                 "message": "Please send valid JSON data"
             }), 400
 
-        # Check database
         if db is None:
             return jsonify({
                 "success": False,
@@ -72,8 +69,6 @@ def update_profile(current_user):
             }), 500
 
         users = db["users"]
-
-        # UPDATE DATA
         update_data = {}
 
         if "name" in data and data["name"]:

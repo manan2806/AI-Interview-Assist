@@ -1,12 +1,10 @@
+import os, json, time, random
 from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from google import genai
 from bson import ObjectId
 from dotenv import load_dotenv
-
-import os, json, time, random
-
 from database import interviews, users
 from utils.pdf_generator import generate_interview_pdf
 from utils.email_service import send_interview_report_email
@@ -20,7 +18,6 @@ interview_bp = Blueprint("interview_bp", __name__)
 # GEMINI CLIENT
 # ==========================================
 gemini_api_key = os.getenv("GEMINI_API_KEY")
-
 if gemini_api_key:
     gemini_client = genai.Client(api_key=gemini_api_key)
 else:
@@ -43,9 +40,7 @@ def get_interview_object_id(interview_id):
 def generate_interview_code():
     while True:
         code = f"INT{random.randint(100000, 999999)}"
-
         existing_interview = interviews.find_one({"interview_code": code})
-
         if not existing_interview:
             return code
 
@@ -58,7 +53,6 @@ def evaluate_all_answers_with_gemini(
 ):
     """
     Evaluate complete interview using Gemini.
-
     Features:
     - Supports 1-20 questions
     - Primary + fallback model
@@ -70,18 +64,15 @@ def evaluate_all_answers_with_gemini(
     """
     if gemini_client is None:
         raise Exception("Gemini client is not available.")
-    # ==========================================================
+
     # VALIDATE INPUT
-    # ==========================================================
     if not isinstance(questions, list):
         raise Exception("Invalid questions data.")
     if not isinstance(answers, list):
         raise Exception("Invalid answers data.")
     if not questions:
         raise Exception("No interview questions found.")
-    # ==========================================================
     # CREATE ANSWER LOOKUP
-    # ==========================================================
     answer_map = {}
     for answer_data in answers:
         if not isinstance(answer_data, dict):
@@ -91,9 +82,8 @@ def evaluate_all_answers_with_gemini(
             continue
         answer_text = answer_data.get("answer", "")
         answer_map[question_number] = str(answer_text or "")
-    # ==========================================================
+
     # PREPARE INTERVIEW DATA
-    # ==========================================================
     interview_data = []
     for index, question_data in enumerate(questions):
         if not isinstance(question_data, dict):
@@ -110,22 +100,18 @@ def evaluate_all_answers_with_gemini(
         )
     if not interview_data:
         raise Exception("No valid interview questions found.")
-    # ==========================================================
+
     # PROMPT
-    # ==========================================================
     prompt = f"""
 You are an expert interview evaluator.
-
 Evaluate every candidate answer independently.
 
 Candidate Information:
-
 Job Role: {job_role}
 Experience Level: {experience_level}
 Difficulty: {difficulty}
 
 Interview:
-
 {json.dumps(
     interview_data,
     ensure_ascii=False,
@@ -133,7 +119,6 @@ Interview:
 )}
 
 Evaluation rules:
-
 1. Evaluate every question.
 2. Return exactly one evaluation for every question.
 3. Keep question_number exactly unchanged.
@@ -152,7 +137,6 @@ Evaluation rules:
 16. Do not return code fences.
 
 Required JSON:
-
 {{
     "evaluations": [
         {{
@@ -169,14 +153,11 @@ Required JSON:
     ]
 }}
 """
-    # ==========================================================
     # MODEL CONFIGURATION
-    # ==========================================================
     models = ["gemini-3.8-flash", "gemini-3.5-flash-lite"]
     last_error = None
-    # ==========================================================
+
     # TRY MODELS
-    # ==========================================================
     for model in models:
         max_retries = 2
         for attempt in range(max_retries):
@@ -186,26 +167,23 @@ Required JSON:
                     f"{model} "
                     f"(attempt {attempt + 1}/{max_retries})"
                 )
-                # ==================================================
+
                 # GEMINI REQUEST
-                # ==================================================
                 response = gemini_client.models.generate_content(
                     model=model,
                     contents=prompt,
                     config={"response_mime_type": "application/json"},
                 )
-                # ==================================================
+
                 # RESPONSE VALIDATION
-                # ==================================================
                 if response is None:
                     raise Exception("Gemini returned no response.")
                 response_text = getattr(response, "text", None)
                 if not response_text:
                     raise Exception("Gemini returned an empty response.")
                 response_text = response_text.strip()
-                # ==================================================
+
                 # REMOVE CODE FENCES
-                # ==================================================
                 if response_text.startswith("```json"):
                     response_text = response_text[7:]
                 elif response_text.startswith("```"):
@@ -213,18 +191,16 @@ Required JSON:
                 if response_text.endswith("```"):
                     response_text = response_text[:-3]
                 response_text = response_text.strip()
-                # ==================================================
+
                 # PARSE JSON
-                # ==================================================
                 ai_data = json.loads(response_text)
                 if not isinstance(ai_data, dict):
                     raise Exception("Gemini returned invalid JSON.")
                 evaluations = ai_data.get("evaluations")
                 if not isinstance(evaluations, list):
                     raise Exception("Gemini returned invalid evaluations.")
-                # ==================================================
+
                 # CHECK EVALUATION COUNT
-                # ==================================================
                 expected_count = len(interview_data)
                 if len(evaluations) != expected_count:
                     raise Exception(
@@ -233,26 +209,23 @@ Required JSON:
                         f"Expected: {expected_count}, "
                         f"Received: {len(evaluations)}"
                     )
-                # ==================================================
+
                 # ORIGINAL QUESTION LOOKUP
-                # ==================================================
                 question_map = {
                     item["question_number"]: item for item in interview_data
                 }
                 expected_numbers = [item["question_number"] for item in interview_data]
                 normalized = []
                 received_numbers = []
-                # ==================================================
+
                 # NORMALIZE EACH EVALUATION
-                # ==================================================
                 for index, evaluation in enumerate(evaluations):
                     if not isinstance(evaluation, dict):
                         raise Exception(
                             "Invalid evaluation object " f"at position {index + 1}."
                         )
                     question_number = evaluation.get("question_number")
-                    # If Gemini omitted question number,
-                    # use original question order.
+
                     if question_number is None:
                         question_number = expected_numbers[index]
                     if question_number not in question_map:
@@ -262,9 +235,8 @@ Required JSON:
                         )
                     received_numbers.append(question_number)
                     original = question_map[question_number]
-                    # ==================================================
+
                     # SCORE NORMALIZATION
-                    # ==================================================
                     score = evaluation.get("score", 0)
                     try:
                         score = float(score)
@@ -273,9 +245,8 @@ Required JSON:
                     score = max(0, min(10, score))
                     if score.is_integer():
                         score = int(score)
-                    # ==================================================
+
                     # FIELD NORMALIZATION
-                    # ==================================================
                     evaluation["question_number"] = question_number
                     evaluation["score"] = score
                     evaluation.setdefault("correctness", "Incorrect")
@@ -285,41 +256,35 @@ Required JSON:
                     evaluation.setdefault("weaknesses", [])
                     evaluation.setdefault("missing_concepts", [])
                     evaluation.setdefault("feedback", "")
-                    # ==================================================
+
                     # ENSURE LIST FIELDS ARE LISTS
-                    # ==================================================
                     for field in ["strengths", "weaknesses", "missing_concepts"]:
                         if not isinstance(evaluation.get(field), list):
                             evaluation[field] = []
-                    # ==================================================
+
                     # ADD ORIGINAL QUESTION + ANSWER
-                    # ==================================================
                     evaluation["question"] = original["question"]
                     evaluation["answer"] = original["answer"]
                     evaluation["evaluated_at"] = datetime.utcnow()
                     normalized.append(evaluation)
-                # ==================================================
+
                 # QUESTION NUMBER VALIDATION
-                # ==================================================
                 if set(received_numbers) != set(expected_numbers):
                     raise Exception("Gemini returned mismatched " "question numbers.")
-                # ==================================================
+
                 # SORT TO ORIGINAL ORDER
-                # ==================================================
                 normalized_map = {item["question_number"]: item for item in normalized}
                 normalized = [normalized_map[number] for number in expected_numbers]
                 print("✅ Gemini evaluation successful " f"using {model}.")
                 return normalized
-            # ======================================================
+
             # ERROR HANDLING
-            # ======================================================
             except Exception as e:
                 last_error = e
                 error_message = str(e)
                 print("⚠️ Gemini evaluation error " f"with {model}: {error_message}")
-                # ==================================================
+
                 # DETECT ERROR TYPE
-                # ==================================================
                 is_503_error = "503" in error_message or "UNAVAILABLE" in error_message
                 is_rate_limit_error = (
                     "429" in error_message or "RESOURCE_EXHAUSTED" in error_message
@@ -328,19 +293,14 @@ Required JSON:
                     "deadline" in error_message.lower()
                     or "timeout" in error_message.lower()
                 )
-                # ==================================================
+
                 # 503 / UNAVAILABLE
-                # ==================================================
-                # Do NOT retry the same model.
-                # Immediately move to fallback model.
                 if is_503_error:
                     print(f"⚠️ {model} is currently " "unavailable/high demand.")
                     print(f"➡️ Skipping retry for {model}. " "Moving to next model...")
                     break
-                # ==================================================
+
                 # 429 / RESOURCE_EXHAUSTED
-                # ==================================================
-                # Retry once with short delay.
                 if is_rate_limit_error and attempt < max_retries - 1:
                     wait_time = 2
                     print(
@@ -350,10 +310,8 @@ Required JSON:
                     )
                     time.sleep(wait_time)
                     continue
-                # ==================================================
+
                 # TIMEOUT / DEADLINE
-                # ==================================================
-                # Retry once with short delay.
                 if is_timeout_error and attempt < max_retries - 1:
                     wait_time = 2
                     print(
@@ -363,17 +321,13 @@ Required JSON:
                     )
                     time.sleep(wait_time)
                     continue
-                # ==================================================
+
                 # OTHER ERRORS
-                # ==================================================
                 break
-        # ==========================================================
-        # NEXT MODEL
-        # ==========================================================
+
         print(f"➡️ {model} failed. " "Trying fallback model...")
-    # ==========================================================
+
     # ALL MODELS FAILED
-    # ==========================================================
     raise Exception(
         "Unable to evaluate interview with "
         "available Gemini models. "
@@ -441,7 +395,6 @@ Feedback:
 
 --------------------------------
 """
-
     # ==========================================
     # CREATE PROMPT
     # ==========================================
@@ -526,7 +479,6 @@ IMPORTANT RULES:
     # GET RESPONSE TEXT
     if response is None:
         raise Exception("Gemini returned an empty response")
-
     response_text = getattr(response, "text", None)
 
     if not response_text:
@@ -535,8 +487,7 @@ IMPORTANT RULES:
     response_text = response_text.strip()
 
     print("========================================")
-    print("GEMINI OVERALL ANALYSIS RESPONSE:")
-    print(response_text)
+    print("GEMINI OVERALL ANALYSIS RESPONSE:", response_text)
     print("========================================")
 
     # REMOVE MARKDOWN CODE BLOCK
@@ -556,7 +507,6 @@ IMPORTANT RULES:
 
         response_text = response_text.strip()
 
-    # PARSE JSON
     try:
         result = json.loads(response_text)
     except json.JSONDecodeError as json_error:
@@ -579,10 +529,8 @@ IMPORTANT RULES:
     # VALIDATE ARRAY TYPES
     if not isinstance(strengths, list):
         strengths = []
-
     if not isinstance(weaknesses, list):
         weaknesses = []
-
     if not isinstance(recommendations, list):
         recommendations = []
 
@@ -721,7 +669,6 @@ def generate_overall_result(interview_id):
         except Exception:
             return jsonify({"success": False, "message": "Invalid interview ID"}), 400
 
-        # FIND INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
@@ -962,9 +909,7 @@ def generate_overall_result(interview_id):
             )
 
         max_score = valid_evaluations * 10
-
         overall_score = round((total_score / max_score) * 100, 2)
-
         average_score = round(total_score / valid_evaluations, 2)
 
         # PERFORMANCE LEVEL
@@ -1164,10 +1109,7 @@ def generate_overall_result(interview_id):
             if not user:
                 raise Exception("Registered user not found.")
 
-            # GET USER NAME
             recipient_name = user.get("name") or user.get("username") or "Candidate"
-
-            # GET USER EMAIL
             recipient_email = user.get("email") or ""
 
             if not recipient_email:
@@ -1268,9 +1210,7 @@ def generate_overall_result(interview_id):
 def setup_interview():
     try:
         user_id = get_jwt_identity()
-
         data = request.get_json(silent=True)
-
         if not data:
             return jsonify({"success": False, "message": "JSON body is required."}), 400
 
@@ -1339,33 +1279,23 @@ def setup_interview():
                 400,
             )
 
-        # INTERVIEW DURATION VALIDATION
         duration = data.get("duration", "No Limit")
 
-        # Make duration safe and consistent
         if duration is None:
             duration = "No Limit"
-
         duration = str(duration).strip()
-
-        # Normalize common variations
         duration_lower = duration.lower()
 
         if duration_lower == "no limit":
             duration = "No Limit"
-
         elif duration_lower == "10 minutes":
             duration = "10 Minutes"
-
         elif duration_lower == "20 minutes":
             duration = "20 Minutes"
-
         elif duration_lower == "30 minutes":
             duration = "30 Minutes"
-
         elif duration_lower == "custom":
             duration = "Custom"
-
         else:
             return (
                 jsonify({"success": False, "message": "Invalid interview duration."}),
@@ -1409,7 +1339,6 @@ def setup_interview():
             )
 
         interview_code = generate_interview_code()
-
         interview_data = {
             "user_id": user_id,
             "interview_code": interview_code,
@@ -1426,7 +1355,6 @@ def setup_interview():
             "status": "created",
             "created_at": datetime.utcnow(),
         }
-
         result = interviews.insert_one(interview_data)
 
         return (
@@ -1454,14 +1382,11 @@ def setup_interview():
 def generate_questions(interview_id):
     try:
         user_id = get_jwt_identity()
-
-        # VALIDATE INTERVIEW ID
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # FIND INTERVIEW
         interview = interviews.find_one(
             {"_id": interview_object_id, "user_id": user_id}
         )
@@ -1469,14 +1394,12 @@ def generate_questions(interview_id):
         if not interview:
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # GET INTERVIEW DATA
         job_role = interview.get("job_role")
         experience_level = interview.get("experience_level")
         interview_type = interview.get("interview_type")
         difficulty = interview.get("difficulty")
         number_of_questions = interview.get("number_of_questions")
 
-        # VALIDATE QUESTION COUNT
         try:
             number_of_questions = int(number_of_questions)
         except (TypeError, ValueError):
@@ -1496,7 +1419,6 @@ def generate_questions(interview_id):
                 400,
             )
 
-        # CHECK GEMINI CLIENT
         if gemini_client is None:
             return (
                 jsonify(
@@ -1505,7 +1427,6 @@ def generate_questions(interview_id):
                 500,
             )
 
-        # GEMINI PROMPT
         prompt = f"""
 You are an expert technical interviewer.
 
@@ -1576,8 +1497,6 @@ Return exactly:
 
         # TRY MODELS
         for model_name in models_to_try:
-            # Only retry temporary 503 errors.
-            # NEVER retry quota 429 errors.
             max_retries = 2
 
             for attempt in range(max_retries):
@@ -1792,7 +1711,6 @@ Return exactly:
     # UNEXPECTED ERROR
     except Exception as e:
         print(f"❌ Generate Questions Error: {e}")
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -1802,32 +1720,22 @@ Return exactly:
 @interview_bp.route("/<interview_id>/start", methods=["POST"])
 @jwt_required()
 def start_interview(interview_id):
-
     try:
-
         user_id = get_jwt_identity()
 
-        # VALIDATE INTERVIEW ID
         try:
-
             object_id = ObjectId(interview_id)
-
         except Exception:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
         # FIND INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
-
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
         # QUESTIONS CHECK
         questions = interview.get("questions", [])
-
         if not questions:
-
             return (
                 jsonify(
                     {
@@ -1840,7 +1748,6 @@ def start_interview(interview_id):
 
         # COMPLETED INTERVIEW
         if interview.get("status") == "completed":
-
             return (
                 jsonify(
                     {
@@ -1853,12 +1760,8 @@ def start_interview(interview_id):
 
         # RESUME EXISTING INTERVIEW
         if interview.get("status") == "in_progress":
-
             current_index = interview.get("current_question", 0)
-
-            # Safety check
             if current_index >= len(questions):
-
                 return (
                     jsonify(
                         {"success": False, "message": "Interview is already completed."}
@@ -1867,7 +1770,6 @@ def start_interview(interview_id):
                 )
 
             current_question = questions[current_index]
-
             return (
                 jsonify(
                     {
@@ -1885,9 +1787,7 @@ def start_interview(interview_id):
 
         # FIRST TIME START
         if interview.get("status") in ["ready", "created"]:
-
             current_index = 0
-
             interviews.update_one(
                 {"_id": object_id, "user_id": user_id},
                 {
@@ -1927,9 +1827,7 @@ def start_interview(interview_id):
         )
 
     except Exception as e:
-
         print("Start Interview Error:", str(e))
-
         return (
             jsonify(
                 {
@@ -1948,41 +1846,27 @@ def start_interview(interview_id):
 @interview_bp.route("/<interview_id>/resume", methods=["GET"])
 @jwt_required()
 def resume_interview(interview_id):
-
     try:
         user_id = get_jwt_identity()
-
-        # VALIDATE INTERVIEW ID
         try:
-
             object_id = ObjectId(interview_id)
-
         except Exception:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # FIND INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
         questions = interview.get("questions", [])
-
         answers = interview.get("answers", [])
-
         evaluations = interview.get("evaluations", [])
-
         status = interview.get("status")
-
         current_index = interview.get("current_question", 0)
-
         total_questions = len(questions)
 
         # COMPLETED
         if status == "completed":
-
             return (
                 jsonify(
                     {
@@ -2022,7 +1906,6 @@ def resume_interview(interview_id):
 
         # NOT STARTED
         if status in ["created", "ready"]:
-
             return (
                 jsonify(
                     {
@@ -2041,9 +1924,7 @@ def resume_interview(interview_id):
 
         # IN PROGRESS
         if status == "in_progress":
-
             if current_index >= total_questions:
-
                 return (
                     jsonify(
                         {"success": False, "message": "Invalid current question index."}
@@ -2052,7 +1933,6 @@ def resume_interview(interview_id):
                 )
 
             current_question = questions[current_index]
-
             return (
                 jsonify(
                     {
@@ -2079,9 +1959,7 @@ def resume_interview(interview_id):
         )
 
     except Exception as e:
-
         print("Resume Interview Error:", str(e))
-
         return (
             jsonify(
                 {
@@ -2102,7 +1980,6 @@ def resume_interview(interview_id):
 def get_current_question(interview_id):
     try:
         user_id = get_jwt_identity()
-
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
@@ -2181,22 +2058,16 @@ def get_interview_question(interview_id, question_number):
 
     try:
         user_id = get_jwt_identity()
-
-        # GET OBJECT ID
         object_id = get_interview_object_id(interview_id)
 
         if object_id is None:
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # GET INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
-
         if not interview:
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # GET QUESTIONS
         questions = interview.get("questions", [])
-
         if not questions:
             return (
                 jsonify(
@@ -2205,9 +2076,7 @@ def get_interview_question(interview_id, question_number):
                 400,
             )
 
-        # VALIDATE QUESTION NUMBER
         if question_number < 1 or question_number > len(questions):
-
             return (
                 jsonify({"success": False, "message": "Invalid question number."}),
                 400,
@@ -2243,9 +2112,7 @@ def get_interview_question(interview_id, question_number):
         )
 
     except Exception as e:
-
         print("❌ Get Interview Question Error:", str(e))
-
         return (
             jsonify(
                 {
@@ -2264,27 +2131,17 @@ def get_interview_question(interview_id, question_number):
 @interview_bp.route("/<interview_id>/answer/<int:question_number>", methods=["PUT"])
 @jwt_required()
 def update_interview_answer(interview_id, question_number):
-
     try:
         user_id = get_jwt_identity()
-
-        # GET OBJECT ID
         object_id = get_interview_object_id(interview_id)
-
         if object_id is None:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # GET INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
-
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # ONLY IN-PROGRESS INTERVIEW
         if interview.get("status") != "in_progress":
-
             return (
                 jsonify(
                     {
@@ -2301,11 +2158,8 @@ def update_interview_answer(interview_id, question_number):
 
         # REQUEST DATA
         data = request.get_json(silent=True) or {}
-
         answer = str(data.get("answer", "")).strip()
-
         if not answer:
-
             return (
                 jsonify({"success": False, "message": "Answer cannot be empty."}),
                 400,
@@ -2313,9 +2167,7 @@ def update_interview_answer(interview_id, question_number):
 
         # GET QUESTIONS
         questions = interview.get("questions", [])
-
         if not questions:
-
             return (
                 jsonify(
                     {"success": False, "message": "Interview questions not found."}
@@ -2325,7 +2177,6 @@ def update_interview_answer(interview_id, question_number):
 
         # VALIDATE QUESTION NUMBER
         if question_number < 1 or question_number > len(questions):
-
             return (
                 jsonify({"success": False, "message": "Invalid question number."}),
                 400,
@@ -2341,9 +2192,7 @@ def update_interview_answer(interview_id, question_number):
         answer_found = False
 
         for existing_answer in existing_answers:
-
             if existing_answer.get("question_number") == question_number:
-
                 existing_answer["answer"] = answer
                 existing_answer["answered_at"] = datetime.utcnow()
                 answer_found = True
@@ -2351,7 +2200,6 @@ def update_interview_answer(interview_id, question_number):
 
         # QUESTION MUST ALREADY HAVE AN ANSWER
         if not answer_found:
-
             return (
                 jsonify(
                     {
@@ -2368,9 +2216,6 @@ def update_interview_answer(interview_id, question_number):
             {"$set": {"answers": existing_answers}},
         )
 
-        print(f"✅ Answer updated for " f"Question {question_number}")
-
-        # RESPONSE
         return (
             jsonify(
                 {
@@ -2407,23 +2252,16 @@ def submit_answer(interview_id):
 
     try:
         user_id = get_jwt_identity()
-
         object_id = get_interview_object_id(interview_id)
-
         if object_id is None:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # GET INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # CHECK STATUS
         if interview.get("status") != "in_progress":
-
             return (
                 jsonify(
                     {
@@ -2437,23 +2275,16 @@ def submit_answer(interview_id):
                 400,
             )
 
-        # GET REQUEST DATA
         data = request.get_json(silent=True) or {}
-
         answer = str(data.get("answer", "")).strip()
-
         if not answer:
-
             return (
                 jsonify({"success": False, "message": "Answer cannot be empty."}),
                 400,
             )
 
-        # GET QUESTIONS
         questions = interview.get("questions", [])
-
         if not questions:
-
             return (
                 jsonify(
                     {"success": False, "message": "Interview questions not found."}
@@ -2461,20 +2292,13 @@ def submit_answer(interview_id):
                 400,
             )
 
-        # CURRENT QUESTION INDEX
         current_index = interview.get("current_question", 0)
-
         try:
-
             current_index = int(current_index)
-
         except (ValueError, TypeError):
-
             current_index = 0
 
-        # VALIDATE QUESTION INDEX
         if current_index < 0 or current_index >= len(questions):
-
             return (
                 jsonify({"success": False, "message": "Invalid current question."}),
                 400,
@@ -2482,18 +2306,13 @@ def submit_answer(interview_id):
 
         # CURRENT QUESTION
         current_question = questions[current_index]
-
         question_number = current_question.get("question_number", current_index + 1)
-
         question_text = current_question.get("question", "")
 
         # CHECK DUPLICATE ANSWER
         existing_answers = interview.get("answers", [])
-
         for existing_answer in existing_answers:
-
             if existing_answer.get("question_number") == question_number:
-
                 return (
                     jsonify(
                         {
@@ -2517,7 +2336,6 @@ def submit_answer(interview_id):
 
         # FINAL QUESTION
         if is_last_question:
-
             interviews.update_one(
                 {"_id": object_id, "user_id": user_id},
                 {
@@ -2529,11 +2347,6 @@ def submit_answer(interview_id):
                     },
                 },
             )
-
-            print("✅ Final answer saved.")
-
-            print("⏳ Interview waiting for " "complete Gemini evaluation.")
-
             return (
                 jsonify(
                     {
@@ -2551,9 +2364,7 @@ def submit_answer(interview_id):
 
         # NOT FINAL QUESTION
         next_index = current_index + 1
-
         next_question = questions[next_index]
-
         next_question_number = next_question.get("question_number", next_index + 1)
 
         # SAVE ANSWER + MOVE TO NEXT QUESTION
@@ -2586,9 +2397,7 @@ def submit_answer(interview_id):
         )
 
     except Exception as e:
-
         print("❌ Submit Answer Error:", str(e))
-
         return (
             jsonify(
                 {"success": False, "message": "Unable to save answer.", "error": str(e)}
@@ -2603,27 +2412,17 @@ def submit_answer(interview_id):
 @interview_bp.route("/<interview_id>/timeout", methods=["POST"])
 @jwt_required()
 def timeout_interview(interview_id):
-
     try:
-
         user_id = get_jwt_identity()
-
         object_id = get_interview_object_id(interview_id)
-
         if object_id is None:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # GET INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
-
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # CHECK STATUS
         if interview.get("status") != "in_progress":
-
             return (
                 jsonify(
                     {
@@ -2635,11 +2434,8 @@ def timeout_interview(interview_id):
                 400,
             )
 
-        # GET QUESTIONS
         questions = interview.get("questions", [])
-
         if not questions:
-
             return (
                 jsonify(
                     {"success": False, "message": "Interview questions not found."}
@@ -2647,15 +2443,10 @@ def timeout_interview(interview_id):
                 400,
             )
 
-        # CURRENT QUESTION INDEX
         current_index = interview.get("current_question", 0)
-
         try:
-
             current_index = int(current_index)
-
         except (ValueError, TypeError):
-
             current_index = 0
 
         # GET EXISTING ANSWERS
@@ -2663,20 +2454,14 @@ def timeout_interview(interview_id):
 
         # SAVE CURRENT QUESTION AS SKIPPED
         if 0 <= current_index < len(questions):
-
             current_question = questions[current_index]
-
             question_number = current_question.get("question_number", current_index + 1)
-
             question_text = current_question.get("question", "")
-
             already_answered = any(
                 answer.get("question_number") == question_number
                 for answer in existing_answers
             )
-
             if not already_answered:
-
                 skipped_answer = {
                     "question_number": question_number,
                     "question": question_text,
@@ -2684,7 +2469,6 @@ def timeout_interview(interview_id):
                     "status": "skipped",
                     "answered_at": datetime.utcnow(),
                 }
-
                 interviews.update_one(
                     {"_id": object_id, "user_id": user_id},
                     {"$push": {"answers": skipped_answer}},
@@ -2703,10 +2487,6 @@ def timeout_interview(interview_id):
             },
         )
 
-        print("⏰ Interview time expired.")
-
-        print("⏳ Interview waiting for " "complete Gemini evaluation.")
-
         return (
             jsonify(
                 {
@@ -2720,9 +2500,7 @@ def timeout_interview(interview_id):
         )
 
     except Exception as e:
-
         print("❌ Interview Timeout Error:", str(e))
-
         return (
             jsonify(
                 {
@@ -2741,46 +2519,25 @@ def timeout_interview(interview_id):
 @interview_bp.route("/<interview_id>/evaluate", methods=["POST"])
 @jwt_required()
 def evaluate_interview(interview_id):
-
     object_id = None
     user_id = None
-
     try:
-
-        # =========================================================
         # USER
-        # =========================================================
-
         user_id = get_jwt_identity()
 
-        # =========================================================
         # VALIDATE INTERVIEW ID
-        # =========================================================
-
         object_id = get_interview_object_id(interview_id)
-
         if object_id is None:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # =========================================================
         # GET INTERVIEW
-        # =========================================================
-
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
-
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # =========================================================
         # ALREADY EVALUATED
-        # =========================================================
-
         existing_evaluations = interview.get("evaluations", [])
-
         if existing_evaluations:
-
             return (
                 jsonify(
                     {
@@ -2794,14 +2551,9 @@ def evaluate_interview(interview_id):
                 200,
             )
 
-        # =========================================================
         # CHECK QUESTIONS
-        # =========================================================
-
         questions = interview.get("questions", [])
-
         if not questions:
-
             return (
                 jsonify(
                     {"success": False, "message": ("Interview questions not found.")}
@@ -2809,14 +2561,9 @@ def evaluate_interview(interview_id):
                 400,
             )
 
-        # =========================================================
         # CHECK ANSWERS
-        # =========================================================
-
         answers = interview.get("answers", [])
-
         if len(answers) != len(questions):
-
             return (
                 jsonify(
                     {
@@ -2832,12 +2579,8 @@ def evaluate_interview(interview_id):
                 400,
             )
 
-        # =========================================================
         # CHECK GEMINI
-        # =========================================================
-
         if gemini_client is None:
-
             return (
                 jsonify(
                     {"success": False, "message": ("Gemini client is not available.")}
@@ -2845,14 +2588,9 @@ def evaluate_interview(interview_id):
                 500,
             )
 
-        # =========================================================
         # CHECK STATUS
-        # =========================================================
-
         current_status = interview.get("status")
-
         if current_status not in ["evaluation_pending", "completed"]:
-
             return (
                 jsonify(
                     {
@@ -2864,38 +2602,19 @@ def evaluate_interview(interview_id):
                 400,
             )
 
-        # =========================================================
         # CHECK EVALUATION LOCK
-        # =========================================================
-
         evaluating = interview.get("evaluating", False)
-
         evaluation_started_at = interview.get("evaluation_started_at")
 
-        # =========================================================
         # HANDLE EXISTING LOCK
-        # =========================================================
-
         if evaluating is True:
-
-            # -----------------------------------------------------
-            # Check whether lock is stale.
-            #
-            # If Render worker was killed, evaluating=True can
-            # remain in MongoDB forever.
-            # -----------------------------------------------------
-
             stale_lock = False
-
             if evaluation_started_at:
-
                 try:
-
                     elapsed_seconds = (
                         datetime.utcnow() - evaluation_started_at
                     ).total_seconds()
 
-                    # 5 minutes
                     if elapsed_seconds > 300:
                         stale_lock = True
 
@@ -2903,12 +2622,9 @@ def evaluate_interview(interview_id):
                     stale_lock = True
 
             else:
-                # Old records may have evaluating=True
-                # without timestamp.
                 stale_lock = True
 
             if not stale_lock:
-
                 return (
                     jsonify(
                         {
@@ -2922,12 +2638,7 @@ def evaluate_interview(interview_id):
                     409,
                 )
 
-            # -----------------------------------------------------
             # Reset stale lock
-            # -----------------------------------------------------
-
-            print("⚠️ Stale evaluation lock detected. " "Resetting...")
-
             interviews.update_one(
                 {"_id": object_id, "user_id": user_id},
                 {
@@ -2936,10 +2647,7 @@ def evaluate_interview(interview_id):
                 },
             )
 
-        # =========================================================
         # ATOMIC LOCK
-        # =========================================================
-
         lock_result = interviews.update_one(
             {"_id": object_id, "user_id": user_id, "evaluating": {"$ne": True}},
             {
@@ -2952,7 +2660,6 @@ def evaluate_interview(interview_id):
         )
 
         if lock_result.modified_count == 0:
-
             return (
                 jsonify(
                     {
@@ -2964,12 +2671,8 @@ def evaluate_interview(interview_id):
                 409,
             )
 
-        # =========================================================
         # START GEMINI
-        # =========================================================
-
         print("🤖 Starting complete interview " "evaluation...")
-
         evaluations = evaluate_all_answers_with_gemini(
             job_role=interview.get("job_role", ""),
             experience_level=interview.get("experience_level", ""),
@@ -2978,12 +2681,8 @@ def evaluate_interview(interview_id):
             answers=answers,
         )
 
-        # =========================================================
         # VALIDATE GEMINI RESULT
-        # =========================================================
-
         if not evaluations:
-
             interviews.update_one(
                 {"_id": object_id, "user_id": user_id},
                 {
@@ -3002,12 +2701,8 @@ def evaluate_interview(interview_id):
                 500,
             )
 
-        # =========================================================
         # CHECK COUNT
-        # =========================================================
-
         if len(evaluations) != len(questions):
-
             interviews.update_one(
                 {"_id": object_id, "user_id": user_id},
                 {
@@ -3028,10 +2723,7 @@ def evaluate_interview(interview_id):
                 500,
             )
 
-        # =========================================================
         # SAVE FINAL EVALUATION
-        # =========================================================
-
         update_result = interviews.update_one(
             {"_id": object_id, "user_id": user_id},
             {
@@ -3045,20 +2737,12 @@ def evaluate_interview(interview_id):
             },
         )
 
-        # =========================================================
         # CHECK DATABASE UPDATE
-        # =========================================================
-
         if update_result.modified_count == 0:
-
             print("⚠️ Evaluation data was not modified.")
 
-        # =========================================================
         # SUCCESS
-        # =========================================================
-
         print("✅ Complete interview evaluation " "saved successfully.")
-
         return (
             jsonify(
                 {
@@ -3072,22 +2756,11 @@ def evaluate_interview(interview_id):
             200,
         )
 
-    # =============================================================
     # ERROR
-    # =============================================================
-
     except Exception as e:
-
         print("❌ Complete Interview Evaluation Error:", str(e))
-
-        # ---------------------------------------------------------
-        # RESET LOCK
-        # ---------------------------------------------------------
-
         if object_id is not None and user_id is not None:
-
             try:
-
                 interviews.update_one(
                     {"_id": object_id, "user_id": user_id},
                     {
@@ -3095,17 +2768,12 @@ def evaluate_interview(interview_id):
                         "$unset": {"evaluation_started_at": ""},
                     },
                 )
-
                 print("🔓 Evaluation lock reset.")
 
             except Exception as reset_error:
-
                 print("⚠️ Unable to reset " "evaluation lock:", str(reset_error))
 
-        # ---------------------------------------------------------
         # DO NOT RETURN INTERNAL ERROR TO FRONTEND
-        # ---------------------------------------------------------
-
         return (
             jsonify(
                 {
@@ -3125,7 +2793,6 @@ def evaluate_interview(interview_id):
 def get_interview_result(interview_id):
     try:
         user_id = get_jwt_identity()
-
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
@@ -3173,8 +2840,6 @@ def interview_dashboard(interview_id):
 
     try:
         user_id = get_jwt_identity()
-
-        # Validate ObjectId
         try:
             object_id = ObjectId(interview_id)
         except Exception:
@@ -3205,29 +2870,21 @@ def interview_dashboard(interview_id):
 
         # Question-wise performance
         question_performance = []
-
         answer_map = {}
 
         for answer in answers:
             question_number = answer.get("question_number")
-
             answer_map[question_number] = answer
-
         evaluation_map = {}
 
         for evaluation in evaluations:
             question_number = evaluation.get("question_number")
-
             evaluation_map[question_number] = evaluation
 
         for index, question in enumerate(questions):
-
             question_number = question.get("question_number", index + 1)
-
             answer = answer_map.get(question_number)
-
             evaluation = evaluation_map.get(question_number)
-
             question_performance.append(
                 {
                     "question_number": question_number,
@@ -3262,7 +2919,6 @@ def interview_dashboard(interview_id):
                 }
             )
 
-        # Dashboard response
         dashboard_data = {
             "interview": {
                 "interview_id": interview_id,
@@ -3307,7 +2963,6 @@ def interview_dashboard(interview_id):
         )
 
     except Exception as e:
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -3317,10 +2972,8 @@ def interview_dashboard(interview_id):
 @interview_bp.route("/history", methods=["GET"])
 @jwt_required()
 def interview_history():
-
     try:
         user_id = get_jwt_identity()
-
         if interviews is None:
             return (
                 jsonify({"success": False, "message": "Database is not connected."}),
@@ -3339,9 +2992,7 @@ def interview_history():
         history = []
 
         for interview in interview_cursor:
-
             overall_result = interview.get("overall_result", {})
-
             history.append(
                 {
                     "interview_id": str(interview["_id"]),
@@ -3376,7 +3027,6 @@ def interview_history():
         )
 
     except Exception as e:
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -3386,36 +3036,26 @@ def interview_history():
 @interview_bp.route("/<interview_id>", methods=["DELETE"])
 @jwt_required()
 def delete_interview(interview_id):
-
     try:
-        # GET LOGGED-IN USER
         user_id = get_jwt_identity()
-
-        # VALIDATE INTERVIEW ID
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
-
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # CHECK INTERVIEW EXISTS
-        # AND BELONGS TO CURRENT USER
         interview = interviews.find_one(
             {"_id": interview_object_id, "user_id": user_id}
         )
 
         if not interview:
-
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
-        # DELETE INTERVIEW
         delete_result = interviews.delete_one(
             {"_id": interview_object_id, "user_id": user_id}
         )
 
         # CHECK DELETE RESULT
         if delete_result.deleted_count == 0:
-
             return (
                 jsonify(
                     {"success": False, "message": "Interview could not be deleted."}
@@ -3436,9 +3076,7 @@ def delete_interview(interview_id):
         )
 
     except Exception as e:
-
         print("Delete Interview Error:", str(e))
-
         return (
             jsonify(
                 {
@@ -3459,8 +3097,6 @@ def delete_interview(interview_id):
 def interview_details(interview_id):
     try:
         user_id = get_jwt_identity()
-
-        # VALIDATE INTERVIEW ID
         interview_object_id = get_interview_object_id(interview_id)
 
         if not interview_object_id:
@@ -3470,7 +3106,6 @@ def interview_details(interview_id):
         interview = interviews.find_one(
             {"_id": interview_object_id, "user_id": user_id}
         )
-
         if not interview:
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
@@ -3482,21 +3117,18 @@ def interview_details(interview_id):
 
         # ANSWER MAP
         answer_map = {}
-
         for answer in answers:
             question_number = answer.get("question_number")
             answer_map[question_number] = answer
 
         # EVALUATION MAP
         evaluation_map = {}
-
         for evaluation in evaluations:
             question_number = evaluation.get("question_number")
             evaluation_map[question_number] = evaluation
 
         # QUESTION-WISE DETAILS
         question_details = []
-
         for index, question in enumerate(questions):
             question_number = question.get("question_number", index + 1)
             answer = answer_map.get(question_number)
@@ -3567,8 +3199,6 @@ def interview_details(interview_id):
                         "total_questions": len(questions),
                         "answered_questions": len(answers),
                         "evaluated_questions": len(evaluations),
-                        # Overall result values
-                        # directly inside summary
                         "overall_score": overall_result.get("overall_score", None),
                         "average_score": overall_result.get("average_score", None),
                         "total_score": overall_result.get("total_score", None),
@@ -3576,10 +3206,8 @@ def interview_details(interview_id):
                         "performance_level": overall_result.get(
                             "performance_level", ""
                         ),
-                        # Keep complete result also
                         "overall_result": overall_result,
                     },
-                    # QUESTION DETAILS
                     "question_details": question_details,
                 }
             ),
@@ -3588,7 +3216,6 @@ def interview_details(interview_id):
 
     except Exception as e:
         print("Interview Details Error:", repr(e))
-
         return jsonify({"success": False, "message": str(e)}), 500
 
 
@@ -3598,21 +3225,15 @@ def interview_details(interview_id):
 @interview_bp.route("/<interview_id>/retake", methods=["POST"])
 @jwt_required()
 def retake_interview(interview_id):
-
     try:
         user_id = get_jwt_identity()
-
-        # Validate interview ID
         interview_object_id = get_interview_object_id(interview_id)
-
         if not interview_object_id:
             return jsonify({"success": False, "message": "Invalid interview ID."}), 400
 
-        # Find original interview
         original_interview = interviews.find_one(
             {"_id": interview_object_id, "user_id": user_id}
         )
-
         if not original_interview:
             return jsonify({"success": False, "message": "Interview not found."}), 404
 
@@ -3693,42 +3314,21 @@ def retake_interview(interview_id):
 def download_interview_report(interview_id):
 
     try:
-
-        print("\n")
-        print("==========================================")
-        print("📄 PDF DOWNLOAD REQUEST")
-        print("Interview ID:", interview_id)
-        print("==========================================")
-
         user_id = get_jwt_identity()
 
-        print("Logged-in User ID:", user_id)
-
-        # VALIDATE INTERVIEW ID
         try:
-
             object_id = ObjectId(interview_id)
-
         except Exception:
-
             print("❌ Invalid Interview ID")
-
             return jsonify({"success": False, "message": "Invalid interview ID"}), 400
 
-        # FIND INTERVIEW
         interview = interviews.find_one({"_id": object_id, "user_id": user_id})
 
-        # INTERVIEW NOT FOUND
         if not interview:
-
             print("❌ INTERVIEW NOT FOUND")
-
             print("Searching with:")
-
             print("_id:", object_id)
-
             print("user_id:", user_id)
-
             return (
                 jsonify(
                     {"success": False, "message": "Interview not found for this user"}
@@ -3737,18 +3337,12 @@ def download_interview_report(interview_id):
             )
 
         print("✅ Interview found")
-
         print("Interview user_id:", interview.get("user_id"))
-
         print("Interview status:", interview.get("status"))
-
         print("Overall result exists:", bool(interview.get("overall_result")))
 
         # CHECK OVERALL RESULT
         if not interview.get("overall_result"):
-
-            print("❌ Overall result does not exist")
-
             return (
                 jsonify(
                     {
@@ -3761,21 +3355,16 @@ def download_interview_report(interview_id):
 
         # CREATE REPORT DIRECTORY
         reports_folder = os.path.join(os.getcwd(), "generated_reports")
-
         os.makedirs(reports_folder, exist_ok=True)
-
         print("Reports folder:", reports_folder)
 
         # PDF FILE NAME
         pdf_file_name = f"interview_report_" f"{interview_id}.pdf"
-
         pdf_path = os.path.join(reports_folder, pdf_file_name)
-
         print("Expected PDF path:", pdf_path)
 
         # ALWAYS GENERATE FRESH PDF
         print("📄 Generating fresh PDF report...")
-
         try:
             generate_interview_pdf(interview, pdf_path)
             print("✅ Fresh PDF generated")
@@ -3797,9 +3386,7 @@ def download_interview_report(interview_id):
 
         # FINAL FILE CHECK
         if not os.path.isfile(pdf_path):
-
             print("❌ PDF FILE DOES NOT EXIST AFTER GENERATION")
-
             return (
                 jsonify(
                     {
@@ -3813,11 +3400,8 @@ def download_interview_report(interview_id):
 
         # DOWNLOAD PDF
         print("✅ Sending PDF to browser")
-
         print("File:", pdf_path)
-
         print("==========================================")
-
         return send_file(
             pdf_path,
             as_attachment=True,
@@ -3826,15 +3410,10 @@ def download_interview_report(interview_id):
         )
 
     except Exception as e:
-
         print("==========================================")
-
         print("❌ PDF DOWNLOAD ERROR")
-
         print(repr(e))
-
         print("==========================================")
-
         return (
             jsonify(
                 {
