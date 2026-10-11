@@ -61,6 +61,24 @@ function Dashboard() {
         loadDashboard();
     }, [navigate]);
 
+
+    // ==========================================
+    // CLOSE MOBILE MENU ON OUTSIDE CLICK
+    // ==========================================
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            const clickedMenuButton = event.target.closest(".dashboard-menu-button");
+            const clickedDropdown = event.target.closest(".dashboard-mobile-dropdown");
+            if (!clickedMenuButton && !clickedDropdown) {
+                setMobileMenuOpen(false);
+            }
+        };
+        document.addEventListener("click", handleOutsideClick);
+        return () => {
+            document.removeEventListener("click", handleOutsideClick);
+        };
+    }, []);
+
     // ==========================================
     // LOGOUT
     // ==========================================

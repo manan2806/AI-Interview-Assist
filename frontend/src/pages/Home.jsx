@@ -1,14 +1,27 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import "../context/Home.css"
+import { useEffect, useState } from "react";
+import "../context/Home.css";
+
 
 function Home() {
 
     const [menuOpen, setMenuOpen] = useState(false);
+    const closeMenu = () => { setMenuOpen(false); };
 
-    const closeMenu = () => {
-        setMenuOpen(false);
-    };
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            const clickedMenuButton = event.target.closest(".home-menu-btn");
+            const clickedMenu = event.target.closest(".home-nav-links");
+
+            if (!clickedMenuButton && !clickedMenu) {
+                setMenuOpen(false);
+            }
+        };
+        document.addEventListener("click", handleOutsideClick);
+        return () => {
+            document.removeEventListener("click", handleOutsideClick);
+        };
+    }, []);
 
 
     return (

@@ -122,11 +122,6 @@ function PerformanceChart() {
             ) === String(comparisonInterview2)
     );
 
-    // console.log("Comparison Interview 1:", selectedInterview1);
-    // console.log("Comparison Interview 2:", selectedInterview2);
-    // console.log("Selected Interview 1 ID:", comparisonInterview1);
-    // console.log("Selected Interview 2 ID:", comparisonInterview2);
-
     const chartData = {
         labels: chartInterviews.map(
             (_, index) => `Interview ${index + 1}`

@@ -1722,53 +1722,62 @@ html[data-theme="dark"] .dashboard-footer {
     border-top-color: #374151;
 }
 
-/* MOBILE MENU - RESPONSIVE DARK THEME */
+/* DASHBOARD MOBILE MENU - VISIBILITY FIX */
 @media screen and (max-width: 640px) {
-    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-nav {
+    html body .dashboard-navbar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    html body .dashboard-navbar .dashboard-nav-right {
+        display: none !important;
+    }
+
+    html body .dashboard-navbar .dashboard-mobile-nav {
         display: block !important;
         position: relative !important;
         visibility: visible !important;
         opacity: 1 !important;
         flex-shrink: 0 !important;
-        z-index: 99999 !important;
+        z-index: 10000 !important;
     }
 
-    html[data-theme="dark"] .dashboard-navbar .dashboard-menu-button {
+    html body .dashboard-navbar .dashboard-menu-button {
         display: flex !important;
-        align-items: center;
-        justify-content: center;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px;
+        height: 44px;
         visibility: visible !important;
         opacity: 1 !important;
         cursor: pointer;
     }
 
-    html[data-theme="dark"] .dashboard-navbar {
-        display: flex !important;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    html[data-theme="dark"] .dashboard-navbar .dashboard-nav-right {
-        display: none !important;
-    }
-
-    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown {
-        position: absolute;
-        top: calc(100% + 10px);
-        right: 0;
-        z-index: 99999;
-        min-width: 200px;
+    html body .dashboard-navbar .dashboard-mobile-dropdown {
+        position: absolute !important;
+        top: calc(100% + 10px) !important;
+        right: 0 !important;
+        z-index: 10001 !important;
+        width: 220px;
         max-width: calc(100vw - 32px);
-        padding: 8px;
+        box-sizing: border-box;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    html body .dashboard-navbar {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
     }
 
-    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown a,
-    html[data-theme="dark"] .dashboard-navbar .dashboard-mobile-dropdown button {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 12px 14px;
-        text-align: left;
+    html body .dashboard-navbar .dashboard-menu-button {
+        width: 40px;
+        height: 40px;
     }
 }

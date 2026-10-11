@@ -799,8 +799,10 @@ html {
 /* MOBILE NAVIGATION */
 @media (max-width: 768px) {
     .home-navbar {
-        height: 66px;
-        padding: 0 5%;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        overflow: visible;
     }
 
     .home-logo {
@@ -817,46 +819,73 @@ html {
     /* HAMBURGER */
     .home-menu-btn {
         display: flex !important;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1002;
     }
 
     /* MOBILE NAV */
     .home-nav-links {
         position: absolute;
-        top: 66px;
-        left: 0;
-        right: 0;
-        padding: 18px 5% 25px;
+        top: calc(100% + 10px);
+        right: 5%;
+        left: auto;
+        width: 230px;
+        max-width: calc(100vw - 32px);
+        box-sizing: border-box;
+        padding: 8px;
         display: none;
         flex-direction: column;
         align-items: stretch;
         gap: 4px;
         background: #ffffff;
-        border-top: 1px solid #e7e9f0;
-        border-bottom: 1px solid #e7e9f0;
-        box-shadow:
-            0 12px 25px rgba(23, 32, 51, 0.08);
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+        z-index: 1001;
     }
 
     .home-nav-links.mobile-menu-open {
-        display: flex;
+        display: flex !important;
     }
 
     .home-nav-links a {
-        display: block;
+        display: flex;
+        align-items: center;
         width: 100%;
-        padding: 13px 12px;
-        border-radius: 7px;
-        font-size: 15px;
+        box-sizing: border-box;
+        padding: 12px 13px;
+        border: none;
+        border-radius: 9px;
+        background: transparent;
+        color: #1f2937;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: left;
+        text-decoration: none;
     }
 
     .home-nav-links a:hover {
-        background: #f2f6ff;
+        background: #f3f1ff;
+        color: #6258dc;
         transform: none;
     }
 
     .home-nav-links .home-register-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 4px;
+        padding: 12px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #7167ef, #594fd0);
+        color: #ffffff;
         text-align: center;
-        margin-top: 6px;
+    }
+
+    .home-nav-links .home-register-btn:hover {
+        background: linear-gradient(135deg, #6258dc, #4f45c5);
+        color: #ffffff;
     }
 
     /* HERO */
@@ -975,6 +1004,12 @@ html {
 @media (max-width: 480px) {
     .home-navbar {
         padding: 0 4%;
+    }
+
+    .home-nav-links {
+        right: 4%;
+        width: 220px;
+        max-width: calc(100vw - 24px);
     }
 
     .home-logo {
