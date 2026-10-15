@@ -193,85 +193,6 @@ function Register() {
                     )}
 
                     <form onSubmit={handleRegister}>
-
-                        {/* ACCOUNT TYPE */}
-                        <div className="form-group">
-                            <label htmlFor="role">
-                                Account Type
-                            </label>
-
-                            <select
-                                id="role"
-                                value={role}
-                                onChange={(e) => {
-                                    setRole(e.target.value);
-                                    setAdminSecret("");
-                                    setError("");
-                                    setSuccess("");
-                                }}
-                                disabled={loading}
-                            >
-                                <option value="user">
-                                    User
-                                </option>
-
-                                <option value="admin">
-                                    Admin
-                                </option>
-                            </select>
-                        </div>
-
-                        {/* ADMIN SECRET */}
-                        {role === "admin" && (
-                            <div className="form-group">
-                                <label htmlFor="adminSecret">
-                                    Admin Registration Secret
-                                </label>
-
-                                <div className="password-input-wrapper">
-                                    <input
-                                        id="adminSecret"
-                                        type={
-                                            showAdminSecret
-                                                ? "text"
-                                                : "password"
-                                        }
-                                        placeholder="Enter admin secret key"
-                                        value={adminSecret}
-                                        onChange={(e) =>
-                                            setAdminSecret(
-                                                e.target.value
-                                            )
-                                        }
-                                        autoComplete="off"
-                                        disabled={loading}
-                                    />
-
-                                    <button
-                                        type="button"
-                                        className="password-toggle"
-                                        onClick={() =>
-                                            setShowAdminSecret(
-                                                !showAdminSecret
-                                            )
-                                        }
-                                        disabled={loading}
-                                        aria-label={
-                                            showAdminSecret
-                                                ? "Hide admin secret"
-                                                : "Show admin secret"
-                                        }
-                                    >
-                                        {showAdminSecret ? "🙈" : "👁️"}
-                                    </button>
-                                </div>
-
-                                <small>
-                                    Authorized administrators only.
-                                </small>
-                            </div>
-                        )}
-
                         {/* NAME */}
                         <div className="form-group">
                             <label htmlFor="name">
@@ -397,6 +318,118 @@ function Register() {
                                 </button>
                             </div>
                         </div>
+
+                        {/* ACCOUNT TYPE - CIRCULAR RADIO OPTIONS */}
+                        <div className="form-group">
+                            <label>Account Type</label>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "20px",
+                                    marginTop: "10px",
+                                    flexWrap: "wrap"
+                                }}
+                            >
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="accountType"
+                                        value="user"
+                                        checked={role === "user"}
+                                        onChange={() => {
+                                            setRole("user");
+                                            setAdminSecret("");
+                                            setError("");
+                                            setSuccess("");
+                                        }}
+                                        disabled={loading}
+                                        style={{
+                                            width: "17px",
+                                            height: "17px",
+                                            accentColor: "#6366f1",
+                                            cursor: "pointer"
+                                        }}
+                                    />
+                                    <span>User</span>
+                                </label>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="accountType"
+                                        value="admin"
+                                        checked={role === "admin"}
+                                        onChange={() => {
+                                            setRole("admin");
+                                            setError("");
+                                            setSuccess("");
+                                        }}
+                                        disabled={loading}
+                                        style={{
+                                            width: "17px",
+                                            height: "17px",
+                                            accentColor: "#6366f1",
+                                            cursor: "pointer"
+                                        }}
+                                    />
+                                    <span>Admin</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* ADMIN REGISTRATION SECRET */}
+                        {role === "admin" && (
+                            <div className="form-group">
+                                <label htmlFor="adminSecret">
+                                    Admin Registration Secret
+                                </label>
+
+                                <div className="password-input-wrapper">
+                                    <input
+                                        id="adminSecret"
+                                        type={showAdminSecret ? "text" : "password"}
+                                        placeholder="Enter admin secret key"
+                                        value={adminSecret}
+                                        onChange={(e) => setAdminSecret(e.target.value)}
+                                        autoComplete="off"
+                                        disabled={loading}
+                                    />
+
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={() =>
+                                            setShowAdminSecret(!showAdminSecret)
+                                        }
+                                        disabled={loading}
+                                        aria-label={
+                                            showAdminSecret
+                                                ? "Hide admin secret"
+                                                : "Show admin secret"
+                                        }
+                                    >
+                                        {showAdminSecret ? "🙈" : "👁️"}
+                                    </button>
+                                </div>
+
+                                <small>Authorized administrators only.</small>
+                            </div>
+                        )}
 
                         {/* SUBMIT */}
                         <button
