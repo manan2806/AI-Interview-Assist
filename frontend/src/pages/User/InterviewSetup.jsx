@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getUser } from "../utils/auth";
-import { getSettings } from "../services/api";
-import "../context/InterviewSetup.css"
+import { getUser } from "../../utils/auth";
+import { getSettings } from "../../services/api";
+import "../../context/User/InterviewSetup.css"
 import {
     createInterview,
     generateQuestions
-} from "../services/interviewService";
+} from "../../services/interviewService";
 
 function InterviewSetup() {
     const navigate = useNavigate();

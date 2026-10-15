@@ -8,8 +8,8 @@ import {
 } from "chart.js";
 
 import { Line, Bar, Doughnut } from "react-chartjs-2";
-import "../context/PerformanceChart.css"
-import { getInterviewHistory } from "../services/interviewService";
+import "../../context/User/PerformanceChart.css"
+import { getInterviewHistory } from "../../services/interviewService";
 
 ChartJS.register(
     CategoryScale,

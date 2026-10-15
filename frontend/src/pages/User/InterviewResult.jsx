@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import api from "../services/api";
-import "../context/InterviewResult.css"
+import api from "../../services/api";
+import "../../context/User/InterviewResult.css"
 import {
     getInterviewDashboard,
     generateOverallResult
-} from "../services/interviewService";
+} from "../../services/interviewService";
 
 
 function InterviewResult() {

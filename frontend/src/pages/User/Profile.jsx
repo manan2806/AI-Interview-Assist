@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../context/Profile.css"
+import "../../context/User/Profile.css"
 import {
     getProfile,
     updateProfile
-} from "../services/authService";
+} from "../../services/authService";
 
 function Profile() {
     const navigate = useNavigate();

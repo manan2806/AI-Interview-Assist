@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import "../../context/Admin/AdminDashboard.css";
 
 const initialStats = {
     total_users: 0,

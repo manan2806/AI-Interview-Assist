@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import "../context/InterviewStart.css"
+import "../../context/User/InterviewStart.css"
 import {
     startInterview,
     resumeInterview,
@@ -11,7 +11,7 @@ import {
     generateOverallResult,
     getInterviewQuestion,
     updateInterviewAnswer
-} from "../services/interviewService";
+} from "../../services/interviewService";
 
 function InterviewStart() {
     const navigate = useNavigate();

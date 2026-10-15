@@ -1,22 +1,30 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import VerifyOTP from "./pages/VerifyOTP";
-import ResetPassword from "./pages/ResetPassword";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import ProfileImprovement from "./pages/ProfileImprovement";
-import InterviewSetup from "./pages/InterviewSetup";
-import InterviewStart from "./pages/InterviewStart";
-import InterviewResult from "./pages/InterviewResult";
-import InterviewHistory from "./pages/InterviewHistory";
-import InterviewDetails from "./pages/InterviewDetails";
-import PerformanceChart from "./pages/PerformanceChart";
-import Support from "./pages/Support";
-import Settings from "./pages/Settings";
+
+// Auth Pages
+import Home from "./pages/Auth/Home";
+import Login from "./pages/Auth/Login";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import VerifyOTP from "./pages/Auth/VerifyOTP";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import Register from "./pages/Auth/Register";
+
+// User Pages
+import Dashboard from "./pages/User/Dashboard";
+import Profile from "./pages/User/Profile";
+import ProfileImprovement from "./pages/User/ProfileImprovement";
+import InterviewSetup from "./pages/User/InterviewSetup";
+import InterviewStart from "./pages/User/InterviewStart";
+import InterviewResult from "./pages/User/InterviewResult";
+import InterviewHistory from "./pages/User/InterviewHistory";
+import InterviewDetails from "./pages/User/InterviewDetails";
+import PerformanceChart from "./pages/User/PerformanceChart";
+import Support from "./pages/User/Support";
+import Settings from "./pages/User/Settings";
+
+// Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+
+// Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {

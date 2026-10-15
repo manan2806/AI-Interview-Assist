@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
-import { getInterviewDetails, retakeInterview } from "../services/interviewService";
-import "../context/InterviewDetails.css"
+import { getInterviewDetails, retakeInterview } from "../../services/interviewService";
+import "../../context/User/InterviewDetails.css"
 
 function InterviewDetails() {
 

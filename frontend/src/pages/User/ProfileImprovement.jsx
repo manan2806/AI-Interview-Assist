@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getProfile } from "../services/authService";
-import "../context/ProfileImprovement.css"
+import { getProfile } from "../../services/authService";
+import "../../context/User/ProfileImprovement.css"
 
 function ProfileImprovement() {
     const navigate = useNavigate();

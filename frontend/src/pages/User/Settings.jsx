@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getSettings, updateSettings, } from "../services/api";
-import { useTheme } from "../context/ThemeContext.jsx";
-import { changePassword, deleteAccount } from "../services/authService";
-import "../context/Settings.css"
+import { getSettings, updateSettings, } from "../../services/api.js";
+import { useTheme } from "../../context/ThemeContext.jsx";
+import { changePassword, deleteAccount } from "../../services/authService.js";
+import "../../context/User/Settings.css"
 
 
 function Settings() {
