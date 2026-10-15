@@ -16,7 +16,7 @@ import InterviewDetails from "./pages/InterviewDetails";
 import PerformanceChart from "./pages/PerformanceChart";
 import Support from "./pages/Support";
 import Settings from "./pages/Settings";
-
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -72,7 +72,7 @@ function App() {
                 {/* ==================================
                     PROTECTED ROUTES
                 ================================== */}
-                <Route element={<ProtectedRoute />}>
+                <Route element={<ProtectedRoute requiredRole="user" />}>
                     {/* Dashboard */}
                     <Route
                         path="/dashboard"
@@ -137,6 +137,16 @@ function App() {
                     <Route
                         path="/interview/details/:id"
                         element={<InterviewDetails />}
+                    />
+                </Route>
+
+                {/* ==================================
+                    ADMIN ROUTE
+                ================================== */}
+                <Route element={<ProtectedRoute requiredRole="admin" />}>
+                    <Route
+                        path="/admin-dashboard"
+                        element={<AdminDashboard />}
                     />
                 </Route>
 

@@ -46,7 +46,20 @@ function Login() {
                     );
                 }
 
-                navigate("/dashboard");
+                const role = data.user?.role;
+
+                if (role === "admin") {
+                    navigate("/admin-dashboard", { replace: true });
+                } else if (role === "user") {
+                    navigate("/dashboard", { replace: true });
+                } else {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+
+                    setError(
+                        "Unable to verify account role. Please contact support."
+                    );
+                }
             } else {
                 setError(
                     data.message ||

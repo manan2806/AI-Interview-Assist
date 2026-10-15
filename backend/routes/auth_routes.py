@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, redirect, session
 from flask_bcrypt import Bcrypt
 import uuid
-import os
+import os, hmac
 import secrets
 import hashlib
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -31,82 +31,140 @@ GMAIL_REDIRECT_URI = (
 # ==========================================
 @auth_bp.route("/api/register", methods=["POST"])
 def register():
-
     try:
         data = request.get_json(silent=True)
 
-        if not data:
+        # Validate JSON
+        if not isinstance(data, dict):
             return (
-                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                jsonify({"success": False, "message": "Please send valid JSON data."}),
                 400,
             )
 
         name = data.get("name")
         email = data.get("email")
         password = data.get("password")
+        role = data.get("role", "user")
 
-        if not name or not email or not password:
+        # Validate required fields
+        if not all(
+            [
+                isinstance(name, str) and name.strip(),
+                isinstance(email, str) and email.strip(),
+                isinstance(password, str) and password,
+            ]
+        ):
             return (
                 jsonify(
                     {
                         "success": False,
-                        "message": "Name, email and password are required",
+                        "message": "Name, email and password are required.",
                     }
                 ),
                 400,
             )
 
-        # CHECK DATABASE
+        if not isinstance(role, str) or role not in ("user", "admin"):
+            return jsonify({"success": False, "message": "Invalid account type."}), 400
+
+        # Validate admin registration secret
+        if role == "admin":
+            configured_secret = os.getenv("ADMIN_REGISTRATION_SECRET")
+            submitted_secret = data.get("admin_secret")
+
+            if not configured_secret:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Admin registration is not configured.",
+                        }
+                    ),
+                    503,
+                )
+
+            if not isinstance(submitted_secret, str) or not hmac.compare_digest(
+                submitted_secret, configured_secret
+            ):
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Invalid admin registration secret.",
+                        }
+                    ),
+                    403,
+                )
+
         if database.db is None:
             return (
-                jsonify({"success": False, "message": "Database is not connected"}),
+                jsonify({"success": False, "message": "Database is not connected."}),
                 500,
             )
+
         users = database.db["users"]
 
-        # CLEAN EMAIL
+        # Normalize email
         email = email.strip().lower()
 
-        # CHECK EXISTING USER
-        existing_user = users.find_one({"email": email})
-        if existing_user:
+        # Check existing account
+        if users.find_one({"email": email}):
             return (
-                jsonify({"success": False, "message": "Email already registered"}),
+                jsonify({"success": False, "message": "Email already registered."}),
                 409,
             )
 
-        # HASH PASSWORD
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
 
-        # CREATE USER
+        # Generate role-specific user ID
+        if role == "admin":
+            user_id = "ADM-" + str(uuid.uuid4())[:8].upper()
+        else:
+            user_id = "USR-" + str(uuid.uuid4())[:8].upper()
+
+        # Common fields for both account types
         user = {
-            "user_id": "USR-" + str(uuid.uuid4())[:8].upper(),
+            "user_id": user_id,
             "name": name.strip(),
             "email": email,
             "password": hashed_password,
-            "skills": [],
-            "target_role": "",
-            "experience_level": "Fresher",
+            "role": role,
         }
 
-        # SAVE USER
+        # Add profile fields only for normal users
+        if role == "user":
+            user.update(
+                {"skills": [], "target_role": "", "experience_level": "Fresher"}
+            )
+
         result = users.insert_one(user)
 
-        # SUCCESS RESPONSE
+        # Success response
         return (
             jsonify(
                 {
                     "success": True,
-                    "message": "User registered successfully 🎉",
+                    "message": (
+                        "Admin registered successfully."
+                        if role == "admin"
+                        else "User registered successfully."
+                    ),
                     "user_id": user["user_id"],
+                    "role": user["role"],
                     "mongo_id": str(result.inserted_id),
                 }
             ),
             201,
         )
 
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+    except Exception:
+        # Do not expose internal exception details to clients
+        return (
+            jsonify(
+                {"success": False, "message": "An internal server error occurred."}
+            ),
+            500,
+        )
 
 
 # ==========================================
@@ -114,67 +172,77 @@ def register():
 # ==========================================
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
-
     try:
         data = request.get_json(silent=True)
 
         if not data:
             return (
-                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                jsonify({"success": False, "message": "Please send valid JSON data."}),
                 400,
             )
 
-        # GET LOGIN DATA
-        email = data.get("email")
-        password = data.get("password")
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "")
 
-        # VALIDATION
         if not email or not password:
             return (
                 jsonify(
-                    {"success": False, "message": "Email and password are required"}
+                    {"success": False, "message": "Email and password are required."}
                 ),
                 400,
             )
 
-        # CHECK DATABASE
         if database.db is None:
             return (
-                jsonify({"success": False, "message": "Database is not connected"}),
+                jsonify({"success": False, "message": "Database is not connected."}),
                 500,
             )
+
         users = database.db["users"]
 
-        # FIND USER
-        user = users.find_one({"email": email.strip().lower()})
+        user = users.find_one({"email": email})
+
         if not user:
             return (
-                jsonify({"success": False, "message": "Invalid email or password"}),
+                jsonify({"success": False, "message": "Invalid email or password."}),
                 401,
             )
 
-        # VERIFY PASSWORD
-        password_correct = bcrypt.check_password_hash(user["password"], password)
-        if not password_correct:
+        if not bcrypt.check_password_hash(user["password"], password):
             return (
-                jsonify({"success": False, "message": "Invalid email or password"}),
+                jsonify({"success": False, "message": "Invalid email or password."}),
                 401,
             )
 
-        # GENERATE JWT TOKEN
+        # Get and validate user role
+        role = user.get("role")
+
+        if role not in ("admin", "user"):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Account role is missing or invalid. Please contact support.",
+                    }
+                ),
+                403,
+            )
+
+        # Generate JWT token
         token = generate_token(user)
 
-        # LOGIN SUCCESS
+        # Return login response
         return (
             jsonify(
                 {
                     "success": True,
-                    "message": "Login successful 🎉",
+                    "message": "Login successful.",
                     "token": token,
                     "user": {
                         "user_id": user["user_id"],
                         "name": user["name"],
                         "email": user["email"],
+                        "role": role,
                         "skills": user.get("skills", []),
                         "target_role": user.get("target_role", ""),
                         "experience_level": user.get("experience_level", "Fresher"),
@@ -184,8 +252,18 @@ def login():
             200,
         )
 
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+    except Exception:
+        # Log the full exception on the server, not to the client
+        import logging
+
+        logging.exception("Login API error")
+
+        return (
+            jsonify(
+                {"success": False, "message": "An internal server error occurred."}
+            ),
+            500,
+        )
 
 
 # ==========================================

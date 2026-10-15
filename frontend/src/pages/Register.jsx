@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/authService";
-import "../context/AuthPage.css"
+import "../context/AuthPage.css";
 
 function Register() {
     const navigate = useNavigate();
@@ -10,8 +10,14 @@ function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+
+    const [role, setRole] = useState("user");
+    const [adminSecret, setAdminSecret] = useState("");
+
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showAdminSecret, setShowAdminSecret] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -52,33 +58,44 @@ function Register() {
             return;
         }
 
+        if (role === "admin" && !adminSecret.trim()) {
+            setError("Please enter the admin registration secret.");
+            return;
+        }
+
         try {
             setLoading(true);
 
-            const data = await registerUser({
+            const registrationData = {
                 name: name.trim(),
                 email: email.trim(),
-                password: password
-            });
+                password,
+                role,
+                ...(role === "admin"
+                    ? { admin_secret: adminSecret }
+                    : {})
+            };
+
+            const data = await registerUser(registrationData);
 
             if (data.success) {
                 setSuccess(
-                    data.message ||
-                    "Account created successfully."
+                    data.message || "Account created successfully."
                 );
 
                 setName("");
                 setEmail("");
                 setPassword("");
                 setConfirmPassword("");
+                setAdminSecret("");
+                setRole("user");
 
                 setTimeout(() => {
                     navigate("/login");
                 }, 1200);
             } else {
                 setError(
-                    data.message ||
-                    "Unable to create account."
+                    data.message || "Unable to create account."
                 );
             }
         } catch (error) {
@@ -95,16 +112,13 @@ function Register() {
 
     return (
         <div className="auth-page">
+
             {/* LEFT SECTION */}
             <div className="auth-left">
                 <div className="brand">
-                    <div className="brand-icon">
-                        AI
-                    </div>
+                    <div className="brand-icon">AI</div>
 
-                    <h1>
-                        AI Interview Assist
-                    </h1>
+                    <h1>AI Interview Assist</h1>
 
                     <p>
                         Prepare smarter and perform better
@@ -115,12 +129,8 @@ function Register() {
                 <div className="feature-list">
                     <div className="feature">
                         <span>✓</span>
-
                         <div>
-                            <strong>
-                                AI-Powered Questions
-                            </strong>
-
+                            <strong>AI-Powered Questions</strong>
                             <p>
                                 Get interview questions based
                                 on your job role and experience.
@@ -130,12 +140,8 @@ function Register() {
 
                     <div className="feature">
                         <span>✓</span>
-
                         <div>
-                            <strong>
-                                Smart Answer Evaluation
-                            </strong>
-
+                            <strong>Smart Answer Evaluation</strong>
                             <p>
                                 Receive AI-based feedback on
                                 your interview answers.
@@ -145,12 +151,8 @@ function Register() {
 
                     <div className="feature">
                         <span>✓</span>
-
                         <div>
-                            <strong>
-                                Track Your Progress
-                            </strong>
-
+                            <strong>Track Your Progress</strong>
                             <p>
                                 Review your interview history,
                                 scores and improvements.
@@ -163,17 +165,11 @@ function Register() {
             {/* RIGHT SECTION */}
             <div className="auth-right">
                 <div className="auth-card register-card">
-                    {/* MOBILE LOGO */}
-                    <div className="mobile-logo">
-                        AI
-                    </div>
 
-                    {/* HEADER */}
+                    <div className="mobile-logo">AI</div>
+
                     <div className="auth-header">
-                        <h2>
-                            Create Account
-                        </h2>
-
+                        <h2>Create Account</h2>
                         <p>
                             Start your AI-powered interview preparation
                         </p>
@@ -181,20 +177,101 @@ function Register() {
 
                     {/* ERROR */}
                     {error && (
-                        <div className="error-message">
+                        <div className="error-message" role="alert">
                             {error}
                         </div>
                     )}
 
                     {/* SUCCESS */}
                     {success && (
-                        <div className="success-message">
+                        <div
+                            className="success-message"
+                            role="status"
+                        >
                             {success}
                         </div>
                     )}
 
-                    {/* FORM */}
                     <form onSubmit={handleRegister}>
+
+                        {/* ACCOUNT TYPE */}
+                        <div className="form-group">
+                            <label htmlFor="role">
+                                Account Type
+                            </label>
+
+                            <select
+                                id="role"
+                                value={role}
+                                onChange={(e) => {
+                                    setRole(e.target.value);
+                                    setAdminSecret("");
+                                    setError("");
+                                    setSuccess("");
+                                }}
+                                disabled={loading}
+                            >
+                                <option value="user">
+                                    User
+                                </option>
+
+                                <option value="admin">
+                                    Admin
+                                </option>
+                            </select>
+                        </div>
+
+                        {/* ADMIN SECRET */}
+                        {role === "admin" && (
+                            <div className="form-group">
+                                <label htmlFor="adminSecret">
+                                    Admin Registration Secret
+                                </label>
+
+                                <div className="password-input-wrapper">
+                                    <input
+                                        id="adminSecret"
+                                        type={
+                                            showAdminSecret
+                                                ? "text"
+                                                : "password"
+                                        }
+                                        placeholder="Enter admin secret key"
+                                        value={adminSecret}
+                                        onChange={(e) =>
+                                            setAdminSecret(
+                                                e.target.value
+                                            )
+                                        }
+                                        autoComplete="off"
+                                        disabled={loading}
+                                    />
+
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={() =>
+                                            setShowAdminSecret(
+                                                !showAdminSecret
+                                            )
+                                        }
+                                        disabled={loading}
+                                        aria-label={
+                                            showAdminSecret
+                                                ? "Hide admin secret"
+                                                : "Show admin secret"
+                                        }
+                                    >
+                                        {showAdminSecret ? "🙈" : "👁️"}
+                                    </button>
+                                </div>
+
+                                <small>
+                                    Authorized administrators only.
+                                </small>
+                            </div>
+                        )}
+
                         {/* NAME */}
                         <div className="form-group">
                             <label htmlFor="name">
@@ -314,12 +391,14 @@ function Register() {
                                             : "Show password"
                                     }
                                 >
-                                    {showConfirmPassword ? "🙈" : "👁️"}
+                                    {showConfirmPassword
+                                        ? "🙈"
+                                        : "👁️"}
                                 </button>
                             </div>
                         </div>
 
-                        {/* BUTTON */}
+                        {/* SUBMIT */}
                         <button
                             type="submit"
                             className="auth-button"
@@ -327,19 +406,16 @@ function Register() {
                         >
                             {loading
                                 ? "Creating Account..."
-                                : "Create Account"}
+                                : role === "admin"
+                                    ? "Create Admin Account"
+                                    : "Create Account"}
                         </button>
                     </form>
 
                     {/* LOGIN */}
                     <div className="auth-footer">
-                        <span>
-                            Already have an account?
-                        </span>
-
-                        <Link to="/login">
-                            Sign In
-                        </Link>
+                        <span>Already have an account?</span>
+                        <Link to="/login">Sign In</Link>
                     </div>
 
                     {/* HOME */}
@@ -351,6 +427,7 @@ function Register() {
                             ← Back to Home
                         </Link>
                     </div>
+
                 </div>
             </div>
         </div>
