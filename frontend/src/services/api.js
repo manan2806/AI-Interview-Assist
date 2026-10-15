@@ -25,7 +25,7 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         const requestUrl = error.config?.url || "";
-        
+
         // Login aur registration ke errors par redirect mat karo
         const isPublicAuthRequest =
             requestUrl.includes("/api/login") ||

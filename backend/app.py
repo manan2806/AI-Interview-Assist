@@ -9,6 +9,7 @@ from routes.auth_routes import auth_bp, bcrypt
 from routes.profile_routes import user_bp
 from routes.interview_routes import interview_bp
 from routes.support_routes import support_bp
+from routes.admin_routes import admin_bp
 
 
 def create_app():
@@ -43,14 +44,7 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(interview_bp, url_prefix="/api/interview")
     app.register_blueprint(support_bp)
-
-    # print("\n========== REGISTERED INTERVIEW ROUTES ==========")
-
-    # for rule in app.url_map.iter_rules():
-    #     if str(rule).startswith("/api/interview"):
-    #         print(rule)
-
-    # print("=================================================\n")
+    app.register_blueprint(admin_bp)
 
     @app.route("/", methods=["GET"])
     def home():
