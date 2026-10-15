@@ -307,7 +307,6 @@
 }
 
 /* Detail colors */
-
 .history-detail:nth-child(1) {
     background: linear-gradient(135deg, #ffffff, #eeeaff);
     border-color: #d8d1ff;
@@ -883,7 +882,6 @@
         font-size: 22px;
     }
 }
-
 
 /* ==========================================
    INTERVIEW HISTORY - COLORFUL DARK MODE
@@ -1696,7 +1694,6 @@ html[data-theme="dark"] .history-page a:focus-visible {
         width: 100%;
     }
 }
-
 
 /* ==========================================
    ADVANCED SEARCH & FILTER (COLORFUL DARK MODE)

@@ -1,13 +1,10 @@
 function AuthLayout({ children }) {
     return (
         <div className="auth-page">
-
             <div className="auth-left">
                 <div className="brand">
                     <div className="brand-icon">AI</div>
-
                     <h1>AI Interview Assist</h1>
-
                     <p>
                         Prepare smarter. Practice better.
                         Crack your next interview with confidence.
@@ -44,7 +41,6 @@ function AuthLayout({ children }) {
             <div className="auth-right">
                 {children}
             </div>
-
         </div>
     );
 }

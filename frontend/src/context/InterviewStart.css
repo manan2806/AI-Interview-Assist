@@ -677,8 +677,6 @@
 /* ==========================================
    INTERVIEW START - COLORFUL DARK MODE
 ========================================== */
-
-/* MAIN PAGE */
 html[data-theme="dark"] .interview-start-page {
     background: #0b1120;
     color: #e5eaf5;

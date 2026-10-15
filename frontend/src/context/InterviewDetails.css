@@ -1408,8 +1408,6 @@ html[data-theme="dark"] .details-page a:focus-visible {
 /* ==========================================
    INTERVIEW DETAILS - MOBILE BUTTON ALIGNMENT
 ========================================== */
-
-/* Header action buttons */
 .details-header-actions {
     display: flex;
     align-items: stretch;

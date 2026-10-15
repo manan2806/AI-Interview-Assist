@@ -149,7 +149,6 @@
 
 /* PERFORMANCE CHART - TABLET */
 @media (max-width: 768px) {
-
     .performance-chart-container {
         padding: 20px;
         border-radius: 15px;
@@ -174,7 +173,6 @@
 
 /* PERFORMANCE CHART - MOBILE */
 @media (max-width: 480px) {
-
     .performance-chart-container {
         padding: 16px;
         border-radius: 13px;
@@ -330,7 +328,6 @@
 
 /* PERFORMANCE OVERVIEW MOBILE= */
 @media (max-width: 768px) {
-
     .score-distribution-charts {
         grid-template-columns: 1fr;
         gap: 28px;
@@ -359,7 +356,6 @@
 }
 
 @media (max-width: 480px) {
-
     .score-distribution-charts {
         margin-top: 20px;
     }
@@ -969,8 +965,6 @@
 /* ==========================================
    PERFORMANCE CHART - COLORFUL DARK MODE
 ========================================== */
-
-/* PERFORMANCE CHART */
 html[data-theme="dark"] .performance-chart-container,
 html[data-theme="dark"] .score-distribution-container,
 html[data-theme="dark"] .interview-comparison-container {

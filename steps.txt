@@ -1,6 +1,5 @@
 //( in mongodb atlas) Username : rangoonwalamanan_db_user  Password : AIInterview2026 
 
-
 *** Backend ***
 ✅ STEP 1 — Project Setup + Flask Backend
 ✅ STEP 2 — MongoDB Connection

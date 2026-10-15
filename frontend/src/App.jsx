@@ -1,10 +1,4 @@
-import {
-    BrowserRouter,
-    Routes,
-    Route,
-    Navigate
-} from "react-router-dom";
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -26,7 +20,6 @@ import Settings from "./pages/Settings";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
-
     return (
         <BrowserRouter>
 
@@ -80,7 +73,6 @@ function App() {
                     PROTECTED ROUTES
                 ================================== */}
                 <Route element={<ProtectedRoute />}>
-
                     {/* Dashboard */}
                     <Route
                         path="/dashboard"
@@ -146,7 +138,6 @@ function App() {
                         path="/interview/details/:id"
                         element={<InterviewDetails />}
                     />
-
                 </Route>
 
                 {/* ==================================
@@ -154,14 +145,8 @@ function App() {
                 ================================== */}
                 <Route
                     path="*"
-                    element={
-                        <Navigate
-                            to="/"
-                            replace
-                        />
-                    }
+                    element={<Navigate to="/" replace />}
                 />
-
             </Routes>
 
         </BrowserRouter>
