@@ -206,8 +206,14 @@ function AdminDashboard() {
                 </Link>
 
                 {/* DESKTOP: LOGOUT ONLY */}
-
                 <div className="admin-navbar-actions admin-desktop-nav">
+                    <Link
+                        to="/admin-profile"
+                        className="admin-profile-nav-link"
+                    >
+                        👤 My Profile
+                    </Link>
+
                     <button
                         type="button"
                         className="admin-logout-btn"
@@ -218,7 +224,6 @@ function AdminDashboard() {
                 </div>
 
                 {/* MOBILE MENU */}
-
                 <div className="admin-mobile-nav">
                     <button
                         type="button"
@@ -234,6 +239,14 @@ function AdminDashboard() {
 
                     {mobileMenuOpen && (
                         <div className="admin-mobile-dropdown">
+                            <Link
+                                to="/admin-profile"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>👤</span>
+                                <span>My Profile</span>
+                            </Link>
+
                             <button
                                 type="button"
                                 onClick={() => {
@@ -247,6 +260,7 @@ function AdminDashboard() {
                         </div>
                     )}
                 </div>
+
             </nav>
 
             {/* MAIN CONTENT */}
