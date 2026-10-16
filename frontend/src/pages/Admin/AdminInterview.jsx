@@ -10,9 +10,31 @@ function AdminInterview() {
 
     const [interviews, setInterviews] = useState([]);
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // FILTER HELPER
+    const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [experienceFilter, setExperienceFilter] = useState("all");
+    const [difficultyFilter, setDifficultyFilter] = useState("all");
+    const [dateFilter, setDateFilter] = useState("all");
+    const [sortBy, setSortBy] = useState("newest");
+
+    const hasActiveFilters =
+        statusFilter !== "all" ||
+        experienceFilter !== "all" ||
+        difficultyFilter !== "all" ||
+        dateFilter !== "all" ||
+        sortBy !== "newest";
+
+    const clearFilters = () => {
+        setStatusFilter("all");
+        setExperienceFilter("all");
+        setDifficultyFilter("all");
+        setDateFilter("all");
+        setSortBy("newest");
+    };
 
     const fetchInterviews = useCallback(async () => {
         setLoading(true);
@@ -55,28 +77,84 @@ function AdminInterview() {
         fetchInterviews();
     }, [navigate, fetchInterviews]);
 
-    const filteredInterviews = interviews.filter((interview) => {
-        const query = search.trim().toLowerCase();
+    const filteredInterviews = interviews
+        .filter((interview) => {
+            const query = search.trim().toLowerCase();
 
-        const matchesSearch = [
-            interview.job_role,
-            interview.interview_type,
-            interview.experience_level,
-            interview.difficulty,
-            interview.status,
-            interview.interview_id,
-            interview.user_id,
-        ].some((value) =>
-            String(value || "").toLowerCase().includes(query)
-        );
+            const matchesSearch = [
+                interview.job_role,
+                interview.interview_type,
+                interview.experience_level,
+                interview.difficulty,
+                interview.status,
+                interview.interview_id,
+                interview.user_id,
+            ].some((value) =>
+                String(value || "").toLowerCase().includes(query)
+            );
 
-        const matchesStatus =
-            statusFilter === "all" ||
-            String(interview.status || "unknown").toLowerCase() ===
-            statusFilter;
+            const matchesStatus =
+                statusFilter === "all" ||
+                String(interview.status || "unknown").toLowerCase() ===
+                statusFilter;
 
-        return matchesSearch && matchesStatus;
-    });
+            const experience = String(interview.experience_level || "")
+                .toLowerCase()
+                .replace(/[-_]/g, " ")
+                .trim();
+
+            const matchesExperience =
+                experienceFilter === "all" ||
+                experience === experienceFilter;
+
+            const matchesDifficulty =
+                difficultyFilter === "all" ||
+                String(interview.difficulty || "").toLowerCase() ===
+                difficultyFilter;
+
+            let matchesDate = true;
+
+            if (dateFilter !== "all") {
+                const createdDate = new Date(interview.created_at);
+                const now = new Date();
+
+                if (
+                    !interview.created_at ||
+                    Number.isNaN(createdDate.getTime())
+                ) {
+                    matchesDate = false;
+                } else if (dateFilter === "today") {
+                    matchesDate =
+                        createdDate.getFullYear() === now.getFullYear() &&
+                        createdDate.getMonth() === now.getMonth() &&
+                        createdDate.getDate() === now.getDate();
+                } else {
+                    const days = Number(dateFilter.replace("days", ""));
+                    const cutoff = new Date(
+                        now.getTime() - days * 24 * 60 * 60 * 1000
+                    );
+
+                    matchesDate =
+                        createdDate >= cutoff && createdDate <= now;
+                }
+            }
+
+            return (
+                matchesSearch &&
+                matchesStatus &&
+                matchesExperience &&
+                matchesDifficulty &&
+                matchesDate
+            );
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.created_at || 0).getTime();
+            const dateB = new Date(b.created_at || 0).getTime();
+
+            return sortBy === "oldest"
+                ? dateA - dateB
+                : dateB - dateA;
+        });
 
     const formatDate = (value) => {
         if (!value) return "—";
@@ -131,22 +209,103 @@ function AdminInterview() {
                     aria-label="Search interviews"
                 />
 
-                <select
-                    className="admin-interviews-filter"
-                    value={statusFilter}
-                    onChange={(event) =>
-                        setStatusFilter(event.target.value)
-                    }
-                    aria-label="Filter by status"
-                >
-                    <option value="all">All statuses</option>
-                    <option value="created">Created</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="evaluation_pending">
-                        Evaluation Pending
-                    </option>
-                </select>
+
+                <div className="admin-filter-wrapper">
+                    <button
+                        type="button"
+                        className={`admin-filter-button ${hasActiveFilters ? "active" : ""}`}
+                        onClick={() => setFilterMenuOpen((prev) => !prev)}
+                        aria-expanded={filterMenuOpen}
+                        aria-label="Open interview filters"
+                    >
+                        <span>☷ Filters</span>
+                        {hasActiveFilters && (
+                            <span className="admin-filter-count">Active</span>
+                        )}
+                        <span>{filterMenuOpen ? "▲" : "▼"}</span>
+                    </button>
+
+                    {filterMenuOpen && (
+                        <div className="admin-filter-dropdown">
+                            <div className="admin-filter-dropdown-header">
+                                <strong>Filter Interviews</strong>
+                                <button
+                                    type="button"
+                                    onClick={clearFilters}
+                                    className="admin-filter-clear"
+                                >
+                                    Clear all
+                                </button>
+                            </div>
+
+                            <label>
+                                Status
+                                <select
+                                    value={statusFilter}
+                                    onChange={(event) => setStatusFilter(event.target.value)}
+                                >
+                                    <option value="all">All statuses</option>
+                                    <option value="created">Created</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="evaluation_pending">Evaluation Pending</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Experience
+                                <select
+                                    value={experienceFilter}
+                                    onChange={(event) => setExperienceFilter(event.target.value)}
+                                >
+                                    <option value="all">All Experience Levels</option>
+                                    <option value="fresher">Fresher</option>
+                                    <option value="junior">Junior</option>
+                                    <option value="mid level">Mid Level</option>
+                                    <option value="senior">Senior</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Difficulty
+                                <select
+                                    value={difficultyFilter}
+                                    onChange={(event) => setDifficultyFilter(event.target.value)}
+                                >
+                                    <option value="all">All difficulties</option>
+                                    <option value="easy">Easy</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Created date
+                                <select
+                                    value={dateFilter}
+                                    onChange={(event) => setDateFilter(event.target.value)}
+                                >
+                                    <option value="all">Any time</option>
+                                    <option value="today">Today</option>
+                                    <option value="7days">Last 7 days</option>
+                                    <option value="30days">Last 30 days</option>
+                                    <option value="90days">Last 90 days</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Sort by
+                                <select
+                                    value={sortBy}
+                                    onChange={(event) => setSortBy(event.target.value)}
+                                >
+                                    <option value="newest">Newest first</option>
+                                    <option value="oldest">Oldest first</option>
+                                </select>
+                            </label>
+                        </div>
+                    )}
+                </div>
 
                 <button
                     type="button"
@@ -190,6 +349,7 @@ function AdminInterview() {
                         <table className="admin-interviews-table">
                             <thead>
                                 <tr>
+                                    <th>User ID</th>
                                     <th>Job Role</th>
                                     <th>Type</th>
                                     <th>Experience</th>
@@ -202,16 +362,19 @@ function AdminInterview() {
                             <tbody>
                                 {filteredInterviews.map((interview) => (
                                     <tr key={interview.interview_id}>
+                                        <td>{interview.user_id || "—"}</td>
                                         <td>{interview.job_role || "—"}</td>
                                         <td>{interview.interview_type || "—"}</td>
                                         <td>{interview.experience_level || "—"}</td>
                                         <td>{interview.difficulty || "—"}</td>
                                         <td>
+
                                             <span
-                                                className={`status-badge ${interview.status}`}
+                                                className={`status-badge ${statusClass(interview.status)}`}
                                             >
                                                 {interview.status || "Unknown"}
                                             </span>
+
                                         </td>
                                         <td>{formatDate(interview.created_at)}</td>
                                     </tr>

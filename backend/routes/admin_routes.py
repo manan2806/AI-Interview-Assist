@@ -63,7 +63,7 @@ def admin_get_users(current_user):
         users = list(
             users_collection.find(
                 {"role": {"$ne": "admin"}},
-                {"_id": 1, "name": 1, "email": 1, "role": 1},
+                {"_id": 1, "user_id": 1, "name": 1, "email": 1, "role": 1},
             ).sort("_id", -1)
         )
 
@@ -72,7 +72,7 @@ def admin_get_users(current_user):
         for user in users:
             user_list.append(
                 {
-                    "user_id": str(user["_id"]),
+                    "user_id": user.get("user_id", ""),
                     "name": user.get("name", ""),
                     "email": user.get("email", ""),
                     "role": user.get("role", "user"),

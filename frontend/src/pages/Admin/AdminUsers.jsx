@@ -158,6 +158,7 @@ function AdminUsers() {
                         <table className="admin-users-table">
                             <thead>
                                 <tr>
+                                    <th>User ID</th>
                                     <th>User</th>
                                     <th>Email</th>
                                     <th>Role</th>
@@ -167,6 +168,9 @@ function AdminUsers() {
                             <tbody>
                                 {filteredUsers.map((user) => (
                                     <tr key={user.user_id}>
+                                        <td>
+                                            {user.user_id || "—"}
+                                        </td>
                                         <td>
                                             <div className="admin-users-identity">
                                                 <span className="admin-users-avatar">
@@ -194,6 +198,7 @@ function AdminUsers() {
                                 ))}
                             </tbody>
                         </table>
+
                     </div>
                 ) : null}
             </section>
