@@ -248,6 +248,39 @@
     font-size: 14px;
 }
 
+.admin-user-id-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.admin-copy-id-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    color: #4f46e5;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-copy-id-btn:hover {
+    color: #fff;
+    background: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.admin-copy-id-btn:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
 .admin-users-table tbody tr {
     transition: background 0.2s ease;
 }

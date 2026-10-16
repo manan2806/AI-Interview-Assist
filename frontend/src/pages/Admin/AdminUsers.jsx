@@ -169,8 +169,37 @@ function AdminUsers() {
                                 {filteredUsers.map((user) => (
                                     <tr key={user.user_id}>
                                         <td>
-                                            {user.user_id || "—"}
+                                            <div className="admin-user-id-cell">
+                                                <span>{user.user_id || "—"}</span>
+                                                {user.user_id && (
+                                                    <button
+                                                        type="button"
+                                                        className="admin-copy-id-btn"
+                                                        title="Copy User ID"
+                                                        aria-label={`Copy user ID ${user.user_id}`}
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(user.user_id);
+                                                        }}
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="15"
+                                                            height="15"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                        >
+                                                            <rect x="8" y="8" width="13" height="13" rx="2" />
+                                                            <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
+
                                         <td>
                                             <div className="admin-users-identity">
                                                 <span className="admin-users-avatar">
