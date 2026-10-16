@@ -23,6 +23,7 @@ import Settings from "./pages/User/Settings";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -155,6 +156,11 @@ function App() {
                     <Route
                         path="/admin-dashboard"
                         element={<AdminDashboard />}
+                    />
+
+                    <Route
+                        path="/admin-users"
+                        element={<AdminUsers />}
                     />
                 </Route>
 
