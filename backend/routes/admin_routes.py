@@ -43,3 +43,61 @@ def admin_stats(current_user):
             jsonify({"success": False, "message": "Unable to fetch admin statistics."}),
             500,
         )
+
+
+# ==================================
+# ADMIN USER MANAGEMENT - LIST USERS
+# ==================================
+@admin_bp.route("/api/admin/users", methods=["GET"])
+@admin_required
+def admin_get_users(current_user):
+    try:
+        if db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        users_collection = db["users"]
+
+        users = list(
+            users_collection.find(
+                {},
+                {
+                    "_id": 1,
+                    "name": 1,
+                    "email": 1,
+                    "role": 1,
+                },
+            ).sort("_id", -1)
+        )
+
+        user_list = []
+
+        for user in users:
+            user_list.append(
+                {
+                    "user_id": str(user["_id"]),
+                    "name": user.get("name", ""),
+                    "email": user.get("email", ""),
+                    "role": user.get("role", "user"),
+                }
+            )
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "total": len(user_list),
+                    "users": user_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception:
+        logging.exception("Admin user list API error")
+        return (
+            jsonify({"success": False, "message": "Unable to fetch users."}),
+            500,
+        )
