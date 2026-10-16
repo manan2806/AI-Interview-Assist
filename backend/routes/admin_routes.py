@@ -62,13 +62,8 @@ def admin_get_users(current_user):
 
         users = list(
             users_collection.find(
-                {},
-                {
-                    "_id": 1,
-                    "name": 1,
-                    "email": 1,
-                    "role": 1,
-                },
+                {"role": {"$ne": "admin"}},
+                {"_id": 1, "name": 1, "email": 1, "role": 1},
             ).sort("_id", -1)
         )
 
