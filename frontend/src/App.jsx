@@ -24,6 +24,7 @@ import Settings from "./pages/User/Settings";
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminUsers from "./pages/Admin/AdminUsers";
+import AdminInterview from "./pages/Admin/AdminInterview";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -161,6 +162,11 @@ function App() {
                     <Route
                         path="/admin-users"
                         element={<AdminUsers />}
+                    />
+
+                    <Route
+                        path="/admin-interviews"
+                        element={<AdminInterview />}
                     />
                 </Route>
 

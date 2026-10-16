@@ -1,0 +1,232 @@
+.admin-interviews-page {
+    min-height: 100vh;
+    padding: 32px;
+    color: #1e293b;
+    background: #f8fafc;
+}
+
+.admin-interviews-header,
+.admin-interviews-toolbar,
+.admin-interviews-table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-interviews-header {
+    margin-bottom: 28px;
+}
+
+.admin-interviews-eyebrow {
+    margin: 0 0 8px;
+    color: #6366f1;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.admin-interviews-header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(26px, 4vw, 36px);
+}
+
+.admin-interviews-header p:last-child {
+    margin: 0;
+    color: #64748b;
+}
+
+.admin-interviews-back {
+    padding: 11px 16px;
+    color: #4338ca;
+    text-decoration: none;
+    font-weight: 700;
+    background: #eef2ff;
+    border-radius: 10px;
+}
+
+.admin-interviews-toolbar,
+.admin-interviews-table-card {
+    padding: 20px;
+    margin-bottom: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgb(15 23 42 / 4%);
+}
+
+.admin-interviews-count {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 120px;
+}
+
+.admin-interviews-count span,
+.admin-interviews-table-heading span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.admin-interviews-count strong {
+    font-size: 27px;
+}
+
+.admin-interviews-search,
+.admin-interviews-filter {
+    min-width: 160px;
+    padding: 11px 12px;
+    color: #334155;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    outline: none;
+}
+
+.admin-interviews-search {
+    flex: 1;
+}
+
+.admin-interviews-search:focus,
+.admin-interviews-filter:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 12%);
+}
+
+.admin-interviews-refresh,
+.admin-interviews-error button {
+    padding: 11px 16px;
+    color: #fff;
+    font-weight: 700;
+    background: #4f46e5;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.admin-interviews-refresh:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.admin-interviews-table-heading {
+    margin-bottom: 18px;
+}
+
+.admin-interviews-table-heading h2 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.admin-interviews-table-wrapper {
+    overflow-x: auto;
+}
+
+.admin-interviews-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.admin-interviews-table th {
+    padding: 14px 12px;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f8fafc;
+}
+
+.admin-interviews-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 13px;
+}
+
+.admin-interviews-table tbody tr:hover {
+    background: #f8faff;
+}
+
+.admin-interviews-status {
+    display: inline-block;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.admin-interviews-status.status-completed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-interviews-status.status-in_progress {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.admin-interviews-status.status-created {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.admin-interviews-status.status-evaluation_pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-interviews-id {
+    display: inline-block;
+    max-width: 145px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.admin-interviews-empty {
+    padding: 40px 16px;
+    color: #64748b;
+    text-align: center;
+}
+
+.admin-interviews-error {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+}
+
+@media (max-width: 760px) {
+    .admin-interviews-page {
+        padding: 18px 12px;
+    }
+
+    .admin-interviews-header,
+    .admin-interviews-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-interviews-search,
+    .admin-interviews-filter {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .admin-interviews-back {
+        align-self: flex-start;
+    }
+
+    .admin-interviews-table-card {
+        padding: 14px;
+    }
+}

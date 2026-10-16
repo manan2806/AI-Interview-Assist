@@ -96,3 +96,92 @@ def admin_get_users(current_user):
             jsonify({"success": False, "message": "Unable to fetch users."}),
             500,
         )
+
+
+# ==========================================
+# ADMIN INTERVIEW MANAGEMENT - LIST INTERVIEWS
+# ==========================================
+@admin_bp.route("/api/admin/interviews", methods=["GET"])
+@admin_required
+def admin_get_interviews(current_user):
+    try:
+        if db is None:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Database is not connected.",
+                    }
+                ),
+                500,
+            )
+
+        interviews_collection = db["interviews"]
+
+        interviews = list(
+            interviews_collection.find(
+                {},
+                {
+                    "_id": 1,
+                    "user_id": 1,
+                    "job_role": 1,
+                    "experience_level": 1,
+                    "interview_type": 1,
+                    "difficulty": 1,
+                    "number_of_questions": 1,
+                    "status": 1,
+                    "created_at": 1,
+                    "duration": 1,
+                },
+            )
+            .sort("_id", -1)
+            .limit(200)
+        )
+
+        interview_list = []
+
+        for interview in interviews:
+            created_at = interview.get("created_at")
+
+            if created_at and hasattr(created_at, "isoformat"):
+                created_at = created_at.isoformat()
+            elif created_at is not None:
+                created_at = str(created_at)
+
+            interview_list.append(
+                {
+                    "interview_id": str(interview["_id"]),
+                    "user_id": str(interview.get("user_id", "")),
+                    "job_role": interview.get("job_role", ""),
+                    "experience_level": interview.get("experience_level", ""),
+                    "interview_type": interview.get("interview_type", ""),
+                    "difficulty": interview.get("difficulty", ""),
+                    "number_of_questions": interview.get("number_of_questions", 0),
+                    "status": interview.get("status", "unknown"),
+                    "created_at": created_at,
+                    "duration": interview.get("duration", ""),
+                }
+            )
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "total": len(interview_list),
+                    "interviews": interview_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception:
+        logging.exception("Admin interview list API error")
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to fetch interviews.",
+                }
+            ),
+            500,
+        )
