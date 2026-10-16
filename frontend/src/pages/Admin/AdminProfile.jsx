@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import "./AdminProfile.css";
+import "../../context/Admin/AdminProfile.css";
 
 function AdminProfile() {
+    const navigate = useNavigate();
     const [profile, setProfile] = useState({
         user_id: "",
         name: "",
@@ -208,22 +210,22 @@ function AdminProfile() {
         <div className="admin-profile-page">
             <div className="admin-profile-container">
 
+
                 <div className="admin-profile-heading">
                     <div>
                         <h1>My Profile</h1>
                         <p>View and manage your admin profile information.</p>
                     </div>
 
-                    {!editing && (
-                        <button
-                            type="button"
-                            className="admin-profile-edit-btn"
-                            onClick={handleEdit}
-                        >
-                            Edit Profile
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        className="admin-profile-back-btn"
+                        onClick={() => navigate("/admin-dashboard")}
+                    >
+                        ← Back to Dashboard
+                    </button>
                 </div>
+
 
                 {error && (
                     <div className="admin-profile-alert error">
@@ -317,6 +319,7 @@ function AdminProfile() {
                             </div>
                         </form>
                     ) : (
+
                         <div className="admin-profile-details">
                             <h3>Profile Information</h3>
 
@@ -340,12 +343,23 @@ function AdminProfile() {
 
                                 <div className="admin-profile-detail">
                                     <span>Account Created</span>
-                                    <strong>
-                                        {formatDate(profile.created_at)}
-                                    </strong>
+                                    <strong>{formatDate(profile.created_at)}</strong>
                                 </div>
                             </div>
+
+                            <div className="admin-profile-bottom-actions">
+                                {!editing && (
+                                    <button
+                                        type="button"
+                                        className="admin-profile-edit-btn"
+                                        onClick={handleEdit}
+                                    >
+                                        ✏️ Edit Profile
+                                    </button>
+                                )}
+                            </div>
                         </div>
+
                     )}
                 </div>
 
