@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
 import api from "../../services/api";
-import "../../context/Admin/AdminProfile.css";
+import "./AdminProfile.css";
 
 function AdminProfile() {
     const [profile, setProfile] = useState({
@@ -10,62 +8,86 @@ function AdminProfile() {
         name: "",
         email: "",
         role: "admin",
+        created_at: "",
     });
 
-    const [form, setForm] = useState({
+    const [formData, setFormData] = useState({
         name: "",
         email: "",
     });
 
-    const [editing, setEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [editing, setEditing] = useState(false);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
 
+    // ==========================================
+    // FETCH ADMIN PROFILE
+    // ==========================================
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const response = await api.get("/api/admin/profile");
-
-                if (response.data?.success) {
-                    const data = response.data.profile;
-
-                    setProfile(data);
-                    setForm({
-                        name: data.name || "",
-                        email: data.email || "",
-                    });
-                } else {
-                    setError(
-                        response.data?.message ||
-                        "Unable to load profile."
-                    );
-                }
-            } catch (err) {
-                setError(
-                    err.response?.data?.message ||
-                    "Unable to load admin profile."
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProfile();
     }, []);
 
-    const handleChange = (event) => {
-        const { name, value } = event.target;
+    const fetchProfile = async () => {
+        try {
+            setLoading(true);
+            setError("");
 
-        setForm((previous) => ({
+            const response = await api.get("/api/admin/profile");
+            const data = response.data;
+
+            if (data.success && data.profile) {
+                setProfile(data.profile);
+
+                setFormData({
+                    name: data.profile.name || "",
+                    email: data.profile.email || "",
+                });
+            } else {
+                setError(data.message || "Unable to load profile.");
+            }
+        } catch (err) {
+            setError(
+                err.response?.data?.message ||
+                "Failed to load admin profile."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ==========================================
+    // HANDLE INPUT CHANGE
+    // ==========================================
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        setFormData((previous) => ({
             ...previous,
             [name]: value,
         }));
     };
 
+    // ==========================================
+    // ENABLE EDIT MODE
+    // ==========================================
+    const handleEdit = () => {
+        setFormData({
+            name: profile.name || "",
+            email: profile.email || "",
+        });
+
+        setError("");
+        setMessage("");
+        setEditing(true);
+    };
+
+    // ==========================================
+    // CANCEL EDIT
+    // ==========================================
     const handleCancel = () => {
-        setForm({
+        setFormData({
             name: profile.name || "",
             email: profile.email || "",
         });
@@ -75,229 +97,260 @@ function AdminProfile() {
         setMessage("");
     };
 
-    const handleSave = async (event) => {
-        event.preventDefault();
+    // ==========================================
+    // SAVE PROFILE
+    // ==========================================
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
         setError("");
         setMessage("");
 
-        if (!form.name.trim() || !form.email.trim()) {
+        const name = formData.name.trim();
+        const email = formData.email.trim().toLowerCase();
+
+        if (!name || !email) {
             setError("Name and email are required.");
             return;
         }
 
-        setSaving(true);
+        if (name.length > 100) {
+            setError("Name cannot exceed 100 characters.");
+            return;
+        }
+
+        if (email.length > 254) {
+            setError("Email cannot exceed 254 characters.");
+            return;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailPattern.test(email)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
 
         try {
+            setSaving(true);
+
             const response = await api.patch(
                 "/api/admin/profile",
-                {
-                    name: form.name.trim(),
-                    email: form.email.trim(),
-                }
+                { name, email }
             );
 
-            if (response.data?.success) {
-                const updatedProfile = response.data.profile;
+            const data = response.data;
 
-                setProfile(updatedProfile);
-                setForm({
-                    name: updatedProfile.name,
-                    email: updatedProfile.email,
+            if (data.success && data.profile) {
+                setProfile(data.profile);
+
+                setFormData({
+                    name: data.profile.name || "",
+                    email: data.profile.email || "",
                 });
 
                 setEditing(false);
-                setMessage("Profile updated successfully.");
-
-                // Keep cached user details in sync, if available.
-                try {
-                    const cachedUser = JSON.parse(
-                        localStorage.getItem("user") || "null"
-                    );
-
-                    if (cachedUser) {
-                        localStorage.setItem(
-                            "user",
-                            JSON.stringify({
-                                ...cachedUser,
-                                name: updatedProfile.name,
-                                email: updatedProfile.email,
-                                user_id: updatedProfile.user_id,
-                                role: updatedProfile.role,
-                            })
-                        );
-                    }
-                } catch {
-                    // Profile is already saved on the backend.
-                }
-            } else {
-                setError(
-                    response.data?.message ||
-                    "Unable to update profile."
+                setMessage(
+                    data.message || "Profile updated successfully."
                 );
+            } else {
+                setError(data.message || "Unable to update profile.");
             }
         } catch (err) {
             setError(
                 err.response?.data?.message ||
-                "Unable to update profile."
+                "Failed to update admin profile."
             );
         } finally {
             setSaving(false);
         }
     };
 
+    // ==========================================
+    // FORMAT ACCOUNT CREATION DATE
+    // ==========================================
+    const formatDate = (dateValue) => {
+        if (!dateValue) {
+            return "Not available";
+        }
+
+        const date = new Date(dateValue);
+
+        if (Number.isNaN(date.getTime())) {
+            return String(dateValue);
+        }
+
+        return date.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        });
+    };
+
+    // ==========================================
+    // LOADING STATE
+    // ==========================================
     if (loading) {
         return (
-            <main className="admin-profile-page">
-                <div className="admin-profile-card">
-                    Loading admin profile...
+            <div className="admin-profile-page">
+                <div className="admin-profile-loading">
+                    <div className="admin-profile-spinner"></div>
+                    <p>Loading admin profile...</p>
                 </div>
-            </main>
+            </div>
         );
     }
 
+    // ==========================================
+    // PROFILE PAGE
+    // ==========================================
     return (
-        <main className="admin-profile-page">
-            <header className="admin-profile-header">
-                <div>
-                    <p className="admin-profile-eyebrow">
-                        ADMINISTRATION
-                    </p>
-                    <h1>My Profile</h1>
-                    <p>View and manage your administrator details.</p>
-                </div>
+        <div className="admin-profile-page">
+            <div className="admin-profile-container">
 
-                <Link
-                    to="/admin-dashboard"
-                    className="admin-profile-back"
-                >
-                    ← Dashboard
-                </Link>
-            </header>
-
-            <section className="admin-profile-card">
-                <div className="admin-profile-identity">
-                    <div className="admin-profile-avatar">
-                        {(profile.name || "A")
-                            .charAt(0)
-                            .toUpperCase()}
-                    </div>
-
+                <div className="admin-profile-heading">
                     <div>
-                        <h2>{profile.name || "Administrator"}</h2>
-                        <span className="admin-profile-role">
-                            {profile.role || "admin"}
-                        </span>
+                        <h1>My Profile</h1>
+                        <p>View and manage your admin profile information.</p>
                     </div>
+
+                    {!editing && (
+                        <button
+                            type="button"
+                            className="admin-profile-edit-btn"
+                            onClick={handleEdit}
+                        >
+                            Edit Profile
+                        </button>
+                    )}
                 </div>
 
                 {error && (
-                    <div className="admin-profile-error" role="alert">
+                    <div className="admin-profile-alert error">
                         {error}
                     </div>
                 )}
 
                 {message && (
-                    <div className="admin-profile-success" role="status">
+                    <div className="admin-profile-alert success">
                         {message}
                     </div>
                 )}
 
-                {!editing ? (
-                    <>
-                        <div className="admin-profile-details">
-                            <div className="admin-profile-field">
-                                <label>Admin User ID</label>
-                                <p>{profile.user_id || "—"}</p>
-                            </div>
+                <div className="admin-profile-card">
 
-                            <div className="admin-profile-field">
-                                <label>Full Name</label>
-                                <p>{profile.name || "—"}</p>
-                            </div>
-
-                            <div className="admin-profile-field">
-                                <label>Email Address</label>
-                                <p>{profile.email || "—"}</p>
-                            </div>
-
-                            <div className="admin-profile-field">
-                                <label>Account Role</label>
-                                <p>{profile.role || "admin"}</p>
-                            </div>
+                    <div className="admin-profile-banner">
+                        <div className="admin-profile-avatar">
+                            {(profile.name || "A")
+                                .trim()
+                                .charAt(0)
+                                .toUpperCase()}
                         </div>
 
-                        <button
-                            type="button"
-                            className="admin-profile-primary"
-                            onClick={() => {
-                                setError("");
-                                setMessage("");
-                                setEditing(true);
-                            }}
+                        <div className="admin-profile-banner-info">
+                            <h2>{profile.name || "Admin"}</h2>
+                            <p>{profile.email || "No email available"}</p>
+                            <span className="admin-profile-role">
+                                {profile.role || "admin"}
+                            </span>
+                        </div>
+                    </div>
+
+                    {editing ? (
+                        <form
+                            className="admin-profile-form"
+                            onSubmit={handleSubmit}
                         >
-                            ✎ Edit Profile
-                        </button>
-                    </>
-                ) : (
-                    <form
-                        className="admin-profile-form"
-                        onSubmit={handleSave}
-                    >
-                        <div className="admin-profile-field">
-                            <label htmlFor="admin-profile-name">
-                                Full Name
-                            </label>
+                            <h3>Edit Profile Information</h3>
 
-                            <input
-                                id="admin-profile-name"
-                                name="name"
-                                type="text"
-                                value={form.name}
-                                onChange={handleChange}
-                                maxLength={100}
-                                required
-                            />
+                            <div className="admin-profile-field">
+                                <label htmlFor="admin-name">
+                                    Full Name
+                                </label>
+
+                                <input
+                                    id="admin-name"
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    placeholder="Enter your name"
+                                    maxLength={100}
+                                    required
+                                />
+                            </div>
+
+                            <div className="admin-profile-field">
+                                <label htmlFor="admin-email">
+                                    Email Address
+                                </label>
+
+                                <input
+                                    id="admin-email"
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    placeholder="Enter your email"
+                                    maxLength={254}
+                                    required
+                                />
+                            </div>
+
+                            <div className="admin-profile-actions">
+                                <button
+                                    type="button"
+                                    className="admin-profile-cancel-btn"
+                                    onClick={handleCancel}
+                                    disabled={saving}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    className="admin-profile-save-btn"
+                                    disabled={saving}
+                                >
+                                    {saving ? "Saving..." : "Save Changes"}
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="admin-profile-details">
+                            <h3>Profile Information</h3>
+
+                            <div className="admin-profile-detail-grid">
+                                <div className="admin-profile-detail">
+                                    <span>Full Name</span>
+                                    <strong>{profile.name || "Not available"}</strong>
+                                </div>
+
+                                <div className="admin-profile-detail">
+                                    <span>Email Address</span>
+                                    <strong>{profile.email || "Not available"}</strong>
+                                </div>
+
+                                <div className="admin-profile-detail">
+                                    <span>Admin Role</span>
+                                    <strong className="admin-profile-role-text">
+                                        {profile.role || "admin"}
+                                    </strong>
+                                </div>
+
+                                <div className="admin-profile-detail">
+                                    <span>Account Created</span>
+                                    <strong>
+                                        {formatDate(profile.created_at)}
+                                    </strong>
+                                </div>
+                            </div>
                         </div>
+                    )}
+                </div>
 
-                        <div className="admin-profile-field">
-                            <label htmlFor="admin-profile-email">
-                                Email Address
-                            </label>
-
-                            <input
-                                id="admin-profile-email"
-                                name="email"
-                                type="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                maxLength={254}
-                                required
-                            />
-                        </div>
-
-                        <div className="admin-profile-actions">
-                            <button
-                                type="submit"
-                                className="admin-profile-primary"
-                                disabled={saving}
-                            >
-                                {saving ? "Saving..." : "Save Changes"}
-                            </button>
-
-                            <button
-                                type="button"
-                                className="admin-profile-secondary"
-                                onClick={handleCancel}
-                                disabled={saving}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                )}
-            </section>
-        </main>
+            </div>
+        </div>
     );
 }
 

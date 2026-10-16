@@ -202,7 +202,6 @@ def admin_profile(current_user):
 
         users_collection = db["users"]
 
-        # token_required already loads the authenticated user
         user_id = current_user.get("user_id")
 
         if not user_id:
@@ -211,7 +210,7 @@ def admin_profile(current_user):
                 401,
             )
 
-        # Confirm this is the admin's database record
+        # FIND ADMIN PROFILE
         admin = users_collection.find_one({"user_id": user_id, "role": "admin"})
 
         if not admin:
@@ -220,24 +219,23 @@ def admin_profile(current_user):
                 404,
             )
 
-        # VIEW PROFILE
-        if request.method == "GET":
-            return (
-                jsonify(
-                    {
-                        "success": True,
-                        "profile": {
-                            "user_id": admin.get("user_id", ""),
-                            "name": admin.get("name", ""),
-                            "email": admin.get("email", ""),
-                            "role": admin.get("role", "admin"),
-                        },
-                    }
+        # PREPARE PROFILE RESPONSE
+        def get_profile(admin_data):
+            return {
+                "user_id": admin_data.get("user_id", ""),
+                "name": admin_data.get("name", ""),
+                "email": admin_data.get("email", ""),
+                "role": admin_data.get("role", "admin"),
+                "created_at": admin_data.get(
+                    "created_at", admin_data.get("createdAt", "")
                 ),
-                200,
-            )
+            }
 
-        # EDIT PROFILE
+        # GET - VIEW ADMIN PROFILE
+        if request.method == "GET":
+            return jsonify({"success": True, "profile": get_profile(admin)}), 200
+
+        # PATCH - EDIT ADMIN PROFILE
         data = request.get_json(silent=True)
 
         if not isinstance(data, dict):
@@ -248,35 +246,74 @@ def admin_profile(current_user):
                 400,
             )
 
-        name = data.get("name")
-        email = data.get("email")
+        # Only allow name and email updates
+        allowed_fields = {"name", "email"}
 
-        if not isinstance(name, str) or not isinstance(email, str):
+        if not data:
             return (
-                jsonify({"success": False, "message": "Name and email must be text."}),
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Please provide profile details to update.",
+                    }
+                ),
                 400,
             )
+
+        if not set(data.keys()).issubset(allowed_fields):
+            return (
+                jsonify(
+                    {"success": False, "message": "Only name and email can be updated."}
+                ),
+                400,
+            )
+
+        # VALIDATE NAME
+        name = data.get("name", admin.get("name", ""))
+
+        if not isinstance(name, str):
+            return jsonify({"success": False, "message": "Name must be text."}), 400
 
         name = name.strip()
-        email = email.strip().lower()
 
-        if not name or not email:
+        if not name:
+            return jsonify({"success": False, "message": "Name is required."}), 400
+
+        if len(name) > 100:
             return (
-                jsonify({"success": False, "message": "Name and email are required."}),
+                jsonify(
+                    {"success": False, "message": "Name cannot exceed 100 characters."}
+                ),
                 400,
             )
 
-        if len(name) > 100 or len(email) > 254:
+        # VALIDATE EMAIL
+        email = data.get("email", admin.get("email", ""))
+
+        if not isinstance(email, str):
+            return jsonify({"success": False, "message": "Email must be text."}), 400
+
+        email = email.strip().lower()
+
+        if not email:
+            return jsonify({"success": False, "message": "Email is required."}), 400
+
+        if len(email) > 254:
             return (
-                jsonify({"success": False, "message": "Name or email is too long."}),
+                jsonify(
+                    {"success": False, "message": "Email cannot exceed 254 characters."}
+                ),
                 400,
             )
 
         # Basic email validation
         if (
             "@" not in email
+            or email.count("@") != 1
             or "." not in email.rsplit("@", 1)[-1]
             or email.startswith("@")
+            or email.endswith("@")
+            or any(char.isspace() for char in email)
         ):
             return (
                 jsonify(
@@ -285,9 +322,15 @@ def admin_profile(current_user):
                 400,
             )
 
-        # Do not allow another account to use this email
+        # CHECK DUPLICATE EMAIL
         existing_email = users_collection.find_one(
-            {"email": email, "_id": {"$ne": admin["_id"]}}
+            {
+                "email": {
+                    "$regex": f"^{__import__('re').escape(email)}$",
+                    "$options": "i",
+                },
+                "_id": {"$ne": admin["_id"]},
+            }
         )
 
         if existing_email:
@@ -298,21 +341,32 @@ def admin_profile(current_user):
                 409,
             )
 
+        # UPDATE PROFILE
         users_collection.update_one(
             {"_id": admin["_id"]}, {"$set": {"name": name, "email": email}}
         )
 
+        # Fetch updated record
+        updated_admin = users_collection.find_one({"_id": admin["_id"]})
+
+        if not updated_admin:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Unable to retrieve updated admin profile.",
+                    }
+                ),
+                500,
+            )
+
+        # SUCCESS RESPONSE
         return (
             jsonify(
                 {
                     "success": True,
                     "message": "Admin profile updated successfully.",
-                    "profile": {
-                        "user_id": admin.get("user_id", ""),
-                        "name": name,
-                        "email": email,
-                        "role": admin.get("role", "admin"),
-                    },
+                    "profile": get_profile(updated_admin),
                 }
             ),
             200,
@@ -320,6 +374,7 @@ def admin_profile(current_user):
 
     except Exception:
         logging.exception("Admin profile API error")
+
         return (
             jsonify({"success": False, "message": "Unable to process admin profile."}),
             500,
