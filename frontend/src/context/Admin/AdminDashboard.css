@@ -1639,3 +1639,122 @@ html[data-theme="dark"] .admin-mobile-dropdown a span,
 html[data-theme="dark"] .admin-mobile-dropdown button span {
     color: inherit !important;
 }
+
+
+/* ==========================================
+   ADMIN NAVBAR - PROPER DARK THEME
+========================================== */
+
+/* Navbar background */
+html[data-theme="dark"] .admin-dashboard .admin-navbar {
+    background: rgba(15, 23, 42, 0.97) !important;
+    border-bottom: 1px solid #334155 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Brand and logo */
+html[data-theme="dark"] .admin-dashboard .admin-brand {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-brand-text h2 {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-brand-icon {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1, #0891b2) !important;
+    box-shadow: 0 5px 16px rgba(99, 102, 241, 0.3);
+}
+
+/* Admin badge */
+html[data-theme="dark"] .admin-dashboard .admin-badge {
+    color: #ddd6fe !important;
+    background: linear-gradient(135deg, #312e81, #4c1d95) !important;
+    border: 1px solid #6d5bd0 !important;
+}
+
+/* Profile and Settings links */
+html[data-theme="dark"] .admin-dashboard .admin-profile-nav-link {
+    color: #e2e8f0 !important;
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-profile-nav-link:hover {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #4338ca, #6d28d9) !important;
+    border-color: #818cf8 !important;
+}
+
+/* Logout button */
+html[data-theme="dark"] .admin-dashboard .admin-logout-btn {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    border: 1px solid #ef4444 !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-logout-btn:hover {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #ef4444, #be123c) !important;
+    border-color: #f87171 !important;
+}
+
+/* Mobile hamburger button */
+html[data-theme="dark"] .admin-dashboard .admin-menu-button {
+    color: #f8fafc !important;
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-menu-button:hover {
+    color: #ffffff !important;
+    background: #3730a3 !important;
+    border-color: #818cf8 !important;
+}
+
+/* Mobile dropdown */
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown {
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Dropdown links */
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown a {
+    color: #e2e8f0 !important;
+    background: transparent !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown a span {
+    color: inherit !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown a:hover {
+    color: #ffffff !important;
+    background: #3730a3 !important;
+}
+
+/* Dropdown logout */
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown button {
+    color: #fca5a5 !important;
+    background: transparent !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown button:hover {
+    color: #ffffff !important;
+    background: #991b1b !important;
+}
+
+html[data-theme="dark"] .admin-dashboard .admin-mobile-dropdown button span {
+    color: inherit !important;
+}
+
+/* Keyboard focus */
+html[data-theme="dark"] .admin-dashboard .admin-navbar a:focus-visible,
+html[data-theme="dark"] .admin-dashboard .admin-navbar button:focus-visible {
+    outline: 2px solid #a5b4fc !important;
+    outline-offset: 3px;
+}

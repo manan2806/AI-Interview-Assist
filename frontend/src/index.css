@@ -145,3 +145,55 @@ html[data-theme="dark"] .result-card {
     color 0.25s ease,
     border-color 0.25s ease;
 }
+
+/* ==========================================
+   AUTH PAGES - ALWAYS LIGHT THEME
+========================================== */
+
+html[data-theme="dark"] .auth-page {
+  background: #f4f7fb !important;
+  color: #1f2937 !important;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] .auth-page .auth-left {
+  color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .auth-page .auth-right {
+  background: #f6f8fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .auth-page .auth-card {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  border-color: #e7e9f0 !important;
+}
+
+html[data-theme="dark"] .auth-page h1,
+html[data-theme="dark"] .auth-page h2,
+html[data-theme="dark"] .auth-page h3,
+html[data-theme="dark"] .auth-page p,
+html[data-theme="dark"] .auth-page label,
+html[data-theme="dark"] .auth-page span {
+  color: #1f2937;
+}
+
+html[data-theme="dark"] .auth-page input,
+html[data-theme="dark"] .auth-page select,
+html[data-theme="dark"] .auth-page textarea {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  border-color: #d1d5db !important;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] .auth-page input::placeholder,
+html[data-theme="dark"] .auth-page textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] .auth-page a {
+  color: #6a1b9a;
+}

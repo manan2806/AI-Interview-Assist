@@ -835,3 +835,109 @@ html[data-theme="dark"] .admin-settings-toggle-icon {
 html[data-theme="dark"] .admin-settings-switch input:checked+span {
     background: #8b83ff;
 }
+
+
+/* ==========================================
+   DARK THEME - ADMIN SETTINGS TEXT FIX
+========================================== */
+html[data-theme="dark"] .admin-settings-header h1,
+html[data-theme="dark"] .admin-settings-sidebar-title h3,
+html[data-theme="dark"] .admin-settings-section-header h2,
+html[data-theme="dark"] .admin-settings-toggle-info h3,
+html[data-theme="dark"] .admin-settings-security-info h3,
+html[data-theme="dark"] .admin-settings-danger-card h3,
+html[data-theme="dark"] .admin-settings-modal-header h2 {
+    color: #f8fafc !important;
+}
+
+/* Header and section descriptions */
+html[data-theme="dark"] .admin-settings-header p,
+html[data-theme="dark"] .admin-settings-section-header p,
+html[data-theme="dark"] .admin-settings-sidebar-title p,
+html[data-theme="dark"] .admin-settings-toggle-info p,
+html[data-theme="dark"] .admin-settings-security-info p,
+html[data-theme="dark"] .admin-settings-danger-card p,
+html[data-theme="dark"] .admin-settings-modal-header p,
+html[data-theme="dark"] .admin-settings-note,
+html[data-theme="dark"] .admin-settings-loading p {
+    color: #cbd5e1 !important;
+}
+
+/* Labels and sidebar menu */
+html[data-theme="dark"] .admin-settings-label {
+    color: #c4b5fd !important;
+}
+
+html[data-theme="dark"] .admin-settings-menu-text strong {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .admin-settings-menu-text small,
+html[data-theme="dark"] .admin-settings-menu-arrow {
+    color: #cbd5e1 !important;
+}
+
+/* Theme cards */
+html[data-theme="dark"] .admin-settings-theme-card,
+html[data-theme="dark"] .admin-settings-theme-card strong {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .admin-settings-theme-card small {
+    color: #cbd5e1 !important;
+}
+
+/* Toggle and security text */
+html[data-theme="dark"] .admin-settings-toggle-row,
+html[data-theme="dark"] .admin-settings-security-card {
+    color: #f1f5f9 !important;
+}
+
+/* Modal labels and inputs */
+html[data-theme="dark"] .admin-settings-password-form>label,
+html[data-theme="dark"] .admin-settings-delete-password,
+html[data-theme="dark"] .admin-settings-delete-confirm {
+    color: #f1f5f9 !important;
+}
+
+html[data-theme="dark"] .admin-settings-password-form input,
+html[data-theme="dark"] .admin-settings-delete-password input {
+    color: #f8fafc !important;
+    background: #111827 !important;
+    border-color: #475569 !important;
+}
+
+html[data-theme="dark"] .admin-settings-password-form input::placeholder,
+html[data-theme="dark"] .admin-settings-delete-password input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Modal close button and cancel button */
+html[data-theme="dark"] .admin-settings-modal-header>button,
+html[data-theme="dark"] .admin-settings-cancel {
+    color: #f8fafc !important;
+    background: #334155 !important;
+    border-color: #475569 !important;
+}
+
+/* Back button */
+html[data-theme="dark"] .admin-settings-back {
+    color: #f8fafc !important;
+    background: #263449 !important;
+    border-color: #475569 !important;
+}
+
+/* Loading heading */
+html[data-theme="dark"] .admin-settings-loading h2 {
+    color: #c4b5fd !important;
+}
+
+/* Keyboard focus */
+html[data-theme="dark"] .admin-settings-back:focus-visible,
+html[data-theme="dark"] .admin-settings-save:focus-visible,
+html[data-theme="dark"] .admin-settings-cancel:focus-visible,
+html[data-theme="dark"] .admin-settings-outline-button:focus-visible,
+html[data-theme="dark"] .admin-settings-delete-button:focus-visible {
+    outline: 2px solid #a5b4fc;
+    outline-offset: 3px;
+}
