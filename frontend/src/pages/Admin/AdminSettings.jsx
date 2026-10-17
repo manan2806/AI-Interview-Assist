@@ -6,7 +6,7 @@ import "../../context/Admin/AdminSettings.css";
 
 function AdminSettings() {
     const navigate = useNavigate();
-    const { theme: globalTheme, setTheme } = useTheme();
+    const { setTheme } = useTheme();
 
     const [activeSection, setActiveSection] = useState("appearance");
 
@@ -79,7 +79,6 @@ function AdminSettings() {
                     };
 
                     setSettings(nextSettings);
-                    setTheme(nextSettings.theme);
                 }
             } catch (error) {
                 setErrorMessage(
@@ -100,10 +99,6 @@ function AdminSettings() {
             [field]: value,
         }));
 
-        if (field === "theme") {
-            setTheme(value);
-        }
-
         setSuccessMessage("");
         setErrorMessage("");
     };
@@ -114,7 +109,10 @@ function AdminSettings() {
             setSuccessMessage("");
             setErrorMessage("");
 
-            const response = await api.put("/api/admin/settings", settings);
+            const response = await api.put(
+                "/api/admin/settings",
+                settings
+            );
 
             if (!response.data?.success) {
                 setErrorMessage(
@@ -123,14 +121,18 @@ function AdminSettings() {
                 return;
             }
 
-            if (response.data.settings) {
-                setSettings((previous) => ({
-                    ...previous,
-                    ...response.data.settings,
-                }));
+            const savedSettings = response.data.settings || settings;
+
+            setSettings((previous) => ({
+                ...previous,
+                ...savedSettings,
+            }));
+
+            // Apply the theme only after a successful save.
+            if (["Light", "Dark"].includes(savedSettings.theme)) {
+                setTheme(savedSettings.theme);
             }
 
-            setTheme(settings.theme);
             setSuccessMessage("Admin settings saved successfully.");
         } catch (error) {
             setErrorMessage(
@@ -306,13 +308,24 @@ function AdminSettings() {
                         <p>Manage your admin preferences and account security.</p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="admin-settings-back"
-                        onClick={() => navigate("/admin-dashboard")}
-                    >
-                        ← Dashboard
-                    </button>
+                    <div className="admin-settings-header-actions">
+                        <button
+                            type="button"
+                            className="admin-settings-save"
+                            onClick={handleSaveSettings}
+                            disabled={saving || loading}
+                        >
+                            {saving ? "Saving..." : "Save Changes"}
+                        </button>
+
+                        <button
+                            type="button"
+                            className="admin-settings-back"
+                            onClick={() => navigate("/admin-dashboard")}
+                        >
+                            Dashboard
+                        </button>
+                    </div>
                 </header>
 
                 {successMessage && (
@@ -424,18 +437,8 @@ function AdminSettings() {
                                 </div>
 
                                 <p className="admin-settings-note">
-                                    Theme changes apply immediately. Click Save
-                                    Changes to store your preference.
+                                    Select your preferred theme and click Save Changes to apply it.
                                 </p>
-
-                                <button
-                                    type="button"
-                                    className="admin-settings-save"
-                                    onClick={handleSaveSettings}
-                                    disabled={saving}
-                                >
-                                    {saving ? "Saving..." : "Save Changes"}
-                                </button>
                             </section>
                         )}
 
@@ -495,15 +498,6 @@ function AdminSettings() {
                                         </label>
                                     </div>
                                 ))}
-
-                                <button
-                                    type="button"
-                                    className="admin-settings-save"
-                                    onClick={handleSaveSettings}
-                                    disabled={saving}
-                                >
-                                    {saving ? "Saving..." : "Save Preferences"}
-                                </button>
                             </section>
                         )}
 

@@ -1,59 +1,115 @@
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
-
-import { getSettings } from "../services/api";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import api, { getSettings } from "../services/api";
 
 const ThemeContext = createContext(null);
 
+const getUserRole = () => {
+    const storedRole = localStorage.getItem("role");
+
+    if (storedRole) {
+        return storedRole.toLowerCase();
+    }
+
+    try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        return (user.role || "user").toLowerCase();
+    } catch {
+        return "user";
+    }
+};
+
+const isAdmin = () => getUserRole() === "admin";
+
+const getSavedLocalTheme = () => {
+    const key = isAdmin() ? "admin_app_theme" : "app_theme";
+    const savedTheme = localStorage.getItem(key);
+
+    if (
+        isAdmin() &&
+        !["Light", "Dark"].includes(savedTheme)
+    ) {
+        return "Light";
+    }
+
+    return ["Light", "Dark", "System"].includes(savedTheme)
+        ? savedTheme
+        : "Light";
+};
+
+const getAppliedTheme = (selectedTheme) => {
+    if (selectedTheme === "System") {
+        return window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+            ? "Dark"
+            : "Light";
+    }
+
+    return selectedTheme;
+};
+
 export function ThemeProvider({ children }) {
-    const [theme, setThemeState] = useState(() => {
-        return localStorage.getItem("app_theme") || "Light";
-    });
+    const [theme, setThemeState] = useState(getSavedLocalTheme);
 
     const [systemDark, setSystemDark] = useState(false);
 
-    // Load saved theme from backend
+    // Load the saved theme from the correct backend settings endpoint.
     useEffect(() => {
         let active = true;
 
         const loadTheme = async () => {
+            if (!localStorage.getItem("token")) {
+                return;
+            }
+
             try {
-                const data = await getSettings();
+                let data;
+
+                if (isAdmin()) {
+                    const response = await api.get(
+                        "/api/admin/settings"
+                    );
+
+                    data = response.data;
+                } else {
+                    data = await getSettings();
+                }
+
+                const allowedThemes = isAdmin()
+                    ? ["Light", "Dark"]
+                    : ["Light", "Dark", "System"];
+
+                const savedTheme = data?.settings?.theme;
 
                 if (
                     active &&
                     data?.success &&
-                    ["Light", "Dark", "System"].includes(
-                        data.settings?.theme
-                    )
+                    allowedThemes.includes(savedTheme)
                 ) {
-                    setThemeState(data.settings.theme);
-                    localStorage.setItem(
-                        "app_theme",
-                        data.settings.theme
-                    );
+                    setThemeState(savedTheme);
+
+                    const storageKey = isAdmin()
+                        ? "admin_app_theme"
+                        : "app_theme";
+
+                    localStorage.setItem(storageKey, savedTheme);
                 }
             } catch (error) {
-                // Keep the locally saved theme if loading fails.
-                console.error("Unable to load saved theme:", error);
+                console.error(
+                    "Unable to load saved theme:",
+                    error
+                );
             }
         };
 
-        if (localStorage.getItem("token")) {
-            loadTheme();
-        }
+        loadTheme();
 
         return () => {
             active = false;
         };
     }, []);
 
-    // Track device appearance preference
+    // Track the device appearance preference.
     useEffect(() => {
         const mediaQuery = window.matchMedia(
             "(prefers-color-scheme: dark)"
@@ -65,7 +121,10 @@ export function ThemeProvider({ children }) {
 
         updateSystemTheme();
 
-        mediaQuery.addEventListener("change", updateSystemTheme);
+        mediaQuery.addEventListener(
+            "change",
+            updateSystemTheme
+        );
 
         return () => {
             mediaQuery.removeEventListener(
@@ -75,14 +134,9 @@ export function ThemeProvider({ children }) {
         };
     }, []);
 
-    // Apply theme globally
-    const appliedTheme =
-        theme === "System"
-            ? systemDark
-                ? "Dark"
-                : "Light"
-            : theme;
+    const appliedTheme = getAppliedTheme(theme);
 
+    // Apply the selected theme globally.
     useEffect(() => {
         document.documentElement.setAttribute(
             "data-theme",
@@ -91,17 +145,27 @@ export function ThemeProvider({ children }) {
 
         document.documentElement.style.colorScheme =
             appliedTheme.toLowerCase();
-    }, [appliedTheme]);
+    }, [appliedTheme, systemDark]);
 
-    // Update theme immediately
+    // Persist a theme only when the caller explicitly applies it.
     const setTheme = useCallback((newTheme) => {
-        if (!["Light", "Dark", "System"].includes(newTheme)) {
+        const admin = isAdmin();
+
+        const allowedThemes = admin
+            ? ["Light", "Dark"]
+            : ["Light", "Dark", "System"];
+
+        if (!allowedThemes.includes(newTheme)) {
             return;
         }
 
         setThemeState(newTheme);
 
-        localStorage.setItem("app_theme", newTheme);
+        const storageKey = admin
+            ? "admin_app_theme"
+            : "app_theme";
+
+        localStorage.setItem(storageKey, newTheme);
     }, []);
 
     return (
@@ -115,7 +179,6 @@ export function ThemeProvider({ children }) {
             {children}
         </ThemeContext.Provider>
     );
-
 }
 
 export function useTheme() {
@@ -128,5 +191,4 @@ export function useTheme() {
     }
 
     return context;
-
 }
