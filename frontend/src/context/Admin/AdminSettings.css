@@ -110,7 +110,7 @@
 .admin-settings-main-card {
     display: grid;
     grid-template-columns: 285px minmax(0, 1fr);
-    min-height: 590px;
+    min-height: 480px;
     overflow: hidden;
     background: #ffffff;
     border: 1px solid #e7e6f6;
