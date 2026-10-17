@@ -578,7 +578,10 @@ def admin_change_password(current_user):
                 400,
             )
 
-        user_id = get_jwt_identity()
+        user_id = current_user.get("user_id")
+
+        if not user_id:
+            return jsonify({"sussecc": False, "message": "Admin User ID is missing."})
 
         admin = db.users.find_one({"user_id": user_id, "role": "admin"})
 
@@ -652,7 +655,12 @@ def admin_delete_account(current_user):
                 400,
             )
 
-        user_id = get_jwt_identity()
+        user_id = current_user.get("user_id")
+        if not user_id:
+            return (
+                jsonify({"success": False, "message": "Admin user ID is missing."}),
+                401,
+            )
 
         admin = db.users.find_one({"user_id": user_id, "role": "admin"})
 
