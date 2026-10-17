@@ -261,7 +261,12 @@ AI Interview Assist
 # PROBLEM REPORT EMAIL
 # ==========================================
 def send_problem_report_email(
-    sender_name, sender_email, problem_type, subject, description
+    sender_name,
+    sender_email,
+    problem_type,
+    subject,
+    description,
+    recipient_email,
 ):
     if not sender_email:
         raise Exception("User email is missing.")
@@ -411,7 +416,7 @@ def send_problem_report_email(
 
     # CREATE EMAIL
     message = EmailMessage()
-    message["To"] = "my.project.service78@gmail.com"
+    message["To"] = recipient_email
 
     # User email for direct reply
     message["Reply-To"] = sender_email

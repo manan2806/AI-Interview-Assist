@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 import random
+
 from database import users, problem_reports
 from utils.email_service import send_problem_report_email
 
@@ -45,6 +46,7 @@ def create_problem_report():
                 400,
             )
 
+        # FIND USER
         user = users.find_one({"user_id": user_id})
 
         if not user:
@@ -75,27 +77,51 @@ def create_problem_report():
         # SAVE TO MONGODB
         problem_reports.insert_one(report)
 
-        # SEND PROBLEM REPORT EMAIL
+        # SEND NOTIFICATION EMAIL TO ALL ADMINS
+        email_sent = False
+
         try:
-            send_problem_report_email(
-                sender_name=user_name,
-                sender_email=user_email,
-                problem_type=problem_type,
-                subject=subject,
-                description=description,
-            )
-            email_sent = True
-            print("✅ Problem report email sent successfully")
+            admins = users.find({"role": "admin"})
 
-        except Exception as email_error:
-            email_sent = False
-            print("❌ Problem report email error:", str(email_error))
+            for admin in admins:
+                admin_email = admin.get("email")
 
+                if not admin_email:
+                    continue
+
+                admin_settings = admin.get("admin_settings", {})
+
+                # Respect each admin's System Alerts setting
+                if not admin_settings.get("system_alerts", True):
+                    print(f"System alerts disabled for {admin_email}")
+                    continue
+
+                try:
+                    send_problem_report_email(
+                        sender_name=user_name,
+                        sender_email=user_email,
+                        problem_type=problem_type,
+                        subject=subject,
+                        description=description,
+                        recipient_email=admin_email,
+                    )
+
+                    email_sent = True
+
+                    print("Problem report email sent to:", admin_email)
+
+                except Exception as email_error:
+                    print(f"Email failed for {admin_email}:", str(email_error))
+
+        except Exception as admin_error:
+            print("Unable to fetch admin accounts:", str(admin_error))
+
+        # LOG REPORT DETAILS
         print("==========================================")
-        print("✅ PROBLEM REPORT SAVED")
+        print("PROBLEM REPORT SAVED")
         print("Report ID:", report_id)
         print("User:", user_name)
-        print("Email:", user_email)
+        print("Email sent:", email_sent)
         print("==========================================")
 
         return (
@@ -111,7 +137,8 @@ def create_problem_report():
         )
 
     except Exception as error:
-        print("❌ PROBLEM REPORT ERROR:", str(error))
+        print("PROBLEM REPORT ERROR:", str(error))
+
         return (
             jsonify({"success": False, "message": "Unable to submit problem report."}),
             500,
