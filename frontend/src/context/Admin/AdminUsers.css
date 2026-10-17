@@ -483,3 +483,120 @@ html[data-theme="dark"] .admin-users-error {
         flex-direction: column;
     }
 }
+
+
+/* ==========================================
+   DARK THEME - ADMIN USERS TEXT FIX
+========================================== */
+html[data-theme="dark"] .admin-users-eyebrow {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-users-header h1 {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .admin-users-header p:last-child {
+    color: #cbd5e1;
+}
+
+/* Back button */
+html[data-theme="dark"] .admin-users-back {
+    color: #ddd6fe;
+    border-color: #475569;
+    background: #1e293b;
+}
+
+html[data-theme="dark"] .admin-users-back:hover {
+    color: #ffffff;
+    background: #7c3aed;
+    border-color: #7c3aed;
+}
+
+/* Toolbar */
+html[data-theme="dark"] .admin-users-count span {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-users-count strong {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-users-search {
+    color: #f8fafc;
+    caret-color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-users-search:focus {
+    border-color: #a78bfa;
+}
+
+/* Refresh button */
+html[data-theme="dark"] .admin-users-refresh {
+    color: #ffffff;
+}
+
+/* Error message button */
+html[data-theme="dark"] .admin-users-error button {
+    color: #fecaca;
+    border-color: #7f1d1d;
+    background: #450a0a;
+}
+
+/* Table heading badge */
+html[data-theme="dark"] .admin-users-table-heading span {
+    color: #ddd6fe;
+    background: #3b2768;
+}
+
+/* Table rows */
+html[data-theme="dark"] .admin-users-table td {
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .admin-users-identity strong {
+    color: #f8fafc;
+}
+
+/* Copy ID button */
+html[data-theme="dark"] .admin-copy-id-btn {
+    color: #c7d2fe;
+    border-color: #4338ca;
+    background: #1e1b4b;
+}
+
+html[data-theme="dark"] .admin-copy-id-btn:hover {
+    color: #ffffff;
+    border-color: #6366f1;
+    background: #4f46e5;
+}
+
+/* Role badge */
+html[data-theme="dark"] .admin-users-role {
+    color: #bfdbfe;
+    border-color: #1e40af;
+    background: #172554;
+}
+
+/* Table hover */
+html[data-theme="dark"] .admin-users-table tbody tr:hover td {
+    color: #f8fafc;
+}
+
+/* Empty state */
+html[data-theme="dark"] .admin-users-empty {
+    color: #cbd5e1;
+}
+
+/* Error text */
+html[data-theme="dark"] .admin-users-error {
+    color: #fecaca;
+}
+
+/* Keyboard focus visibility */
+html[data-theme="dark"] .admin-users-search:focus-visible,
+html[data-theme="dark"] .admin-users-back:focus-visible,
+html[data-theme="dark"] .admin-users-refresh:focus-visible {
+    outline: 2px solid #a78bfa;
+    outline-offset: 3px;
+}

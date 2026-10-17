@@ -193,9 +193,7 @@ function AdminDashboard() {
         <div className="admin-dashboard">
 
             {/* NAVBAR */}
-
             <nav className="admin-navbar">
-
                 <Link to="/admin-dashboard" className="admin-brand">
                     <div className="admin-brand-icon">AI</div>
 
@@ -212,6 +210,13 @@ function AdminDashboard() {
                         className="admin-profile-nav-link"
                     >
                         👤 My Profile
+                    </Link>
+
+                    <Link
+                        to="/admin-settings"
+                        className="admin-profile-nav-link"
+                    >
+                        ⚙️ Settings
                     </Link>
 
                     <button
@@ -245,6 +250,14 @@ function AdminDashboard() {
                             >
                                 <span>👤</span>
                                 <span>My Profile</span>
+                            </Link>
+
+                            <Link
+                                to="/admin-settings"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>⚙️</span>
+                                <span>Settings</span>
                             </Link>
 
                             <button

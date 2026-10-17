@@ -1334,7 +1334,7 @@ def change_password():
 
 
 # ==========================================
-# CHANGE PASSWORD
+# DELETE ACCOUNT
 # ==========================================
 @auth_bp.route("/api/delete-account", methods=["DELETE"])
 @jwt_required()

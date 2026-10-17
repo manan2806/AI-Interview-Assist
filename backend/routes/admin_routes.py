@@ -1,7 +1,11 @@
 from flask import Blueprint, jsonify, request
 from database import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+# from flask_bcrypt import Bcrypt
 import logging
 from utils.auth_utils import admin_required
+from routes.auth_routes import bcrypt
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -377,5 +381,323 @@ def admin_profile(current_user):
 
         return (
             jsonify({"success": False, "message": "Unable to process admin profile."}),
+            500,
+        )
+
+
+# ==========================================
+# ADMIN SETTINGS - GET AND UPDATE
+# ==========================================
+DEFAULT_ADMIN_SETTINGS = {
+    "theme": "Light",
+    "email_notifications": True,
+    "evaluation_alerts": True,
+    "system_alerts": True,
+}
+
+
+@admin_bp.route("/api/admin/settings", methods=["GET", "PUT"])
+@admin_required
+def admin_settings(current_user):
+    try:
+        if db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        users_collection = db["users"]
+        user_id = current_user.get("user_id")
+
+        if not user_id:
+            return (
+                jsonify({"success": False, "message": "Admin user ID is missing."}),
+                401,
+            )
+
+        admin = users_collection.find_one({"user_id": user_id, "role": "admin"})
+
+        if not admin:
+            return (
+                jsonify({"success": False, "message": "Admin account not found."}),
+                404,
+            )
+
+        # GET: Return saved settings with defaults
+        if request.method == "GET":
+            saved_settings = admin.get("admin_settings", {})
+            settings = {**DEFAULT_ADMIN_SETTINGS, **saved_settings}
+
+            return jsonify({"success": True, "settings": settings}), 200
+
+        # PUT: Update settings
+        data = request.get_json(silent=True)
+
+        if not isinstance(data, dict) or not data:
+            return (
+                jsonify(
+                    {"success": False, "message": "Please provide valid settings JSON."}
+                ),
+                400,
+            )
+
+        allowed_fields = set(DEFAULT_ADMIN_SETTINGS.keys())
+
+        if not set(data.keys()).issubset(allowed_fields):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "One or more settings fields are invalid.",
+                    }
+                ),
+                400,
+            )
+
+        updates = {}
+
+        # Validate appearance theme
+        if "theme" in data:
+            theme = data["theme"]
+
+            if not isinstance(theme, str) or theme not in ("Light", "Dark"):
+                return (
+                    jsonify(
+                        {"success": False, "message": "Theme must be Light or Dark."}
+                    ),
+                    400,
+                )
+
+            updates["admin_settings.theme"] = theme
+
+        # Validate notification toggles
+        boolean_fields = [
+            "email_notifications",
+            "evaluation_alerts",
+            "system_alerts",
+        ]
+
+        for field in boolean_fields:
+            if field in data:
+                if not isinstance(data[field], bool):
+                    return (
+                        jsonify(
+                            {
+                                "success": False,
+                                "message": f"{field} must be true or false.",
+                            }
+                        ),
+                        400,
+                    )
+
+                updates[f"admin_settings.{field}"] = data[field]
+
+        if not updates:
+            return (
+                jsonify({"success": False, "message": "No valid settings provided."}),
+                400,
+            )
+
+        users_collection.update_one(
+            {"_id": admin["_id"], "role": "admin"}, {"$set": updates}
+        )
+
+        updated_admin = users_collection.find_one({"_id": admin["_id"]})
+        settings = {**DEFAULT_ADMIN_SETTINGS, **updated_admin.get("admin_settings", {})}
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Admin settings updated successfully.",
+                    "settings": settings,
+                }
+            ),
+            200,
+        )
+
+    except Exception:
+        logging.exception("Admin settings API error")
+        return (
+            jsonify({"success": False, "message": "Unable to process admin settings."}),
+            500,
+        )
+
+
+# ==========================================
+# ADMIN CHANGE PASSWORD
+# ==========================================
+@admin_bp.route("/api/admin/change-password", methods=["PUT"])
+@admin_required
+def admin_change_password(current_user):
+    try:
+        data = request.get_json(silent=True) or {}
+
+        current_password = data.get("current_password", "")
+        new_password = data.get("new_password", "")
+        confirm_password = data.get("confirm_password", "")
+
+        if not all([current_password, new_password, confirm_password]):
+            return (
+                jsonify(
+                    {"success": False, "message": "All password fields are required."}
+                ),
+                400,
+            )
+
+        if new_password != confirm_password:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "New password and confirm password do not match.",
+                    }
+                ),
+                400,
+            )
+
+        if len(new_password) < 6:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "New password must be at least 6 characters.",
+                    }
+                ),
+                400,
+            )
+
+        if current_password == new_password:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "New password must be different from current password.",
+                    }
+                ),
+                400,
+            )
+
+        user_id = get_jwt_identity()
+
+        admin = db.users.find_one({"user_id": user_id, "role": "admin"})
+
+        if not admin:
+            return (
+                jsonify({"success": False, "message": "Admin account not found."}),
+                404,
+            )
+
+        stored_password = admin.get("password", "")
+
+        if not bcrypt.check_password_hash(stored_password, current_password):
+            return (
+                jsonify(
+                    {"success": False, "message": "Current password is incorrect."}
+                ),
+                400,
+            )
+
+        hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+        db.users.update_one(
+            {"user_id": user_id, "role": "admin"},
+            {"$set": {"password": hashed_password}},
+        )
+
+        return (
+            jsonify({"success": True, "message": "Password changed successfully."}),
+            200,
+        )
+
+    except Exception as error:
+        print("Admin Change Password Error:", error)
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to change password. Please try again.",
+                }
+            ),
+            500,
+        )
+
+
+# ==========================================
+# ADMIN DELETE ACCOUNT
+# ==========================================
+@admin_bp.route("/api/admin/delete-account", methods=["DELETE"])
+@admin_required
+def admin_delete_account(current_user):
+    try:
+        data = request.get_json(silent=True) or {}
+
+        current_password = data.get("current_password", "")
+        confirm_delete = data.get("confirm_delete", False)
+
+        if not current_password:
+            return (
+                jsonify(
+                    {"success": False, "message": "Please enter your current password."}
+                ),
+                400,
+            )
+
+        if confirm_delete is not True:
+            return (
+                jsonify(
+                    {"success": False, "message": "Please confirm account deletion."}
+                ),
+                400,
+            )
+
+        user_id = get_jwt_identity()
+
+        admin = db.users.find_one({"user_id": user_id, "role": "admin"})
+
+        if not admin:
+            return (
+                jsonify({"success": False, "message": "Admin account not found."}),
+                404,
+            )
+
+        stored_password = admin.get("password", "")
+
+        if not bcrypt.check_password_hash(stored_password, current_password):
+            return (
+                jsonify(
+                    {"success": False, "message": "Current password is incorrect."}
+                ),
+                400,
+            )
+
+        result = db.users.delete_one({"user_id": user_id, "role": "admin"})
+
+        if result.deleted_count != 1:
+            return (
+                jsonify(
+                    {"success": False, "message": "Unable to delete admin account."}
+                ),
+                500,
+            )
+
+        return (
+            jsonify(
+                {"success": True, "message": "Admin account deleted successfully."}
+            ),
+            200,
+        )
+
+    except Exception as error:
+        print("Admin Delete Account Error:", error)
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to delete account. Please try again.",
+                }
+            ),
             500,
         )

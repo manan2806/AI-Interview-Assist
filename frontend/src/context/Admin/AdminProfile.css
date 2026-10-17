@@ -1,7 +1,6 @@
 /* ==========================================
    ADMIN PROFILE - MAIN PAGE
 ========================================== */
-
 .admin-profile-page {
     min-height: 100vh;
     padding: 32px;
@@ -23,10 +22,7 @@
     margin: 0 auto;
 }
 
-/* ==========================================
-   PAGE HEADER
-========================================== */
-
+/* PAGE HEADER */
 .admin-profile-heading {
     display: flex;
     align-items: center;
@@ -51,10 +47,7 @@
     line-height: 1.7;
 }
 
-/* ==========================================
-   BACK TO DASHBOARD BUTTON
-========================================== */
-
+/* BACK TO DASHBOARD BUTTON */
 .admin-profile-back-btn {
     display: inline-flex;
     align-items: center;
@@ -93,10 +86,7 @@
     outline-offset: 3px;
 }
 
-/* ==========================================
-   ALERT MESSAGES
-========================================== */
-
+/* ALERT MESSAGES */
 .admin-profile-alert {
     margin-bottom: 20px;
     padding: 14px 17px;
@@ -119,9 +109,7 @@
     color: #166534;
 }
 
-/* ==========================================
-   MAIN PROFILE CARD
-========================================== */
+/* MAIN PROFILE CARD */
 .admin-profile-card {
     width: 100%;
     max-width: 980px;
@@ -135,10 +123,7 @@
     box-sizing: border-box;
 }
 
-/* ==========================================
-   PROFILE BANNER
-========================================== */
-
+/* PROFILE BANNER */
 .admin-profile-banner {
     position: relative;
     display: flex;
@@ -201,7 +186,6 @@
 }
 
 /* ADMIN ROLE BADGE */
-
 .admin-profile-role {
     display: inline-flex;
     align-items: center;
@@ -217,10 +201,7 @@
     text-transform: uppercase;
 }
 
-/* ==========================================
-   PROFILE INFORMATION SECTION
-========================================== */
-
+/* PROFILE INFORMATION SECTION */
 .admin-profile-details {
     padding: 32px 38px 34px;
 }
@@ -234,10 +215,7 @@
     line-height: 1.4;
 }
 
-/* ==========================================
-   INFORMATION GRID
-========================================== */
-
+/* INFORMATION GRID */
 .admin-profile-detail-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -291,10 +269,7 @@
     text-transform: capitalize;
 }
 
-/* ==========================================
-   EDIT PROFILE BUTTON - BOTTOM LEFT
-========================================== */
-
+/* EDIT PROFILE BUTTON - BOTTOM LEFT */
 .admin-profile-bottom-actions {
     display: flex;
     align-items: center;
@@ -335,10 +310,7 @@
     transform: translateY(0);
 }
 
-/* ==========================================
-   EDIT PROFILE FORM
-========================================== */
-
+/* EDIT PROFILE FORM */
 .admin-profile-form {
     display: flex;
     flex-direction: column;
@@ -392,10 +364,7 @@
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
 }
 
-/* ==========================================
-   FORM ACTION BUTTONS
-========================================== */
-
+/* FORM ACTION BUTTONS */
 .admin-profile-actions {
     display: flex;
     align-items: center;
@@ -456,10 +425,7 @@
     transform: none;
 }
 
-/* ==========================================
-   LOADING STATE
-========================================== */
-
+/* LOADING STATE */
 .admin-profile-loading {
     display: flex;
     flex-direction: column;
@@ -491,10 +457,7 @@
     }
 }
 
-/* ==========================================
-   TABLET RESPONSIVE
-========================================== */
-
+/* TABLET RESPONSIVE */
 @media (max-width: 768px) {
     .admin-profile-page {
         padding: 24px 18px;
@@ -544,10 +507,7 @@
     }
 }
 
-/* ==========================================
-   MOBILE RESPONSIVE
-========================================== */
-
+/* MOBILE RESPONSIVE */
 @media (max-width: 560px) {
     .admin-profile-page {
         padding: 20px 13px;
@@ -632,10 +592,7 @@
     }
 }
 
-/* ==========================================
-   SMALL MOBILE
-========================================== */
-
+/* SMALL MOBILE */
 @media (max-width: 360px) {
     .admin-profile-page {
         padding: 16px 10px;
@@ -659,10 +616,7 @@
     }
 }
 
-/* ==========================================
-   REDUCED MOTION ACCESSIBILITY
-========================================== */
-
+/* REDUCED MOTION ACCESSIBILITY */
 @media (prefers-reduced-motion: reduce) {
 
     .admin-profile-page *,
@@ -673,4 +627,159 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+
+/* ==========================================
+   DARK THEME - ADMIN PROFILE
+========================================== */
+
+html[data-theme="dark"] .admin-profile-page {
+    color: #e2e8f0;
+    background: #0f172a;
+}
+
+/* Page heading */
+html[data-theme="dark"] .admin-profile-heading h1 {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .admin-profile-heading p {
+    color: #cbd5e1;
+}
+
+/* Back button */
+html[data-theme="dark"] .admin-profile-back-btn {
+    color: #c4b5fd;
+    background: #1e293b;
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .admin-profile-back-btn:hover {
+    color: #ffffff;
+    background: #3730a3;
+    border-color: #6366f1;
+}
+
+/* Profile card */
+html[data-theme="dark"] .admin-profile-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 6px 22px rgb(0 0 0 / 20%);
+}
+
+/* Profile banner text remains white */
+html[data-theme="dark"] .admin-profile-banner-info h2,
+html[data-theme="dark"] .admin-profile-banner-info p,
+html[data-theme="dark"] .admin-profile-avatar,
+html[data-theme="dark"] .admin-profile-role {
+    color: #ffffff;
+}
+
+/* Section headings */
+html[data-theme="dark"] .admin-profile-details h3,
+html[data-theme="dark"] .admin-profile-form h3 {
+    color: #f1f5f9;
+}
+
+/* Information cards */
+html[data-theme="dark"] .admin-profile-detail {
+    background: linear-gradient(145deg, #263449, #1e293b);
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .admin-profile-detail:hover {
+    background: #293750;
+    border-color: #818cf8;
+}
+
+html[data-theme="dark"] .admin-profile-detail span {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-profile-detail strong {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .admin-profile-detail .admin-profile-role-text {
+    color: #c4b5fd;
+}
+
+/* Form labels */
+html[data-theme="dark"] .admin-profile-field label {
+    color: #e2e8f0;
+}
+
+/* Form inputs */
+html[data-theme="dark"] .admin-profile-field input {
+    color: #f8fafc;
+    background: #0f172a;
+    border-color: #475569;
+    caret-color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-profile-field input::placeholder {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .admin-profile-field input:hover {
+    border-color: #818cf8;
+}
+
+html[data-theme="dark"] .admin-profile-field input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 4px rgb(129 140 248 / 15%);
+}
+
+/* Save button */
+html[data-theme="dark"] .admin-profile-save-btn {
+    color: #ffffff;
+    background: #6366f1;
+}
+
+html[data-theme="dark"] .admin-profile-save-btn:hover:not(:disabled) {
+    background: #4f46e5;
+}
+
+/* Cancel button */
+html[data-theme="dark"] .admin-profile-cancel-btn {
+    color: #e2e8f0;
+    background: #334155;
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .admin-profile-cancel-btn:hover:not(:disabled) {
+    color: #ffffff;
+    background: #475569;
+}
+
+/* Alert messages */
+html[data-theme="dark"] .admin-profile-alert.error {
+    color: #fecaca;
+    background: #450a0a;
+    border-color: #7f1d1d;
+}
+
+html[data-theme="dark"] .admin-profile-alert.success {
+    color: #bbf7d0;
+    background: #052e16;
+    border-color: #166534;
+}
+
+/* Loading state */
+html[data-theme="dark"] .admin-profile-loading {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-profile-spinner {
+    border-color: #334155;
+    border-top-color: #818cf8;
+}
+
+/* Keyboard focus */
+html[data-theme="dark"] .admin-profile-back-btn:focus-visible,
+html[data-theme="dark"] .admin-profile-edit-btn:focus-visible,
+html[data-theme="dark"] .admin-profile-save-btn:focus-visible,
+html[data-theme="dark"] .admin-profile-cancel-btn:focus-visible {
+    outline-color: #a5b4fc;
 }

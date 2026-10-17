@@ -412,3 +412,205 @@
         transition: none;
     }
 }
+
+
+/* ==========================================
+   DARK THEME - ADMIN INTERVIEWS
+========================================== */
+html[data-theme="dark"] .admin-interviews-page {
+    color: #e2e8f0;
+    background: #0f172a;
+}
+
+/* Header */
+html[data-theme="dark"] .admin-interviews-eyebrow {
+    color: #a5b4fc;
+}
+
+html[data-theme="dark"] .admin-interviews-header h1,
+html[data-theme="dark"] .admin-interviews-table-heading h2 {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .admin-interviews-header p:last-child {
+    color: #cbd5e1;
+}
+
+/* Back button */
+html[data-theme="dark"] .admin-interviews-back {
+    color: #c7d2fe;
+    background: #252449;
+}
+
+html[data-theme="dark"] .admin-interviews-back:hover {
+    color: #ffffff;
+    background: #4338ca;
+}
+
+/* Toolbar and table cards */
+html[data-theme="dark"] .admin-interviews-toolbar,
+html[data-theme="dark"] .admin-interviews-table-card {
+    color: #e2e8f0;
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 5px 20px rgb(0 0 0 / 15%);
+}
+
+/* Count and table heading description */
+html[data-theme="dark"] .admin-interviews-count span,
+html[data-theme="dark"] .admin-interviews-table-heading span {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-interviews-count strong {
+    color: #c4b5fd;
+}
+
+/* Search and filter inputs */
+html[data-theme="dark"] .admin-interviews-search,
+html[data-theme="dark"] .admin-interviews-filter {
+    color: #f1f5f9;
+    background: #0f172a;
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .admin-interviews-search::placeholder {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .admin-interviews-search:focus,
+html[data-theme="dark"] .admin-interviews-filter:focus {
+    border-color: #818cf8;
+}
+
+/* Refresh button */
+html[data-theme="dark"] .admin-interviews-refresh {
+    color: #ffffff;
+    background: #4f46e5;
+}
+
+/* Table */
+html[data-theme="dark"] .admin-interviews-table th {
+    color: #cbd5e1;
+    background: #0f172a;
+}
+
+html[data-theme="dark"] .admin-interviews-table td {
+    color: #e2e8f0;
+    border-bottom-color: #334155;
+}
+
+html[data-theme="dark"] .admin-interviews-table tbody tr:hover {
+    background: #283449;
+}
+
+html[data-theme="dark"] .admin-interviews-table tbody tr:hover td {
+    color: #ffffff;
+}
+
+/* Status badges */
+html[data-theme="dark"] .admin-interviews-status {
+    color: #e2e8f0;
+    background: #334155;
+}
+
+html[data-theme="dark"] .admin-interviews-status.status-completed {
+    color: #86efac;
+    background: #14532d;
+}
+
+html[data-theme="dark"] .admin-interviews-status.status-in_progress {
+    color: #bfdbfe;
+    background: #1e3a8a;
+}
+
+html[data-theme="dark"] .admin-interviews-status.status-created {
+    color: #ddd6fe;
+    background: #4c1d95;
+}
+
+html[data-theme="dark"] .admin-interviews-status.status-evaluation_pending {
+    color: #fde68a;
+    background: #78350f;
+}
+
+/* Empty state and error */
+html[data-theme="dark"] .admin-interviews-empty {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-interviews-error {
+    color: #fecaca;
+    background: #450a0a;
+    border-color: #7f1d1d;
+}
+
+/* DARK THEME - FILTER DROPDOWN */
+html[data-theme="dark"] .admin-filter-button {
+    color: #e2e8f0;
+    background: #1e293b;
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .admin-filter-button:hover,
+html[data-theme="dark"] .admin-filter-button.active {
+    color: #c4b5fd;
+    background: #312e63;
+    border-color: #818cf8;
+}
+
+html[data-theme="dark"] .admin-filter-count {
+    color: #ffffff;
+    background: #6366f1;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown {
+    background: #1e293b;
+    border-color: #475569;
+    box-shadow: 0 12px 35px rgb(0 0 0 / 35%);
+}
+
+html[data-theme="dark"] .admin-filter-dropdown-header {
+    border-bottom-color: #475569;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown-header strong {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .admin-filter-clear {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-filter-clear:hover {
+    background: #312e63;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown label {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown select {
+    color: #f1f5f9;
+    background: #0f172a;
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown select:focus {
+    border-color: #818cf8;
+}
+
+/* Dropdown options */
+html[data-theme="dark"] .admin-filter-dropdown select option {
+    color: #f1f5f9;
+    background: #1e293b;
+}
+
+/* Keyboard focus */
+html[data-theme="dark"] .admin-filter-button:focus-visible,
+html[data-theme="dark"] .admin-filter-clear:focus-visible,
+html[data-theme="dark"] .admin-interviews-back:focus-visible,
+html[data-theme="dark"] .admin-interviews-refresh:focus-visible {
+    outline: 2px solid #a5b4fc;
+    outline-offset: 3px;
+}
