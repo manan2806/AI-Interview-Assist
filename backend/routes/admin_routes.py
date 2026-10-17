@@ -610,8 +610,8 @@ def admin_change_password(current_user):
             200,
         )
 
-    except Exception as error:
-        print("Admin Change Password Error:", error)
+    except Exception:
+        logging.exception("Admin Change Password API Error")
 
         return (
             jsonify(

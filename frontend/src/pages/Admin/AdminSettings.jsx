@@ -154,7 +154,7 @@ function AdminSettings() {
         }
 
         if (newPassword !== confirmPassword) {
-            setPasswordError("New passwords do not match.");
+            setPasswordError("New password and confirm password do not match.");
             return;
         }
 
