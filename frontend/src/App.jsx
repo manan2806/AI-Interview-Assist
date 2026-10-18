@@ -27,6 +27,7 @@ import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminInterview from "./pages/Admin/AdminInterview";
 import AdminProfile from "./pages/Admin/AdminProfile";
 import AdminSettings from "./pages/Admin/AdminSettings";
+import AdminProblemReports from "./pages/Admin/AdminProblemReports";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -179,6 +180,11 @@ function App() {
                     <Route
                         path="/admin-settings"
                         element={<AdminSettings />}
+                    />
+
+                    <Route
+                        path="/admin-problem-reports"
+                        element={<AdminProblemReports />}
                     />
                 </Route>
 

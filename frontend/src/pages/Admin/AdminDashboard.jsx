@@ -377,31 +377,32 @@ function AdminDashboard() {
                         <div>
                             <h2>Platform Activity</h2>
                             <p>
-                                Keep track of important interview operations.
+                                Manage users, interviews, and problem reports.
                             </p>
                         </div>
                     </div>
 
                     <div className="admin-action-grid">
-
+                        {/* ADMIN PROFILE */}
                         <Link
-                            to="/admin-dashboard"
+                            to="/admin-profile"
                             className="admin-action-card"
                         >
                             <div className="admin-action-icon purple">
-                                📊
+                                🛡️
                             </div>
 
                             <div className="admin-action-content">
-                                <h3>Dashboard Overview</h3>
+                                <h3>Admin Profile</h3>
                                 <p>
-                                    Review platform statistics and activity.
+                                    View your administrator account details.
                                 </p>
                             </div>
 
                             <span className="admin-action-arrow">→</span>
                         </Link>
 
+                        {/* USER MANAGEMENT */}
                         <Link
                             to="/admin-users"
                             className="admin-action-card"
@@ -420,6 +421,7 @@ function AdminDashboard() {
                             <span className="admin-action-arrow">→</span>
                         </Link>
 
+                        {/* INTERVIEW MANAGEMENT */}
                         <Link
                             to="/admin-interviews"
                             className="admin-action-card"
@@ -438,18 +440,20 @@ function AdminDashboard() {
                             <span className="admin-action-arrow">→</span>
                         </Link>
 
+                        {/* PROBLEM REPORTS */}
                         <Link
-                            to="/admin-profile"
+                            to="/admin-problem-reports"
                             className="admin-action-card"
                         >
                             <div className="admin-action-icon orange">
-                                🛡️
+                                📨
                             </div>
 
                             <div className="admin-action-content">
-                                <h3>Admin Profile</h3>
+                                <h3>Problem Reports</h3>
                                 <p>
-                                    View your administrator account details.
+                                    View submitted reports, review details,
+                                    and update report status.
                                 </p>
                             </div>
 

@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 # from flask_bcrypt import Bcrypt
 import logging
+from datetime import datetime
 from utils.auth_utils import admin_required
 from routes.auth_routes import bcrypt
 
@@ -706,6 +707,180 @@ def admin_delete_account(current_user):
                     "success": False,
                     "message": "Unable to delete account. Please try again.",
                 }
+            ),
+            500,
+        )
+
+
+# ==========================================
+# ADMIN PROBLEM REPORTS - LIST, DETAILS, STATUS
+# ==========================================
+ALLOWED_PROBLEM_REPORT_STATUSES = [
+    "Open",
+    "In Progress",
+    "Resolved",
+]
+
+
+def serialize_problem_report(report):
+    report["_id"] = str(report["_id"])
+
+    created_at = report.get("created_at")
+    if isinstance(created_at, datetime):
+        report["created_at"] = created_at.isoformat()
+
+    updated_at = report.get("updated_at")
+    if isinstance(updated_at, datetime):
+        report["updated_at"] = updated_at.isoformat()
+
+    return report
+
+
+# ==========================================
+# GET ALL PROBLEM REPORTS
+# ==========================================
+@admin_bp.route("/api/admin/problem-reports", methods=["GET"])
+@admin_required
+def admin_get_problem_reports(current_user):
+    try:
+        if db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        reports_collection = db["problem_reports"]
+        reports = list(reports_collection.find({}).sort("created_at", -1).limit(500))
+        report_list = [serialize_problem_report(report) for report in reports]
+
+        return (
+            jsonify(
+                {"success": True, "total": len(report_list), "reports": report_list}
+            ),
+            200,
+        )
+
+    except Exception:
+        logging.exception("Admin problem report list API error")
+        return (
+            jsonify({"success": False, "message": "Unable to fetch problem reports."}),
+            500,
+        )
+
+
+# ==========================================
+# GET SINGLE PROBLEM REPORT DETAILS
+# ==========================================
+@admin_bp.route("/api/admin/problem-reports/<report_id>", methods=["GET"])
+@admin_required
+def admin_get_problem_report_details(current_user, report_id):
+    try:
+        if db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        report = db["problem_reports"].find_one({"report_id": report_id})
+
+        if not report:
+            return (
+                jsonify({"success": False, "message": "Problem report not found."}),
+                404,
+            )
+
+        return (
+            jsonify({"success": True, "report": serialize_problem_report(report)}),
+            200,
+        )
+
+    except Exception:
+        logging.exception("Admin problem report details API error")
+        return (
+            jsonify(
+                {"success": False, "message": "Unable to fetch problem report details."}
+            ),
+            500,
+        )
+
+
+# ==========================================
+# UPDATE PROBLEM REPORT STATUS
+# ==========================================
+@admin_bp.route("/api/admin/problem-reports/<report_id>/status", methods=["PATCH"])
+@admin_required
+def admin_update_problem_report_status(current_user, report_id):
+    try:
+        if db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        data = request.get_json(silent=True)
+
+        if not isinstance(data, dict):
+            return (
+                jsonify(
+                    {"success": False, "message": "Please provide valid JSON data."}
+                ),
+                400,
+            )
+
+        status = data.get("status")
+
+        if not isinstance(status, str):
+            return jsonify({"success": False, "message": "Status is required."}), 400
+
+        status = status.strip()
+
+        if status not in ALLOWED_PROBLEM_REPORT_STATUSES:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Invalid problem report status.",
+                        "allowed_statuses": ALLOWED_PROBLEM_REPORT_STATUSES,
+                    }
+                ),
+                400,
+            )
+
+        result = db["problem_reports"].update_one(
+            {"report_id": report_id},
+            {"$set": {"status": status, "updated_at": datetime.utcnow()}},
+        )
+
+        if result.matched_count == 0:
+            return (
+                jsonify({"success": False, "message": "Problem report not found."}),
+                404,
+            )
+
+        logging.info(
+            "Problem report %s status updated to %s by admin %s",
+            report_id,
+            status,
+            current_user.get("user_id", "unknown"),
+        )
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Problem report status updated successfully.",
+                    "report_id": report_id,
+                    "status": status,
+                }
+            ),
+            200,
+        )
+
+    except Exception:
+        logging.exception("Admin problem report status update API error")
+        return (
+            jsonify(
+                {"success": False, "message": "Unable to update problem report status."}
             ),
             500,
         )
