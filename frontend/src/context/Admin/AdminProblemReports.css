@@ -294,7 +294,8 @@
 
 .admin-reports-search {
     flex: 1;
-    min-width: 210px;
+    width: 870px;
+    max-width: 100%;
 }
 
 .admin-reports-search:focus,

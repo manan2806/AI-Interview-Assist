@@ -27,10 +27,10 @@ function AdminProblemReports() {
     const [notice, setNotice] = useState("");
 
     const hasActiveFilters =
+        search.trim() !== "" ||
         statusFilter !== "all" ||
         typeFilter !== "all" ||
-        dateFilter !== "all" ||
-        sortBy !== "newest";
+        dateFilter !== "all";
 
     const clearFilters = () => {
         setStatusFilter("all");
@@ -369,29 +369,22 @@ function AdminProblemReports() {
                         <p>
                             {loading
                                 ? "Loading reports..."
-                                : `${filteredReports.length} results`}
+                                : `${filteredReports.length} out of ${reports.length} results`}
                         </p>
                     </div>
 
                     <div className="admin-reports-toolbar">
-                        <div className="admin-reports-count">
-                            <span>Total Reports</span>
-                            <strong>
-                                {loading ? "..." : reports.length}
-                            </strong>
-                        </div>
-
+                        {/* Search */}
                         <input
                             type="search"
                             className="admin-reports-search"
                             placeholder="Search subject, user or ID..."
                             value={search}
-                            onChange={(event) =>
-                                setSearch(event.target.value)
-                            }
+                            onChange={(event) => setSearch(event.target.value)}
                             aria-label="Search problem reports"
                         />
 
+                        {/* Filters */}
                         <div className="admin-filter-wrapper">
                             <button
                                 type="button"
@@ -403,65 +396,66 @@ function AdminProblemReports() {
                                 aria-expanded={filterMenuOpen}
                             >
                                 <span>☷ Filters</span>
+
                                 {hasActiveFilters && (
                                     <span className="admin-filter-count">
                                         Active
                                     </span>
                                 )}
+
                                 <span>
                                     {filterMenuOpen ? "▲" : "▼"}
                                 </span>
                             </button>
 
+                            {/* Filter Dropdown */}
                             {filterMenuOpen && (
                                 <div className="admin-filter-dropdown">
                                     <div className="admin-filter-dropdown-header">
                                         <strong>Filter Reports</strong>
-                                        <button
-                                            type="button"
-                                            onClick={clearFilters}
-                                            className="admin-filter-clear"
-                                        >
-                                            Clear all
-                                        </button>
+
+                                        {(search.trim() !== "" ||
+                                            statusFilter !== "all" ||
+                                            typeFilter !== "all" ||
+                                            dateFilter !== "all" ||
+                                            sortBy !== "newest") && (
+                                                <button
+                                                    type="button"
+                                                    onClick={clearFilters}
+                                                    className="admin-filter-clear"
+                                                >
+                                                    Clear all
+                                                </button>
+                                            )}
                                     </div>
 
+                                    {/* Status */}
                                     <label>
                                         Status
                                         <select
                                             value={statusFilter}
                                             onChange={(event) =>
-                                                setStatusFilter(
-                                                    event.target.value
-                                                )
+                                                setStatusFilter(event.target.value)
                                             }
                                         >
-                                            <option value="all">
-                                                All statuses
-                                            </option>
+                                            <option value="all">All statuses</option>
                                             <option value="Open">Open</option>
-                                            <option value="In Progress">
-                                                In Progress
-                                            </option>
-                                            <option value="Resolved">
-                                                Resolved
-                                            </option>
+                                            <option value="In Progress">In Progress</option>
+                                            <option value="Resolved">Resolved</option>
                                         </select>
                                     </label>
 
+                                    {/* Problem Type */}
                                     <label>
                                         Problem type
                                         <select
                                             value={typeFilter}
                                             onChange={(event) =>
-                                                setTypeFilter(
-                                                    event.target.value
-                                                )
+                                                setTypeFilter(event.target.value)
                                             }
                                         >
-                                            <option value="all">
-                                                All problem types
-                                            </option>
+                                            <option value="all">All problem types</option>
+
                                             {reportTypes.map((type) => (
                                                 <option key={type} value={type}>
                                                     {type}
@@ -470,34 +464,24 @@ function AdminProblemReports() {
                                         </select>
                                     </label>
 
+                                    {/* Submitted Date */}
                                     <label>
                                         Submitted date
                                         <select
                                             value={dateFilter}
                                             onChange={(event) =>
-                                                setDateFilter(
-                                                    event.target.value
-                                                )
+                                                setDateFilter(event.target.value)
                                             }
                                         >
-                                            <option value="all">
-                                                Any time
-                                            </option>
-                                            <option value="today">
-                                                Today
-                                            </option>
-                                            <option value="7days">
-                                                Last 7 days
-                                            </option>
-                                            <option value="30days">
-                                                Last 30 days
-                                            </option>
-                                            <option value="90days">
-                                                Last 90 days
-                                            </option>
+                                            <option value="all">Any time</option>
+                                            <option value="today">Today</option>
+                                            <option value="7days">Last 7 days</option>
+                                            <option value="30days">Last 30 days</option>
+                                            <option value="90days">Last 90 days</option>
                                         </select>
                                     </label>
 
+                                    {/* Sorting */}
                                     <label>
                                         Sort by
                                         <select
@@ -506,18 +490,15 @@ function AdminProblemReports() {
                                                 setSortBy(event.target.value)
                                             }
                                         >
-                                            <option value="newest">
-                                                Newest first
-                                            </option>
-                                            <option value="oldest">
-                                                Oldest first
-                                            </option>
+                                            <option value="newest">Newest first</option>
+                                            <option value="oldest">Oldest first</option>
                                         </select>
                                     </label>
                                 </div>
                             )}
                         </div>
 
+                        {/* Refresh */}
                         <button
                             type="button"
                             className="admin-reports-refresh"
