@@ -20,6 +20,7 @@ import InterviewDetails from "./pages/User/InterviewDetails";
 import PerformanceChart from "./pages/User/PerformanceChart";
 import Support from "./pages/User/Support";
 import Settings from "./pages/User/Settings";
+import Announcements from "./pages/User/Announcements";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -28,6 +29,7 @@ import AdminInterview from "./pages/Admin/AdminInterview";
 import AdminProfile from "./pages/Admin/AdminProfile";
 import AdminSettings from "./pages/Admin/AdminSettings";
 import AdminProblemReports from "./pages/Admin/AdminProblemReports";
+import AdminAnnouncements from "./pages/Admin/AdminAnnouncements";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -151,6 +153,12 @@ function App() {
                         path="/interview/details/:id"
                         element={<InterviewDetails />}
                     />
+
+                    {/* Announcements & Notifications */}
+                    <Route
+                        path="/announcements"
+                        element={<Announcements />}
+                    />
                 </Route>
 
                 {/* ==================================
@@ -185,6 +193,11 @@ function App() {
                     <Route
                         path="/admin-problem-reports"
                         element={<AdminProblemReports />}
+                    />
+
+                    <Route
+                        path="/admin-announcements"
+                        element={<AdminAnnouncements />}
                     />
                 </Route>
 

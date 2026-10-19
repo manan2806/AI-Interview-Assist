@@ -62,7 +62,6 @@ function AdminDashboard() {
     // ==========================================
     // LOAD ADMIN INFORMATION
     // ==========================================
-
     useEffect(() => {
         const token = localStorage.getItem("token");
 
@@ -92,7 +91,6 @@ function AdminDashboard() {
     // ==========================================
     // FETCH ADMIN STATISTICS
     // ==========================================
-
     const fetchStats = useCallback(async () => {
         setLoading(true);
         setError("");
@@ -132,7 +130,6 @@ function AdminDashboard() {
     // ==========================================
     // CLOSE MOBILE MENU ON OUTSIDE CLICK
     // ==========================================
-
     useEffect(() => {
         const handleOutsideClick = (event) => {
             const clickedButton = event.target.closest(
@@ -161,18 +158,16 @@ function AdminDashboard() {
     // ==========================================
     // LOGOUT
     // ==========================================
-
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        navigate("/login", { replace: true });
+        navigate("/home", { replace: true });
     };
 
     // ==========================================
     // LOADING
     // ==========================================
-
     if (!user) {
         return (
             <div className="admin-dashboard">
@@ -188,7 +183,6 @@ function AdminDashboard() {
     // ==========================================
     // DASHBOARD
     // ==========================================
-
     return (
         <div className="admin-dashboard">
 
@@ -277,11 +271,9 @@ function AdminDashboard() {
             </nav>
 
             {/* MAIN CONTENT */}
-
             <main className="admin-container">
 
                 {/* WELCOME SECTION */}
-
                 <section className="admin-welcome">
                     <div>
                         <p className="admin-eyebrow">
@@ -304,7 +296,6 @@ function AdminDashboard() {
                 </section>
 
                 {/* ERROR MESSAGE */}
-
                 {error && (
                     <div className="admin-error" role="alert">
                         <span>⚠️ {error}</span>
@@ -320,7 +311,6 @@ function AdminDashboard() {
                 )}
 
                 {/* STATISTICS */}
-
                 <section className="admin-stats-section">
                     <div className="admin-section-heading">
                         <div>
@@ -371,7 +361,6 @@ function AdminDashboard() {
                 </section>
 
                 {/* PLATFORM ACTIVITY */}
-
                 <section className="admin-action-section">
                     <div className="admin-section-heading">
                         <div>
@@ -460,11 +449,28 @@ function AdminDashboard() {
                             <span className="admin-action-arrow">→</span>
                         </Link>
 
+                        {/* ANNOUNCEMENTS MANAGEMENT */}
+                        <Link
+                            to="/admin-announcements"
+                            className="admin-action-card"
+                        >
+                            <div className="admin-action-icon purple">
+                                📢
+                            </div>
+
+                            <div className="admin-action-content">
+                                <h3>Announcements Management</h3>
+                                <p>
+                                    Create and manage announcements and notifications
+                                    for users.
+                                </p>
+                            </div>
+                            <span className="admin-action-arrow">→</span>
+                        </Link>
                     </div>
                 </section>
 
                 {/* ADMIN ACCOUNT */}
-
                 <section className="admin-account-section">
                     <div className="admin-section-heading">
                         <div>

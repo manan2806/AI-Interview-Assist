@@ -54,9 +54,6 @@ Step 4 — User Management: Search, user details aur safe account management.
 Step 5 — Interview Monitoring: Status, pending evaluation aur failed evaluation monitoring—private results expose kiye bina.
 Step 6 — Analytics & Testing: Charts, access-control tests, mobile responsive design aur deployment.
 
-# admin setting
-1. Appearance: Light, Dark
-2. Email Notifications: Enable/Disable
-3. Evaluation Alerts: Enable/Disable
-4. System Alerts: Enable/Disable
-5. Account Secturity: password change , delete account
+1. Announcements & Broadcasts
+2. Export & Reports Center
+3. User Activity Logs

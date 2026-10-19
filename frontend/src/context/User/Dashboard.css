@@ -69,6 +69,32 @@
     color: #6258dc;
 }
 
+
+/* ==========================================
+   ANNOUNCEMENTS / NOTIFICATION NAVIGATION
+========================================== */
+
+.dashboard-notification-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dashboard-notification-link:hover {
+    background: rgba(108, 99, 255, 0.12);
+    color: #6c63ff;
+}
+
+.dashboard-notification-link span:first-child {
+    font-size: 18px;
+}
+
 .logout-button {
     padding: 9px 15px;
     border: 1px solid #e2e5ec;

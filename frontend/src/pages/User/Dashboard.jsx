@@ -11,7 +11,6 @@ function Dashboard() {
     // ==========================================
     // STATE
     // ==========================================
-
     const [user, setUser] = useState(null);
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,7 +20,6 @@ function Dashboard() {
     // ==========================================
     // LOAD DASHBOARD DATA
     // ==========================================
-
     useEffect(() => {
         const loadDashboard = async () => {
             try {
@@ -61,7 +59,6 @@ function Dashboard() {
         loadDashboard();
     }, [navigate]);
 
-
     // ==========================================
     // CLOSE MOBILE MENU ON OUTSIDE CLICK
     // ==========================================
@@ -82,7 +79,6 @@ function Dashboard() {
     // ==========================================
     // LOGOUT
     // ==========================================
-
     const handleLogout = () => {
         try {
             logout();
@@ -96,17 +92,13 @@ function Dashboard() {
     // ==========================================
     // INTERVIEW STATISTICS
     // ==========================================
-
     const totalInterviews = interviews.length;
-
     const completedInterviews = interviews.filter(
         (interview) => interview?.status === "completed"
     ).length;
-
     const scoredInterviews = interviews.filter((interview) =>
         Number.isFinite(Number(interview?.overall_score))
     );
-
     const averageScore =
         scoredInterviews.length > 0
             ? Math.round(
@@ -117,16 +109,13 @@ function Dashboard() {
                 ) / scoredInterviews.length
             )
             : 0;
-
     const latestInterview =
         interviews.length > 0 ? interviews[0] : null;
-
     const recentInterviews = interviews.slice(0, 3);
 
     // ==========================================
     // PERFORMANCE LABEL
     // ==========================================
-
     const getPerformanceLabel = (score) => {
         if (score >= 90) return "Excellent";
         if (score >= 75) return "Very Good";
@@ -139,7 +128,6 @@ function Dashboard() {
     // ==========================================
     // FORMAT DATE
     // ==========================================
-
     const formatDate = (date) => {
         if (!date) {
             return "Date unavailable";
@@ -159,7 +147,6 @@ function Dashboard() {
     // ==========================================
     // STATUS LABEL
     // ==========================================
-
     const getStatusLabel = (status) => {
         if (status === "completed") return "Completed";
         if (status === "evaluation_pending") return "Evaluation Pending";
@@ -171,7 +158,6 @@ function Dashboard() {
     // ==========================================
     // LOADING
     // ==========================================
-
     if (loading) {
         return (
             <div className="dashboard-page">
@@ -191,7 +177,6 @@ function Dashboard() {
     // ==========================================
     // ERROR
     // ==========================================
-
     if (error || !user) {
         return (
             <div className="dashboard-page">
@@ -221,17 +206,13 @@ function Dashboard() {
     // ==========================================
     // DASHBOARD
     // ==========================================
-
     return (
         <div className="dashboard-page">
 
             {/* ==========================================
                 NAVBAR
             ========================================== */}
-
             <nav className="dashboard-navbar">
-
-                {/* LOGO / BRAND */}
                 <div className="dashboard-logo">
                     <div className="dashboard-logo-icon">AI</div>
                     <span>Interview Assist</span>
@@ -240,8 +221,11 @@ function Dashboard() {
                 {/* ==========================================
                     DESKTOP NAVIGATION
                 ========================================== */}
-
                 <div className="dashboard-nav-right">
+                    <Link to="/announcements">
+                        <span aria-hidden="true">🔔</span>
+                        <span>Notifications</span>
+                    </Link>
 
                     <Link to="/support">
                         Help & Support
@@ -267,6 +251,7 @@ function Dashboard() {
                 {/* ==========================================
                     MOBILE HAMBURGER
                 ========================================== */}
+
                 <div className="dashboard-mobile-nav">
                     <button
                         className="dashboard-menu-button"
@@ -281,36 +266,44 @@ function Dashboard() {
 
                     {mobileMenuOpen && (
                         <div className="dashboard-mobile-dropdown">
+
+                            {/* ANNOUNCEMENTS */}
+                            <Link
+                                to="/announcements"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>🔔</span>
+                                <span>Announcements</span>
+                            </Link>
+
+                            {/* PROFILE */}
                             <Link
                                 to="/profile"
-                                onClick={() =>
-                                    setMobileMenuOpen(false)
-                                }
+                                onClick={() => setMobileMenuOpen(false)}
                             >
                                 <span>👤</span>
                                 <span>Profile</span>
                             </Link>
 
+                            {/* SETTINGS */}
                             <Link
                                 to="/settings"
-                                onClick={() =>
-                                    setMobileMenuOpen(false)
-                                }
+                                onClick={() => setMobileMenuOpen(false)}
                             >
                                 <span>⚙️</span>
                                 <span>Settings</span>
                             </Link>
 
+                            {/* HELP & SUPPORT */}
                             <Link
                                 to="/support"
-                                onClick={() =>
-                                    setMobileMenuOpen(false)
-                                }
+                                onClick={() => setMobileMenuOpen(false)}
                             >
                                 <span>🛟</span>
                                 <span>Help & Support</span>
                             </Link>
 
+                            {/* LOGOUT */}
                             <button
                                 onClick={() => {
                                     setMobileMenuOpen(false);
@@ -320,9 +313,11 @@ function Dashboard() {
                                 <span>🚪</span>
                                 <span>Logout</span>
                             </button>
+
                         </div>
                     )}
                 </div>
+
             </nav>
 
             {/* MAIN */}

@@ -640,6 +640,15 @@
     background: #ffe1b5
 }
 
+.admin-action-card:nth-child(5) {
+    background: linear-gradient(135deg, #fff, #fce7f3);
+    border: 1px solid #f5c2df;
+}
+
+.admin-action-card:nth-child(5)::after {
+    background: #fbcfe8;
+}
+
 .admin-action-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 13px 27px rgba(31, 41, 55, .075)
@@ -678,6 +687,11 @@
 .admin-action-icon.orange {
     background: linear-gradient(135deg, #ffe7c2, #ffd59b);
     color: #b45309
+}
+
+.admin-action-icon.pink {
+    background: linear-gradient(135deg, #fbcfe8, #f5bde5);
+    color: #be185d;
 }
 
 .admin-action-content {
@@ -1484,6 +1498,11 @@ html[data-theme="dark"] .admin-action-icon.green {
 html[data-theme="dark"] .admin-action-icon.orange {
     color: #fed7aa;
     background: #9a3412;
+}
+
+html[data-theme="dark"] .admin-action-icon.pink {
+    background: #831843;
+    color: #fbcfe8;
 }
 
 /* ==========================================
