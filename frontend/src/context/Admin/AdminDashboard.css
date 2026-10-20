@@ -892,6 +892,125 @@
     outline-offset: 3px
 }
 
+
+/* ==========================================
+   ADMIN REPORT NOTIFICATIONS
+========================================== */
+
+.admin-report-notification-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    text-decoration: none;
+}
+
+.admin-report-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.admin-report-badge,
+.admin-menu-notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    border-radius: 20px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.admin-menu-button {
+    position: relative;
+    overflow: visible;
+}
+
+.admin-menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-menu-notification-badge {
+    top: -6px;
+    right: -6px;
+    pointer-events: none;
+}
+
+.admin-report-card-count {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 8px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #fff0da;
+    color: #b45309;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* MOBILE PROBLEM REPORT BADGE */
+.admin-mobile-dropdown a {
+    overflow: visible;
+}
+
+.admin-mobile-report-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-mobile-report-badge {
+    position: absolute;
+    top: -9px;
+    right: -10px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 2px solid #fff;
+    border-radius: 50px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+@media (max-width: 640px) {
+    .admin-report-notification-link {
+        display: none;
+    }
+}
+
 /* TABLET */
 @media(max-width:1100px) {
     .admin-navbar {

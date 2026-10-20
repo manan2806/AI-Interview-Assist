@@ -58,6 +58,7 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [openReportCount, setOpenReportCount] = useState(0);
 
     // ==========================================
     // LOAD ADMIN INFORMATION
@@ -126,6 +127,57 @@ function AdminDashboard() {
             fetchStats();
         }
     }, [user, fetchStats]);
+
+
+    // ==========================================
+    // LOAD OPEN PROBLEM REPORT NOTIFICATIONS
+    // ==========================================
+    useEffect(() => {
+        if (!user) return;
+
+        let active = true;
+
+        const fetchOpenReportCount = async () => {
+            try {
+                const response = await api.get(
+                    "/api/admin/problem-reports"
+                );
+
+                if (active && response.data?.success) {
+                    const reports = Array.isArray(
+                        response.data.reports
+                    )
+                        ? response.data.reports
+                        : [];
+
+                    const count = reports.filter(
+                        (report) =>
+                            String(report.status || "Open")
+                                .toLowerCase() === "open"
+                    ).length;
+
+                    setOpenReportCount(count);
+                }
+            } catch (err) {
+                console.error(
+                    "Problem Report Notification Error:",
+                    err
+                );
+            }
+        };
+
+        fetchOpenReportCount();
+
+        const intervalId = setInterval(
+            fetchOpenReportCount,
+            30000
+        );
+
+        return () => {
+            active = false;
+            clearInterval(intervalId);
+        };
+    }, [user]);
 
     // ==========================================
     // CLOSE MOBILE MENU ON OUTSIDE CLICK
@@ -197,8 +249,25 @@ function AdminDashboard() {
                     </div>
                 </Link>
 
-                {/* DESKTOP: LOGOUT ONLY */}
                 <div className="admin-navbar-actions admin-desktop-nav">
+                    <Link
+                        to="/admin-problem-reports"
+                        className="admin-profile-nav-link"
+                        aria-label={`${openReportCount} open problem reports`}
+                    >
+                        <span className="admin-report-bell">
+                            🔔
+                            {openReportCount > 0 && (
+                                <span className="admin-report-badge">
+                                    {openReportCount > 99
+                                        ? "99+"
+                                        : openReportCount}
+                                </span>
+                            )}
+                        </span>
+                        <span>Reports</span>
+                    </Link>
+
                     <Link
                         to="/admin-profile"
                         className="admin-profile-nav-link"
@@ -233,7 +302,13 @@ function AdminDashboard() {
                         aria-label="Toggle menu"
                         aria-expanded={mobileMenuOpen}
                     >
-                        ☰
+                        <span className="admin-menu-icon">☰</span>
+
+                        {!mobileMenuOpen && openReportCount > 0 && (
+                            <span className="admin-menu-notification-badge">
+                                {openReportCount > 99 ? "99+" : openReportCount}
+                            </span>
+                        )}
                     </button>
 
                     {mobileMenuOpen && (
@@ -252,6 +327,22 @@ function AdminDashboard() {
                             >
                                 <span>⚙️</span>
                                 <span>Settings</span>
+                            </Link>
+
+                            <Link
+                                to="/admin-problem-reports"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span className="admin-mobile-report-icon">
+                                    📨
+                                    {openReportCount > 0 && (
+                                        <span className="admin-mobile-report-badge">
+                                            {openReportCount > 99 ? "99+" : openReportCount}
+                                        </span>
+                                    )}
+                                </span>
+
+                                <span>Problem Reports</span>
                             </Link>
 
                             <button

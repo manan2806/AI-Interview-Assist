@@ -83,7 +83,6 @@
     border-radius: 10px;
     text-decoration: none;
     font-weight: 600;
-    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .dashboard-notification-link:hover {
@@ -1347,6 +1346,126 @@
         font-size: 12px;
     }
 }
+
+/* Bell icon */
+.dashboard-notification-icon,
+.dashboard-mobile-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Desktop unread count */
+.dashboard-notification-badge,
+.dashboard-mobile-notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    border-radius: 20px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.dashboard-mobile-notification-badge {
+    top: -7px;
+    right: -9px;
+}
+
+
+/* FIX: DESKTOP NOTIFICATION NUMBER POSITION */
+.dashboard-notification-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dashboard-notification-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.dashboard-notification-icon .dashboard-notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -9px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+
+/* MOBILE MENU NOTIFICATION BADGE */
+.dashboard-menu-button {
+    position: relative;
+    overflow: visible;
+}
+
+.dashboard-menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-menu-notification-badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    z-index: 10;
+
+    min-width: 19px;
+    height: 19px;
+    padding: 0 4px;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #ffffff;
+    border-radius: 50px;
+    background: #ef4444;
+    color: #ffffff;
+
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
 
 /* ==========================================
    DASHBOARD - COLORFUL DARK THEME

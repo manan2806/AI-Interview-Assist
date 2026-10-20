@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getUser, logout } from "../../utils/auth";
 import { getInterviewHistory } from "../../services/interviewService";
 import "../../context/User/Dashboard.css";
+import api from "../../services/api";
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -16,6 +17,7 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [unreadAnnouncementCount, setUnreadAnnouncementCount] = useState(0);
 
     // ==========================================
     // LOAD DASHBOARD DATA
@@ -73,6 +75,49 @@ function Dashboard() {
         document.addEventListener("click", handleOutsideClick);
         return () => {
             document.removeEventListener("click", handleOutsideClick);
+        };
+    }, []);
+
+    // ==========================================
+    // LOAD UNREAD ANNOUNCEMENT COUNT
+    // ==========================================
+    useEffect(() => {
+        let active = true;
+
+        const loadUnreadAnnouncements = async () => {
+            try {
+                const response = await api.get("/api/announcements");
+
+                const data = response.data;
+                const announcements = Array.isArray(data)
+                    ? data
+                    : data?.announcements || [];
+
+                const unreadCount = announcements.filter(
+                    (announcement) => announcement.is_read === false
+                ).length;
+
+                if (active) {
+                    setUnreadAnnouncementCount(unreadCount);
+                }
+            } catch (err) {
+                console.error(
+                    "Announcement Notification Error:",
+                    err
+                );
+            }
+        };
+
+        loadUnreadAnnouncements();
+
+        const intervalId = setInterval(
+            loadUnreadAnnouncements,
+            30000
+        );
+
+        return () => {
+            active = false;
+            clearInterval(intervalId);
         };
     }, []);
 
@@ -222,7 +267,17 @@ function Dashboard() {
                     DESKTOP NAVIGATION
                 ========================================== */}
                 <div className="dashboard-nav-right">
-                    <Link to="/announcements">
+                    <Link to="/announcements" className="dashboard-notification-link">
+                        <span className="dashboard-notification-icon">
+                            🔔
+                            {unreadAnnouncementCount > 0 && (
+                                <span className="dashboard-notification-badge">
+                                    {unreadAnnouncementCount > 99
+                                        ? "99+"
+                                        : unreadAnnouncementCount}
+                                </span>
+                            )}
+                        </span>
                         <span>Notifications</span>
                     </Link>
 
@@ -252,15 +307,22 @@ function Dashboard() {
                 ========================================== */}
 
                 <div className="dashboard-mobile-nav">
+
                     <button
+                        type="button"
                         className="dashboard-menu-button"
-                        onClick={() =>
-                            setMobileMenuOpen(!mobileMenuOpen)
-                        }
-                        aria-label="Open menu"
-                        aria-expanded={mobileMenuOpen}
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label={`Open menu. ${unreadAnnouncementCount} unread notifications`}
                     >
-                        ☰
+                        <span className="dashboard-menu-icon">☰</span>
+
+                        {!mobileMenuOpen && unreadAnnouncementCount > 0 && (
+                            <span className="dashboard-menu-notification-badge">
+                                {unreadAnnouncementCount > 99
+                                    ? "99+"
+                                    : unreadAnnouncementCount}
+                            </span>
+                        )}
                     </button>
 
                     {mobileMenuOpen && (
@@ -271,7 +333,16 @@ function Dashboard() {
                                 to="/announcements"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                <span>🔔</span>
+                                <span className="dashboard-mobile-bell">
+                                    🔔
+                                    {unreadAnnouncementCount > 0 && (
+                                        <span className="dashboard-mobile-notification-badge">
+                                            {unreadAnnouncementCount > 99
+                                                ? "99+"
+                                                : unreadAnnouncementCount}
+                                        </span>
+                                    )}
+                                </span>
                                 <span>Announcements</span>
                             </Link>
 
