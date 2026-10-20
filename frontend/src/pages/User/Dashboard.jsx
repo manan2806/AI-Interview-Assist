@@ -223,7 +223,6 @@ function Dashboard() {
                 ========================================== */}
                 <div className="dashboard-nav-right">
                     <Link to="/announcements">
-                        <span aria-hidden="true">🔔</span>
                         <span>Notifications</span>
                     </Link>
 

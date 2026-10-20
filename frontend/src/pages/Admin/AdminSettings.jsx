@@ -596,6 +596,7 @@ function AdminSettings() {
                                     {passwordError}
                                 </div>
                             )}
+
                             {passwordSuccess && (
                                 <div className="admin-settings-message success">
                                     {passwordSuccess}
@@ -610,6 +611,7 @@ function AdminSettings() {
                                     onChange={(event) =>
                                         setCurrentPassword(event.target.value)
                                     }
+                                    placeholder="Enter your current password"
                                     autoComplete="current-password"
                                     required
                                 />
@@ -623,6 +625,7 @@ function AdminSettings() {
                                     onChange={(event) =>
                                         setNewPassword(event.target.value)
                                     }
+                                    placeholder="Enter your new password"
                                     autoComplete="new-password"
                                     minLength={6}
                                     required
@@ -637,6 +640,7 @@ function AdminSettings() {
                                     onChange={(event) =>
                                         setConfirmPassword(event.target.value)
                                     }
+                                    placeholder="Re-enter your new password"
                                     autoComplete="new-password"
                                     minLength={6}
                                     required
@@ -652,6 +656,7 @@ function AdminSettings() {
                                 >
                                     Cancel
                                 </button>
+
                                 <button
                                     type="submit"
                                     className="admin-settings-save"
@@ -711,6 +716,7 @@ function AdminSettings() {
                                     setDeletePassword(event.target.value);
                                     setDeleteError("");
                                 }}
+                                placeholder="Enter your current password"
                                 autoComplete="current-password"
                                 required
                             />

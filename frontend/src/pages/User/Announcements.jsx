@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -15,11 +14,36 @@ const TYPE_LABELS = {
 
 function Announcements() {
     const [items, setItems] = useState([]);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
     const [unreadCount, setUnreadCount] = useState(0);
     const [filter, setFilter] = useState("all");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [updatingId, setUpdatingId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [typeFilter, setTypeFilter] = useState("all");
+    const [sortOrder, setSortOrder] = useState("newest");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+    const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+
+    const hasActiveFilters =
+        searchTerm.trim() !== "" ||
+        filter !== "all" ||
+        typeFilter !== "all" ||
+        startDate !== "" ||
+        endDate !== "" ||
+        sortOrder !== "newest";
+
+    const clearFilters = () => {
+        setSearchTerm("");
+        setFilter("all");
+        setTypeFilter("all");
+        setStartDate("");
+        setEndDate("");
+        setSortOrder("newest");
+    };
 
     const loadAnnouncements = useCallback(async () => {
         setLoading(true);
@@ -72,11 +96,72 @@ function Announcements() {
         }
     };
 
-    const visibleItems = items.filter((item) => {
-        if (filter === "unread") return !item.is_read;
-        if (filter === "read") return item.is_read;
-        return true;
-    });
+    const visibleItems = items
+        .filter((item) => {
+            if (filter === "unread" && item.is_read) return false;
+            if (filter === "read" && !item.is_read) return false;
+
+            const search = searchTerm.trim().toLowerCase();
+
+            if (search) {
+                const searchableText = [
+                    item.title,
+                    item.message,
+                    TYPE_LABELS[item.type],
+                    item.created_by_name,
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+                if (!searchableText.includes(search)) return false;
+            }
+
+            // Announcement type filter
+            if (typeFilter !== "all" && item.type !== typeFilter) {
+                return false;
+            }
+
+            // Date filters
+            const announcementDate = item.created_at
+                ? new Date(item.created_at)
+                : null;
+
+            if (startDate) {
+                if (
+                    !announcementDate ||
+                    Number.isNaN(announcementDate.getTime()) ||
+                    announcementDate < new Date(`${startDate}T00:00:00`)
+                ) {
+                    return false;
+                }
+            }
+
+            if (endDate) {
+                if (
+                    !announcementDate ||
+                    Number.isNaN(announcementDate.getTime()) ||
+                    announcementDate > new Date(`${endDate}T23:59:59.999`)
+                ) {
+                    return false;
+                }
+            }
+
+            return true;
+        })
+        .sort((a, b) => {
+            const dateA = a.created_at
+                ? new Date(a.created_at).getTime()
+                : 0;
+
+            const dateB = b.created_at
+                ? new Date(b.created_at).getTime()
+                : 0;
+
+            return sortOrder === "newest"
+                ? dateB - dateA
+                : dateA - dateB;
+        });
 
     if (loading && items.length === 0) {
         return (
@@ -163,35 +248,116 @@ function Announcements() {
                 {/* ANNOUNCEMENTS CARD */}
                 <div className="profile-card announcements-main-card">
 
-                    {/* FILTERS */}
+                    {/* SEARCH AND FILTER TOOLBAR */}
                     <div className="announcements-toolbar">
                         <div>
                             <h2>All Notifications</h2>
-                            <p>View and manage your latest updates.</p>
+                            <p>
+                                {visibleItems.length} of {items.length} announcements
+                            </p>
                         </div>
 
-                        <div className="announcements-filters">
-                            {[
-                                { value: "all", label: "All" },
-                                {
-                                    value: "unread",
-                                    label: `Unread (${unreadCount})`,
-                                },
-                                { value: "read", label: "Read" },
-                            ].map((option) => (
+                        <div className="announcements-search-toolbar">
+                            {/* Search */}
+                            <input
+                                type="search"
+                                className="announcements-advanced-search"
+                                placeholder="Search title, message or admin..."
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                                aria-label="Search announcements"
+                            />
+
+                            {/* Filters */}
+                            <div className="announcements-filter-wrapper">
                                 <button
                                     type="button"
-                                    key={option.value}
-                                    className={
-                                        filter === option.value
-                                            ? "active"
-                                            : ""
+                                    className={`announcements-filter-button ${hasActiveFilters ? "active" : ""
+                                        }`}
+                                    onClick={() =>
+                                        setFilterMenuOpen((previous) => !previous)
                                     }
-                                    onClick={() => setFilter(option.value)}
+                                    aria-expanded={filterMenuOpen}
                                 >
-                                    {option.label}
+                                    <span>☷ Filters</span>
+                                    {hasActiveFilters && <span>Active</span>}
+                                    <span>{filterMenuOpen ? "▲" : "▼"}</span>
                                 </button>
-                            ))}
+
+                                {filterMenuOpen && (
+                                    <div className="announcements-filter-dropdown">
+                                        <div className="announcements-filter-dropdown-header">
+                                            <strong>Filter Announcements</strong>
+
+                                            {hasActiveFilters && (
+                                                <button
+                                                    type="button"
+                                                    onClick={clearFilters}
+                                                >
+                                                    Clear all
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <label>
+                                            Read Status
+                                            <select
+                                                value={filter}
+                                                onChange={(event) => setFilter(event.target.value)}
+                                            >
+                                                <option value="all">All announcements</option>
+                                                <option value="unread">Unread</option>
+                                                <option value="read">Read</option>
+                                            </select>
+                                        </label>
+
+                                        <label>
+                                            Announcement Type
+                                            <select
+                                                value={typeFilter}
+                                                onChange={(event) => setTypeFilter(event.target.value)}
+                                            >
+                                                <option value="all">All types</option>
+                                                <option value="general">General</option>
+                                                <option value="feature">New Feature</option>
+                                                <option value="maintenance">Maintenance</option>
+                                                <option value="important">Important</option>
+                                            </select>
+                                        </label>
+
+                                        <label>
+                                            From Date
+                                            <input
+                                                type="date"
+                                                value={startDate}
+                                                max={endDate || undefined}
+                                                onChange={(event) => setStartDate(event.target.value)}
+                                            />
+                                        </label>
+
+                                        <label>
+                                            To Date
+                                            <input
+                                                type="date"
+                                                value={endDate}
+                                                min={startDate || undefined}
+                                                onChange={(event) => setEndDate(event.target.value)}
+                                            />
+                                        </label>
+
+                                        <label>
+                                            Sort By
+                                            <select
+                                                value={sortOrder}
+                                                onChange={(event) => setSortOrder(event.target.value)}
+                                            >
+                                                <option value="newest">Newest first</option>
+                                                <option value="oldest">Oldest first</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -202,9 +368,7 @@ function Announcements() {
                         </div>
                     ) : visibleItems.length === 0 ? (
                         <div className="announcements-empty">
-                            <span className="announcements-empty-icon">
-                                📭
-                            </span>
+                            <span className="announcements-empty-icon">📭</span>
                             <h3>No announcements found</h3>
                             <p>
                                 {filter === "unread"
@@ -215,77 +379,198 @@ function Announcements() {
                             </p>
                         </div>
                     ) : (
-                        <div className="announcements-list">
-                            {visibleItems.map((item) => (
-                                <article
-                                    key={item.id}
-                                    className={`announcement-item ${item.is_read ? "is-read" : "is-unread"
-                                        }`}
-                                >
-                                    <div className="announcement-item-top">
-                                        <span
-                                            className={`announcement-type type-${item.type}`}
+                        <div className="announcements-table-wrapper">
+                            <table className="announcements-table">
+                                <thead>
+                                    <tr>
+                                        <th>Announcement</th>
+                                        <th>Type</th>
+                                        <th>Published Date</th>
+                                        <th>Created By</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {visibleItems.map((item) => (
+                                        <tr
+                                            key={item.id}
+                                            className={item.is_read ? "is-read" : "is-unread"}
                                         >
-                                            {TYPE_LABELS[item.type] ||
-                                                "Announcement"}
-                                        </span>
+                                            <td className="announcement-table-message">
+                                                <strong>{item.title}</strong>
 
-                                        {!item.is_read && (
-                                            <span className="announcement-new">
-                                                New
-                                            </span>
-                                        )}
-                                    </div>
+                                                <button
+                                                    type="button"
+                                                    className="announcement-view-details"
+                                                    onClick={() => setSelectedAnnouncement(item)}
+                                                >
+                                                    View Details →
+                                                </button>
+                                            </td>
 
-                                    <div className="announcement-item-content">
-                                        <h3>{item.title}</h3>
-                                        <p className="announcement-message">
-                                            {item.message}
-                                        </p>
-                                    </div>
+                                            <td>
+                                                <span
+                                                    className={`announcement-type type-${item.type}`}
+                                                >
+                                                    {TYPE_LABELS[item.type] || "Announcement"}
+                                                </span>
+                                            </td>
 
-                                    <div className="announcement-item-footer">
-                                        <div className="announcement-meta">
-                                            <span>
-                                                🕒{" "}
+                                            <td>
                                                 {item.created_at
-                                                    ? new Date(
-                                                        item.created_at
-                                                    ).toLocaleString()
+                                                    ? new Date(item.created_at).toLocaleString()
                                                     : "Date unavailable"}
-                                            </span>
+                                            </td>
 
-                                            <span>
-                                                👤 By{" "}
-                                                {item.created_by_name || "Admin"}
-                                            </span>
-                                        </div>
+                                            <td>{item.created_by_name || "Admin"}</td>
 
-                                        {!item.is_read ? (
-                                            <button
-                                                type="button"
-                                                className="announcement-mark-read"
-                                                onClick={() => markAsRead(item)}
-                                                disabled={
-                                                    updatingId === item.id
-                                                }
-                                            >
-                                                {updatingId === item.id
-                                                    ? "Saving..."
-                                                    : "✓ Mark as Read"}
-                                            </button>
-                                        ) : (
-                                            <span className="announcement-read-label">
-                                                ✓ Read
-                                            </span>
-                                        )}
-                                    </div>
-                                </article>
-                            ))}
+                                            <td>
+                                                {item.is_read ? (
+                                                    <span className="announcement-status-badge read">
+                                                        ✓ Read
+                                                    </span>
+                                                ) : (
+                                                    <span className="announcement-status-badge unread">
+                                                        ● Unread
+                                                    </span>
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                {!item.is_read ? (
+                                                    <button
+                                                        type="button"
+                                                        className="announcement-mark-read"
+                                                        onClick={() => markAsRead(item)}
+                                                        disabled={updatingId === item.id}
+                                                    >
+                                                        {updatingId === item.id
+                                                            ? "Saving..."
+                                                            : "✓ Mark as Read"}
+                                                    </button>
+                                                ) : (
+                                                    <span className="announcement-read-label">
+                                                        ✓ Read
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
-
                 </div>
+
+                {/* ANNOUNCEMENT DETAILS MODAL */}
+                {selectedAnnouncement && (
+                    <div
+                        className="announcement-modal-overlay"
+                        onClick={() => setSelectedAnnouncement(null)}
+                    >
+                        <section
+                            className="announcement-modal-card"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="announcement-modal-title"
+                            onClick={(event) => event.stopPropagation()}
+                        >
+                            <div className="announcement-modal-header">
+                                <div>
+                                    <span
+                                        className={`announcement-modal-label announcement-type-badge ${selectedAnnouncement.type || "general"
+                                            }`}
+                                    >
+                                        {TYPE_LABELS[selectedAnnouncement.type] || "ANNOUNCEMENT"}
+                                    </span>
+
+                                    <h2 id="announcement-modal-title">
+                                        {selectedAnnouncement.title}
+                                    </h2>
+
+                                    <p>View your announcement details.</p>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="announcement-modal-close"
+                                    onClick={() => setSelectedAnnouncement(null)}
+                                    aria-label="Close announcement details"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            <div className="announcement-modal-info">
+                                <div>
+                                    <span>Published Date</span>
+                                    <strong>
+                                        {selectedAnnouncement.created_at
+                                            ? new Date(selectedAnnouncement.created_at).toLocaleString()
+                                            : "Date unavailable"}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Admin Name</span>
+                                    <strong>
+                                        {selectedAnnouncement.created_by_name || "Admin"}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Announcement Type</span>
+                                    <strong>
+                                        {TYPE_LABELS[selectedAnnouncement.type] || "Announcement"}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Read Status</span>
+                                    <strong
+                                        className={`announcement-read-status ${selectedAnnouncement.is_read ? "read" : "unread"
+                                            }`}
+                                    >
+                                        {selectedAnnouncement.is_read ? "✓ Read" : "● Unread"}
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <div className="announcement-modal-message">
+                                <h3>Complete Message</h3>
+                                <p>{selectedAnnouncement.message}</p>
+                            </div>
+
+                            <div className="announcement-modal-actions">
+                                <button
+                                    type="button"
+                                    className="announcement-modal-cancel"
+                                    onClick={() => setSelectedAnnouncement(null)}
+                                >
+                                    Cancel
+                                </button>
+
+                                {!selectedAnnouncement.is_read && (
+                                    <button
+                                        type="button"
+                                        className="announcement-modal-submit"
+                                        disabled={updatingId === selectedAnnouncement.id}
+                                        onClick={() => markAsRead(selectedAnnouncement)}
+                                    >
+                                        {updatingId === selectedAnnouncement.id
+                                            ? "Saving..."
+                                            : "✓ Mark as Read"}
+                                    </button>
+                                )}
+                            </div>
+                        </section>
+                    </div>
+                )}
+
+
+
             </div>
         </div>
     );

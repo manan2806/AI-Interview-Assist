@@ -297,6 +297,7 @@ def update_announcement(announcement_id):
             400,
         )
 
+    # Find existing announcement
     item = announcements.find_one(
         {
             "_id": ObjectId(announcement_id),
@@ -328,8 +329,12 @@ def update_announcement(announcement_id):
             400,
         )
 
-    validated["updated_at"] = utc_now()
+    # Update timestamp
+    now = utc_now()
+    validated["updated_at"] = now
+    validated["read_by"] = []
 
+    # Update announcement in MongoDB
     announcements.update_one(
         {"_id": item["_id"]},
         {"$set": validated},
@@ -345,7 +350,10 @@ def update_announcement(announcement_id):
         jsonify(
             {
                 "success": True,
-                "message": "Announcement updated successfully.",
+                "message": (
+                    "Announcement updated successfully. "
+                    "It is now unread for all users."
+                ),
                 "announcement": serialize_announcement(updated),
             }
         ),
