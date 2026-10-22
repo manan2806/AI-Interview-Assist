@@ -4,6 +4,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from extensions import limiter
 
 from routes.auth_routes import auth_bp, bcrypt
 from routes.profile_routes import user_bp
@@ -14,15 +15,12 @@ from routes.announcements_routes import admin_announcements_bp, user_announcemen
 
 
 def create_app():
-
     load_dotenv()
 
     app = Flask(__name__)
 
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
-
     JWTManager(app)
 
     CORS(
@@ -40,6 +38,7 @@ def create_app():
     )
 
     bcrypt.init_app(app)
+    limiter.init_app(app)
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
@@ -59,8 +58,6 @@ def create_app():
 
 
 app = create_app()
-
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "local-development-secret-key")
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)

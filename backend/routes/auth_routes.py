@@ -1,17 +1,14 @@
 from flask import Blueprint, request, jsonify, redirect, session
 from flask_bcrypt import Bcrypt
-import uuid
-import os, hmac
-import secrets
-import hashlib
+import uuid, os, hmac, secrets, hashlib, logging
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import limiter
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 from google_auth_oauthlib.flow import Flow
-import database
-import base64
+import database, base64
 from utils.auth_utils import generate_token
 from utils.gmail_service import get_gmail_service
 
@@ -171,6 +168,7 @@ def register():
 # USER LOGIN API
 # ==========================================
 @auth_bp.route("/api/login", methods=["POST"])
+@limiter.limit("3 per minute")
 def login():
     try:
         data = request.get_json(silent=True)
@@ -254,8 +252,6 @@ def login():
 
     except Exception:
         # Log the full exception on the server, not to the client
-        import logging
-
         logging.exception("Login API error")
 
         return (
