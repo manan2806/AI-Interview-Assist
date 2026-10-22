@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authService";
 import "../../context/Auth/AuthPage.css";
@@ -43,6 +42,38 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const [lockSeconds, setLockSeconds] = useState(() => {
+        const until = Number(
+            sessionStorage.getItem("loginLockedUntil") || 0
+        );
+
+        return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+    });
+
+    useEffect(() => {
+        if (lockSeconds <= 0) return;
+
+        const timer = setTimeout(() => {
+            const until = Number(
+                sessionStorage.getItem("loginLockedUntil") || 0
+            );
+
+            const remaining = Math.max(
+                0,
+                Math.ceil((until - Date.now()) / 1000)
+            );
+
+            setLockSeconds(remaining);
+
+            if (remaining === 0) {
+                sessionStorage.removeItem("loginLockedUntil");
+                setError("");
+            }
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [lockSeconds]);
+
     // CAPTCHA state
     const [captchaCode, setCaptchaCode] = useState(generateCaptcha);
     const [captchaInput, setCaptchaInput] = useState("");
@@ -52,8 +83,43 @@ function Login() {
         setCaptchaInput("");
     };
 
+    const handleLoginLockout = (status, message) => {
+        if (
+            status !== 429 ||
+            !/too many failed attempts/i.test(message || "")
+        ) {
+            return false;
+        }
+
+        const match = message.match(/(\d+)\s*seconds?/i);
+
+        const seconds = match
+            ? Number(match[1])
+            : /disabled for 1 minute/i.test(message)
+                ? 60
+                : 60;
+
+        sessionStorage.setItem(
+            "loginLockedUntil",
+            String(Date.now() + seconds * 1000)
+        );
+
+        setLockSeconds(seconds);
+        setError(
+            `Login temporarily blocked. Try again in ${seconds} seconds.`
+        );
+
+        return true;
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        if (lockSeconds > 0) {
+            setError(
+                `Login temporarily blocked. Try again in ${lockSeconds} seconds.`
+            );
+            return;
+        }
         setError("");
 
         if (!email.trim()) {
@@ -90,6 +156,9 @@ function Login() {
             });
 
             if (data.success) {
+                sessionStorage.removeItem("loginLockedUntil");
+                setLockSeconds(0);
+
                 if (data.token) {
                     localStorage.setItem("token", data.token);
                 }
@@ -120,10 +189,13 @@ function Login() {
                     );
                 }
             } else {
-                setError(
-                    data.message || "Invalid email or password."
-                );
-                refreshCaptcha();
+                const message =
+                    data.message || "Invalid email or password.";
+
+                if (!handleLoginLockout(429, message)) {
+                    setError(message);
+                    refreshCaptcha();
+                }
             }
         } catch (err) {
             console.error("Login Error:", err);
@@ -139,8 +211,15 @@ function Login() {
                             ? "Unable to connect to server. Please try again."
                             : "Unable to login. Please try again.");
 
-            setError(message);
-            refreshCaptcha();
+            const isLocked = handleLoginLockout(
+                err.response?.status,
+                message
+            );
+
+            if (!isLocked) {
+                setError(message);
+                refreshCaptcha();
+            }
         } finally {
             setLoading(false);
         }
@@ -354,11 +433,13 @@ function Login() {
                         <button
                             type="submit"
                             className="auth-button"
-                            disabled={loading}
+                            disabled={loading || lockSeconds > 0}
                         >
                             {loading
                                 ? "Signing In..."
-                                : "Sign In"}
+                                : lockSeconds > 0
+                                    ? `Try Again in ${lockSeconds}s`
+                                    : "Sign In"}
                         </button>
                     </form>
 
