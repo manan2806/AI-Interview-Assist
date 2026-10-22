@@ -1,7 +1,38 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authService";
-import "../../context/Auth/AuthPage.css"
+import "../../context/Auth/AuthPage.css";
+
+
+function generateCaptcha() {
+    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const numbers = "23456789";
+
+    const randomChar = (characters) =>
+        characters[Math.floor(Math.random() * characters.length)];
+
+    const characters = [
+        randomChar(letters),
+        randomChar(letters),
+        randomChar(numbers),
+        randomChar(numbers),
+        randomChar(letters),
+        randomChar(numbers),
+    ];
+
+    // Randomize character positions
+    for (let i = characters.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [characters[i], characters[j]] = [
+            characters[j],
+            characters[i],
+        ];
+    }
+
+    return characters.join("");
+}
+
 
 function Login() {
     const navigate = useNavigate();
@@ -12,10 +43,18 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    // CAPTCHA state
+    const [captchaCode, setCaptchaCode] = useState(generateCaptcha);
+    const [captchaInput, setCaptchaInput] = useState("");
+
+    const refreshCaptcha = () => {
+        setCaptchaCode(generateCaptcha());
+        setCaptchaInput("");
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
-        setLoading(false);
 
         if (!email.trim()) {
             setError("Please enter your email address.");
@@ -27,12 +66,27 @@ function Login() {
             return;
         }
 
+        // Validate CAPTCHA before calling the login API
+        if (!captchaInput.trim()) {
+            setError("Please enter the CAPTCHA code.");
+            return;
+        }
+
+        if (
+            captchaInput.trim().toUpperCase() !== captchaCode
+        ) {
+            setError("Incorrect CAPTCHA. Please try again.");
+            setCaptchaCode(generateCaptcha());
+            setCaptchaInput("");
+            return;
+        }
+
         try {
             setLoading(true);
 
             const data = await loginUser({
                 email: email.trim(),
-                password: password
+                password: password,
             });
 
             if (data.success) {
@@ -50,9 +104,13 @@ function Login() {
                 const role = data.user?.role;
 
                 if (role === "admin") {
-                    navigate("/admin-dashboard", { replace: true });
+                    navigate("/admin-dashboard", {
+                        replace: true,
+                    });
                 } else if (role === "user") {
-                    navigate("/dashboard", { replace: true });
+                    navigate("/dashboard", {
+                        replace: true,
+                    });
                 } else {
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
@@ -63,9 +121,9 @@ function Login() {
                 }
             } else {
                 setError(
-                    data.message ||
-                    "Invalid email or password."
+                    data.message || "Invalid email or password."
                 );
+                refreshCaptcha();
             }
         } catch (err) {
             console.error("Login Error:", err);
@@ -82,6 +140,7 @@ function Login() {
                             : "Unable to login. Please try again.");
 
             setError(message);
+            refreshCaptcha();
         } finally {
             setLoading(false);
         }
@@ -89,16 +148,12 @@ function Login() {
 
     return (
         <div className="auth-page">
-            {/* LEFT */}
+            {/* LEFT PANEL */}
             <div className="auth-left">
                 <div className="brand">
-                    <div className="brand-icon">
-                        AI
-                    </div>
+                    <div className="brand-icon">AI</div>
 
-                    <h1>
-                        AI Interview Assist
-                    </h1>
+                    <h1>AI Interview Assist</h1>
 
                     <p>
                         Prepare smarter and perform better
@@ -109,12 +164,8 @@ function Login() {
                 <div className="feature-list">
                     <div className="feature">
                         <span>✓</span>
-
                         <div>
-                            <strong>
-                                AI-Powered Questions
-                            </strong>
-
+                            <strong>AI-Powered Questions</strong>
                             <p>
                                 Get interview questions based
                                 on your job role and experience.
@@ -124,12 +175,8 @@ function Login() {
 
                     <div className="feature">
                         <span>✓</span>
-
                         <div>
-                            <strong>
-                                Smart Answer Evaluation
-                            </strong>
-
+                            <strong>Smart Answer Evaluation</strong>
                             <p>
                                 Receive AI-based feedback on
                                 your interview answers.
@@ -139,12 +186,8 @@ function Login() {
 
                     <div className="feature">
                         <span>✓</span>
-
                         <div>
-                            <strong>
-                                Track Your Progress
-                            </strong>
-
+                            <strong>Track Your Progress</strong>
                             <p>
                                 Review your interview history,
                                 scores and improvements.
@@ -154,34 +197,28 @@ function Login() {
                 </div>
             </div>
 
-            {/* RIGHT */}
+            {/* RIGHT PANEL */}
             <div className="auth-right">
                 <div className="auth-card">
-                    {/* MOBILE LOGO */}
-                    <div className="mobile-logo">
-                        AI
-                    </div>
+                    <div className="mobile-logo">AI</div>
 
-                    {/* HEADER */}
                     <div className="auth-header">
-                        <h2>
-                            Welcome Back
-                        </h2>
-
+                        <h2>Welcome Back</h2>
                         <p>
                             Sign in to continue your
                             interview preparation
                         </p>
                     </div>
 
-                    {/* ERROR */}
                     {error && (
-                        <div className="error-message">
+                        <div
+                            className="error-message"
+                            role="alert"
+                        >
                             {error}
                         </div>
                     )}
 
-                    {/* FORM */}
                     <form onSubmit={handleLogin}>
                         {/* EMAIL */}
                         <div className="form-group">
@@ -243,6 +280,66 @@ function Login() {
                             </div>
                         </div>
 
+                        {/* MULTICOLOUR CAPTCHA */}
+                        <div className="form-group captcha-group">
+                            <label htmlFor="captcha-input">
+                                Security Verification
+                            </label>
+
+                            <div className="captcha-panel">
+                                <div
+                                    className="captcha-code"
+                                    aria-label="CAPTCHA code"
+                                >
+                                    <span className="captcha-decor captcha-decor-one"></span>
+                                    <span className="captcha-decor captcha-decor-two"></span>
+
+                                    {captchaCode.split("").map((character, index) => (
+                                        <span
+                                            key={`${index}-${captchaCode}`}
+                                            className={`captcha-char captcha-char-${index % 6}`}
+                                        >
+                                            {character}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="captcha-refresh"
+                                    onClick={refreshCaptcha}
+                                    disabled={loading}
+                                    aria-label="Generate a new CAPTCHA"
+                                    title="Refresh CAPTCHA"
+                                >
+                                    ↻
+                                </button>
+                            </div>
+
+                            <input
+                                id="captcha-input"
+                                type="text"
+                                className="captcha-input"
+                                placeholder="Enter CAPTCHA code"
+                                value={captchaInput}
+                                onChange={(e) =>
+                                    setCaptchaInput(
+                                        e.target.value.toUpperCase().slice(0, 6)
+                                    )
+                                }
+                                autoComplete="off"
+                                maxLength={6}
+                                spellCheck="false"
+                                disabled={loading}
+                                aria-describedby="captcha-help"
+                            />
+
+                            <small id="captcha-help" className="captcha-help">
+                                Enter the 6-character code shown above.
+                            </small>
+                        </div>
+
+
                         {/* FORGOT PASSWORD */}
                         <div
                             className="forgot-password"
@@ -253,7 +350,7 @@ function Login() {
                             Forgot Password?
                         </div>
 
-                        {/* SIGN IN BUTTON */}
+                        {/* SIGN IN */}
                         <button
                             type="submit"
                             className="auth-button"
@@ -267,10 +364,7 @@ function Login() {
 
                     {/* REGISTER */}
                     <div className="auth-footer">
-                        <span>
-                            Don't have an account?
-                        </span>
-
+                        <span>Don't have an account?</span>
                         <Link to="/register">
                             Create Account
                         </Link>

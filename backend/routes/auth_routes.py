@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, redirect, session
 from flask_bcrypt import Bcrypt
-import uuid, os, hmac, secrets, hashlib, logging
+import uuid, os, hmac, secrets, hashlib, logging, time
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import limiter
 
@@ -168,7 +168,6 @@ def register():
 # USER LOGIN API
 # ==========================================
 @auth_bp.route("/api/login", methods=["POST"])
-@limiter.limit("3 per minute")
 def login():
     try:
         data = request.get_json(silent=True)
@@ -199,6 +198,33 @@ def login():
         users = database.db["users"]
 
         user = users.find_one({"email": email})
+        if user:
+            now = int(time.time())
+            locked_until = int(user.get("login_locked_until", 0) or 0)
+
+            if locked_until > now:
+                remaining = locked_until - now
+
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": (
+                                f"Too many failed attempts. "
+                                f"Please try again in {remaining} seconds."
+                            ),
+                        }
+                    ),
+                    429,
+                )
+
+            if locked_until and locked_until <= now:
+                users.update_one(
+                    {"_id": user["_id"]},
+                    {"$set": {"failed_login_attempts": 0, "login_locked_until": 0}},
+                )
+                user["failed_login_attempts"] = 0
+                user["login_locked_until"] = 0
 
         if not user:
             return (
@@ -207,14 +233,56 @@ def login():
             )
 
         if not bcrypt.check_password_hash(user["password"], password):
+            attempts = int(user.get("failed_login_attempts", 0) or 0) + 1
+
+            if attempts >= 3:
+                users.update_one(
+                    {"_id": user["_id"]},
+                    {
+                        "$set": {
+                            "failed_login_attempts": attempts,
+                            "login_locked_until": int(time.time()) + 60,
+                        }
+                    },
+                )
+
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Too many failed attempts. Login disabled for 1 minute.",
+                        }
+                    ),
+                    429,
+                )
+
+            users.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"failed_login_attempts": attempts}},
+            )
+
             return (
-                jsonify({"success": False, "message": "Invalid email or password."}),
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Invalid email or password.",
+                    }
+                ),
                 401,
             )
 
-        # Get and validate user role
-        role = user.get("role")
+        # Reset failed attempts after correct password
+        users.update_one(
+            {"_id": user["_id"]},
+            {
+                "$set": {
+                    "failed_login_attempts": 0,
+                    "login_locked_until": 0,
+                }
+            },
+        )
 
+        role = user.get("role")
         if role not in ("admin", "user"):
             return (
                 jsonify(
@@ -225,11 +293,8 @@ def login():
                 ),
                 403,
             )
-
-        # Generate JWT token
         token = generate_token(user)
 
-        # Return login response
         return (
             jsonify(
                 {

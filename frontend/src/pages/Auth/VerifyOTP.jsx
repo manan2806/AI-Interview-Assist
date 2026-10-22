@@ -1,306 +1,209 @@
 import { useState } from "react";
-import {
-    Link,
-    useNavigate,
-    useSearchParams
-} from "react-router-dom";
-import "../../context/Auth/ForgotPassword.css"
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import "../../context/Auth/ForgotPassword.css";
 import { verifyOTP } from "../../services/authService";
 import AuthLayout from "../../components/AuthLayout";
 
 function VerifyOTP() {
-
     const navigate = useNavigate();
-
     const [searchParams] = useSearchParams();
 
-    // Get email from URL
     const email =
         searchParams.get("email") ||
         sessionStorage.getItem("resetEmail") ||
         "";
 
     const [otp, setOtp] = useState("");
-
     const [loading, setLoading] = useState(false);
-
     const [error, setError] = useState("");
-
     const [success, setSuccess] = useState("");
 
-    // ==========================================
-    // VERIFY OTP
-    // ==========================================
     const handleSubmit = async (e) => {
-
         e.preventDefault();
-
         setError("");
         setSuccess("");
 
-        // EMAIL VALIDATION
         if (!email.trim()) {
-
-            setError(
-                "Email is missing. Please request a new OTP."
-            );
-
-            return;
-        }
-
-        // OTP VALIDATION
-        if (!otp.trim()) {
-
-            setError(
-                "Please enter the OTP."
-            );
-
+            setError("Email is missing. Please request a new OTP.");
             return;
         }
 
         if (!/^\d{6}$/.test(otp)) {
-
-            setError(
-                "OTP must contain exactly 6 digits."
-            );
-
+            setError("Please enter a valid 6-digit OTP.");
             return;
         }
 
         try {
-
             setLoading(true);
 
-            // API CALL
-            const response = await verifyOTP(
-                email.trim(),
-                otp
-            );
+            const response = await verifyOTP(email.trim(), otp);
 
-            console.log(
-                "Verify OTP Response:",
-                response
-            );
-
-            // SUCCESS
             if (response?.success) {
+                const resetToken = response?.reset_token;
 
-                const resetToken =
-                    response?.reset_token;
-
-                // Reset token is required
                 if (!resetToken) {
-
                     setError(
                         "OTP verified, but reset token was not received."
                     );
-
                     return;
                 }
 
+                sessionStorage.setItem("reset_token", resetToken);
+                sessionStorage.setItem("resetEmail", email.trim());
+
                 setSuccess(
-                    response?.message ||
-                    "OTP verified successfully."
+                    response?.message || "OTP verified successfully!"
                 );
 
-                // SAVE RESET INFORMATION
-                sessionStorage.setItem(
-                    "reset_token",
-                    resetToken
-                );
-
-                sessionStorage.setItem(
-                    "resetEmail",
-                    email.trim()
-                );
-
-                // GO TO RESET PASSWORD
-                setTimeout(() => {
-
-                    navigate(
-                        "/reset-password"
-                    );
-
-                }, 800);
-
+                navigate("/reset-password", { replace: true });
             } else {
-
                 setError(
                     response?.message ||
                     response?.data?.message ||
                     "Invalid OTP. Please try again."
                 );
             }
-
         } catch (err) {
-
-            console.error(
-                "OTP Verification Error:",
-                err
-            );
-
+            console.error("OTP Verification Error:", err);
 
             setError(
                 err?.response?.data?.message ||
                 err?.response?.data?.error ||
-                err?.message ||
                 "OTP verification failed. Please try again."
             );
-
         } finally {
-
             setLoading(false);
         }
     };
 
-    // OTP INPUT
     const handleOTPChange = (e) => {
+        const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+        setOtp(value);
 
-        const value =
-            e.target.value.replace(/\D/g, "");
-
-        setOtp(value.slice(0, 6));
-
-        // Clear error while typing
-        if (error) {
-            setError("");
-        }
+        if (error) setError("");
+        if (success) setSuccess("");
     };
 
     return (
-
         <AuthLayout>
-
-            <div className="auth-card">
-
-                {/* HEADER */}
-                <div className="auth-header">
-
-                    <div className="mobile-logo">
-                        AI
-                    </div>
-
-                    <h2>
-                        Verify OTP
-                    </h2>
-
-                    <p>
-                        Enter the 6-digit OTP sent to:
-                        <br />
-
-                        <strong>
-                            {email || "your email"}
-                        </strong>
-                    </p>
-
+            <div className="verify-otp-card">
+                <div className="verify-otp-icon" aria-hidden="true">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <rect x="4" y="10" width="16" height="11" rx="2.5" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                        <path d="M12 14v3" />
+                    </svg>
                 </div>
 
-                {/* ERROR */}
+                <div className="verify-otp-header">
+                    <span className="verify-otp-eyebrow">
+                        ACCOUNT SECURITY
+                    </span>
+
+                    <h2>Verify your email</h2>
+
+                    <p>
+                        We’ve sent a verification code to
+                    </p>
+
+                    <div className="verify-otp-email">
+                        <span className="verify-otp-email-icon">✉</span>
+                        <span>{email || "Your email address"}</span>
+                    </div>
+                </div>
+
                 {error && (
-
-                    <div className="error-message forgot-error">
-
-                        <span>⚠️</span>
-
-                        <span>
-                            {error}
-                        </span>
-
+                    <div className="verify-otp-alert verify-otp-alert-error" role="alert">
+                        <span className="verify-otp-alert-icon">!</span>
+                        <span>{error}</span>
                     </div>
                 )}
 
-                {/* SUCCESS */}
                 {success && (
-
-                    <div className="success-message forgot-success">
-
-                        <span>✓</span>
-
-                        <span>
-                            {success}
-                        </span>
-
+                    <div className="verify-otp-alert verify-otp-alert-success" role="status">
+                        <span className="verify-otp-alert-icon">✓</span>
+                        <span>{success}</span>
                     </div>
                 )}
 
-                {/* OTP FORM */}
                 <form onSubmit={handleSubmit}>
-
-                    <div className="form-group">
-
-                        <label htmlFor="otp">
-                            OTP :
+                    <div className="verify-otp-field">
+                        <label htmlFor="verify-otp-input">
+                            Enter verification code
                         </label>
 
                         <input
-                            id="otp"
+                            id="verify-otp-input"
                             type="text"
                             inputMode="numeric"
+                            pattern="[0-9]*"
                             maxLength={6}
-                            className="otp-input"
-                            placeholder="Enter 6-digit OTP"
+                            className="verify-otp-input"
+                            placeholder="000000"
                             value={otp}
                             onChange={handleOTPChange}
-                            disabled={loading}
+                            disabled={loading || !email.trim()}
                             autoComplete="one-time-code"
+                            aria-describedby="verify-otp-hint"
+                            autoFocus
                         />
 
+                        <div className="verify-otp-input-footer">
+                            <span id="verify-otp-hint">
+                                Enter the 6-digit code from your email.
+                            </span>
+                            <span className="verify-otp-counter">
+                                {otp.length}/6
+                            </span>
+                        </div>
                     </div>
 
-                    {/* VERIFY BUTTON */}
                     <button
                         type="submit"
-                        className="auth-button forgot-password-button"
-                        disabled={
-                            loading ||
-                            otp.length !== 6
-                        }
+                        className="verify-otp-submit"
+                        disabled={loading || otp.length !== 6 || !email.trim()}
                     >
-
                         {loading ? (
-
-                            <span className="forgot-loading-content">
-
-                                <span className="forgot-loading-spinner"></span>
-
-                                Verifying...
-
-                            </span>
-
+                            <>
+                                <span className="verify-otp-spinner" />
+                                Verifying code...
+                            </>
                         ) : (
-
-                            "Verify OTP"
-
+                            <>
+                                Verify & Continue
+                                <span className="verify-otp-arrow">→</span>
+                            </>
                         )}
-
                     </button>
-
                 </form>
 
-                {/* REQUEST NEW OTP */}
-                <div className="resend-otp">
-
-                    <span>
-                        Didn't receive the OTP?{" "}
-                    </span>
-
-                    <Link to="/forgot-password">
-                        Request New OTP
-                    </Link>
-
+                <div className="verify-otp-divider">
+                    <span />
+                    <span>Need another code?</span>
+                    <span />
                 </div>
 
-                {/* BACK TO LOGIN */}
-                <div className="back-to-login">
+                <p className="verify-otp-resend">
+                    Didn’t receive the OTP?{" "}
+                    <Link to="/forgot-password">Request a new one</Link>
+                </p>
 
-                    <Link to="/login">
-                        ← Back to Login
-                    </Link>
+                <Link to="/login" className="verify-otp-back">
+                    <span>←</span> Back to Login
+                </Link>
 
+                <div className="verify-otp-security-note">
+                    <span>✓</span>
+                    Your verification code is private and secure.
                 </div>
-
             </div>
-
         </AuthLayout>
     );
 }

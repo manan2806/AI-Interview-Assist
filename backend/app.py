@@ -40,6 +40,15 @@ def create_app():
     bcrypt.init_app(app)
     limiter.init_app(app)
 
+    @app.errorhandler(429)
+    def handle_rate_limit(error):
+        return (
+            jsonify(
+                {"success": False, "message": "Unable to login. Please try again."}
+            ),
+            429,
+        )
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(interview_bp, url_prefix="/api/interview")
