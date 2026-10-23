@@ -54,6 +54,6 @@ Step 4 — User Management: Search, user details aur safe account management.
 Step 5 — Interview Monitoring: Status, pending evaluation aur failed evaluation monitoring—private results expose kiye bina.
 Step 6 — Analytics & Testing: Charts, access-control tests, mobile responsive design aur deployment.
 
-1. Announcements & Broadcasts
+✅ 1. Announcements & Broadcasts
 2. Export & Reports Center
 3. User Activity Logs
