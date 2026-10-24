@@ -45,15 +45,9 @@
 2 — Voice + Lip Sync + Eye Expressions
 3 — Support Diff. Language
 4 — Live Coding Interview (Technical roles ke liye)
+5 — Certificates feature
 
-*** Admin role Implementation ke steps ***
-Step 1 — Admin Role Setup: Existing authentication aur MongoDB user documents ko inspect karke role handling add karna.
-Step 2 — Secure Admin Login: Admin login, JWT authorization aur protected Admin routes.
-Step 3 — Admin Dashboard: Total users, interviews aur aggregate statistics ki APIs aur UI.
-Step 4 — User Management: Search, user details aur safe account management.
-Step 5 — Interview Monitoring: Status, pending evaluation aur failed evaluation monitoring—private results expose kiye bina.
-Step 6 — Analytics & Testing: Charts, access-control tests, mobile responsive design aur deployment.
-
+*** Admin Side ***
 ✅ 1. Announcements & Broadcasts
 2. Export & Reports Center
 3. User Activity Logs
