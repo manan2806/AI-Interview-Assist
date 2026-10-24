@@ -26,14 +26,13 @@ def admin_stats(current_user):
 
         users = db["users"]
         interviews = db["interviews"]
+        problem_reports = db["problem_reports"]
 
         stats = {
             "total_users": users.count_documents({}),
             "total_interviews": interviews.count_documents({}),
             "completed_interviews": interviews.count_documents({"status": "completed"}),
-            "pending_evaluations": interviews.count_documents(
-                {"status": "evaluation_pending"}
-            ),
+            "total_problem_reports": problem_reports.count_documents({}),
             "in_progress_interviews": interviews.count_documents(
                 {"status": "in_progress"}
             ),

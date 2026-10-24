@@ -35,10 +35,10 @@ const statCards = [
         color: "completed",
     },
     {
-        key: "pending_evaluations",
-        title: "Pending Evaluations",
-        description: "Awaiting evaluation",
-        icon: "⏳",
+        key: "total_problem_reports",
+        title: "Total Problem Reports",
+        description: "All submitted problem reports",
+        icon: "📨",
         color: "pending",
     },
     {
