@@ -59,6 +59,10 @@ function AdminDashboard() {
     const [error, setError] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openReportCount, setOpenReportCount] = useState(0);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [pendingReviewCount, setPendingReviewCount] = useState(0);
+
+    const totalNotifications = openReportCount + pendingReviewCount;
 
     // ==========================================
     // LOAD ADMIN INFORMATION
@@ -179,6 +183,44 @@ function AdminDashboard() {
         };
     }, [user]);
 
+    // LOAD PENDING REVIEW COUNT
+    useEffect(() => {
+        if (!user) return;
+
+        let active = true;
+
+        const fetchPendingReviews = async () => {
+            try {
+                const response = await api.get("/api/admin/reviews");
+
+                if (active && response.data?.success) {
+                    const reviews = Array.isArray(response.data.reviews)
+                        ? response.data.reviews
+                        : [];
+
+                    setPendingReviewCount(
+                        reviews.filter(
+                            (review) =>
+                                String(review.status || "pending").toLowerCase() ===
+                                "pending"
+                        ).length
+                    );
+                }
+            } catch (err) {
+                console.error("Review notification error:", err);
+            }
+        };
+
+        fetchPendingReviews();
+
+        const intervalId = setInterval(fetchPendingReviews, 30000);
+
+        return () => {
+            active = false;
+            clearInterval(intervalId);
+        };
+    }, [user]);
+
     // ==========================================
     // CLOSE MOBILE MENU ON OUTSIDE CLICK
     // ==========================================
@@ -250,23 +292,91 @@ function AdminDashboard() {
                 </Link>
 
                 <div className="admin-navbar-actions admin-desktop-nav">
-                    <Link
-                        to="/admin-problem-reports"
-                        className="admin-profile-nav-link"
-                        aria-label={`${openReportCount} open problem reports`}
-                    >
-                        <span className="admin-report-bell">
-                            🔔
-                            {openReportCount > 0 && (
-                                <span className="admin-report-badge">
-                                    {openReportCount > 99
-                                        ? "99+"
-                                        : openReportCount}
+
+                    {/* NOTIFICATIONS DROPDOWN */}
+                    <div className="admin-notifications-wrapper">
+                        <button
+                            type="button"
+                            className="admin-notifications-button"
+                            onClick={() => setNotificationsOpen((previous) => !previous)}
+                            aria-expanded={notificationsOpen}
+                            aria-label={`${totalNotifications} pending notifications`}
+                        >
+                            <span className="admin-notifications-bell">🔔</span>
+                            <span>Notifications</span>
+
+                            {totalNotifications > 0 && (
+                                <span className="admin-notifications-total">
+                                    {totalNotifications > 99 ? "99+" : totalNotifications}
                                 </span>
                             )}
-                        </span>
-                        <span>Reports</span>
-                    </Link>
+
+                            <span className="admin-notifications-chevron">
+                                {notificationsOpen ? "▲" : "▼"}
+                            </span>
+                        </button>
+
+                        {notificationsOpen && (
+                            <div className="admin-notifications-dropdown">
+                                <div className="admin-notifications-heading">
+                                    <div>
+                                        <h3>Notifications</h3>
+                                        <p>You have {totalNotifications} pending items</p>
+                                    </div>
+                                    <span className="admin-notifications-heading-icon">🔔</span>
+                                </div>
+
+                                <Link
+                                    to="/admin-problem-reports"
+                                    className="admin-notification-item"
+                                    onClick={() => setNotificationsOpen(false)}
+                                >
+                                    <span className="admin-notification-icon report">
+                                        📨
+                                    </span>
+
+                                    <span className="admin-notification-details">
+                                        <strong>Problem Reports</strong>
+                                        <small>Review submitted problem reports</small>
+                                    </span>
+
+                                    <span className="admin-notification-count">
+                                        {openReportCount > 99 ? "99+" : openReportCount}
+                                    </span>
+
+                                    <span className="admin-notification-arrow">→</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-reviews"
+                                    className="admin-notification-item"
+                                    onClick={() => setNotificationsOpen(false)}
+                                >
+                                    <span className="admin-notification-icon review">
+                                        ⭐
+                                    </span>
+
+                                    <span className="admin-notification-details">
+                                        <strong>User Reviews</strong>
+                                        <small>Approve or manage user reviews</small>
+                                    </span>
+
+                                    <span className="admin-notification-count">
+                                        {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+                                    </span>
+
+                                    <span className="admin-notification-arrow">→</span>
+                                </Link>
+
+                                {totalNotifications === 0 && (
+                                    <div className="admin-notifications-empty">
+                                        <span>✅</span>
+                                        <p>All caught up! No pending notifications.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     <Link
                         to="/admin-profile"
@@ -304,15 +414,42 @@ function AdminDashboard() {
                     >
                         <span className="admin-menu-icon">☰</span>
 
-                        {!mobileMenuOpen && openReportCount > 0 && (
+                        {!mobileMenuOpen && totalNotifications > 0 && (
                             <span className="admin-menu-notification-badge">
-                                {openReportCount > 99 ? "99+" : openReportCount}
+                                {totalNotifications > 99 ? "99+" : totalNotifications}
                             </span>
                         )}
                     </button>
 
                     {mobileMenuOpen && (
                         <div className="admin-mobile-dropdown">
+
+                            {/* MOBILE PROBLEM REPORT NOTIFICATION */}
+                            <Link
+                                to="/admin-problem-reports"
+                                className="admin-mobile-notification-link"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>📨 Problem Reports</span>
+
+                                <span className="admin-mobile-notification-count">
+                                    {openReportCount > 99 ? "99+" : openReportCount}
+                                </span>
+                            </Link>
+
+                            {/* MOBILE REVIEW NOTIFICATION */}
+                            <Link
+                                to="/admin-reviews"
+                                className="admin-mobile-notification-link"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>⭐ Reviews</span>
+
+                                <span className="admin-mobile-notification-count">
+                                    {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+                                </span>
+                            </Link>
+
                             <Link
                                 to="/admin-profile"
                                 onClick={() => setMobileMenuOpen(false)}
@@ -578,7 +715,7 @@ function AdminDashboard() {
 
                             <span className="admin-action-arrow">→</span>
                         </Link>
-                        
+
                     </div>
                 </section>
 

@@ -2332,3 +2332,376 @@ html[data-theme="dark"] .admin-dashboard .admin-account-info h3,
 html[data-theme="dark"] .admin-dashboard .admin-account-info p {
     overflow-wrap: anywhere;
 }
+
+
+/* ==========================================
+   ADMIN NOTIFICATIONS DROPDOWN
+========================================== */
+.admin-notifications-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.admin-notifications-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1px solid #e0e4f0;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #27324a;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-notifications-button:hover {
+    background: #f3f1ff;
+    border-color: #c9c0ff;
+    color: #5b4be8;
+}
+
+.admin-notifications-bell {
+    font-size: 19px;
+}
+
+.admin-notifications-total {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 20px;
+    background: #e11d48;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.admin-notifications-chevron {
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+.admin-notifications-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 300px;
+    max-width: calc(100vw - 24px);
+    padding: 12px;
+    border: 1px solid #e5e7f2;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 18px 50px rgba(25, 32, 65, 0.18);
+    z-index: 100000;
+    animation: adminNotificationOpen 0.18s ease-out;
+}
+
+@keyframes adminNotificationOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-notifications-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 10px 16px;
+    border-bottom: 1px solid #edf0f6;
+}
+
+.admin-notifications-heading h3 {
+    margin: 0 0 5px;
+    color: #202944;
+    font-size: 17px;
+}
+
+.admin-notifications-heading p {
+    margin: 0;
+    color: #737d91;
+    font-size: 12px;
+}
+
+.admin-notifications-heading-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: #f0edff;
+    font-size: 21px;
+}
+
+.admin-notification-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 9px;
+    margin-top: 7px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-notification-item:hover {
+    background: #f7f8ff;
+    border-color: #e4e4ff;
+}
+
+.admin-notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 20px;
+}
+
+.admin-notification-icon.report {
+    background: #fff0df;
+}
+
+.admin-notification-icon.review {
+    background: #e9f8ed;
+}
+
+.admin-notification-details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.admin-notification-details strong {
+    color: #27324a;
+    font-size: 13px;
+}
+
+.admin-notification-details small {
+    color: #778196;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.admin-notification-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 25px;
+    height: 25px;
+    padding: 0 7px;
+    border-radius: 9px;
+    background: #eeeaff;
+    color: #5b4be8;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-notification-arrow {
+    color: #8b93a5;
+    font-size: 18px;
+}
+
+.admin-notifications-empty {
+    padding: 20px 10px 12px;
+    text-align: center;
+}
+
+.admin-notifications-empty span {
+    font-size: 25px;
+}
+
+.admin-notifications-empty p {
+    margin: 8px 0 0;
+    color: #687285;
+    font-size: 13px;
+}
+
+/* DARK THEME */
+html[data-theme="dark"] .admin-notifications-button,
+.dark-theme .admin-notifications-button {
+    background: #1e293b;
+    border-color: #374151;
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .admin-notifications-dropdown,
+.dark-theme .admin-notifications-dropdown {
+    background: #111827;
+    border-color: #374151;
+}
+
+html[data-theme="dark"] .admin-notifications-heading h3,
+.dark-theme .admin-notifications-heading h3,
+html[data-theme="dark"] .admin-notification-details strong,
+.dark-theme .admin-notification-details strong {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .admin-notifications-heading p,
+.dark-theme .admin-notifications-heading p,
+html[data-theme="dark"] .admin-notification-details small,
+.dark-theme .admin-notification-details small,
+html[data-theme="dark"] .admin-notifications-empty p,
+.dark-theme .admin-notifications-empty p {
+    color: #aab4c5;
+}
+
+html[data-theme="dark"] .admin-notifications-heading,
+.dark-theme .admin-notifications-heading {
+    border-bottom-color: #374151;
+}
+
+html[data-theme="dark"] .admin-notification-item:hover,
+.dark-theme .admin-notification-item:hover {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+html[data-theme="dark"] .admin-notifications-empty span,
+.dark-theme .admin-notifications-empty span {
+    color: #f1f5f9;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .admin-notifications-dropdown {
+        position: fixed;
+        top: 78px;
+        right: 12px;
+        width: 350px;
+        max-width: calc(100vw - 24px);
+    }
+
+    .admin-notifications-button {
+        gap: 6px;
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+}
+
+/* Highlight notification counts inside dropdown */
+.admin-notification-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+
+    background: #e11d48;
+    color: #ffffff !important;
+
+    border: none;
+    border-radius: 50px;
+
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+
+    box-shadow: 0 2px 7px rgba(225, 29, 72, 0.25);
+}
+
+/* Highlight total count in navbar */
+.admin-notifications-total {
+    background: #e11d48;
+    color: #ffffff !important;
+    font-weight: 800;
+    box-shadow: 0 2px 7px rgba(225, 29, 72, 0.25);
+}
+
+/* Mobile notification counts */
+.admin-mobile-notification-count {
+    background: #e11d48;
+    color: #ffffff !important;
+    font-weight: 800;
+    border-radius: 50px;
+}
+
+
+/* MOBILE NOTIFICATION OPTIONS */
+
+.admin-mobile-notification-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #30384b;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.admin-mobile-notification-link:hover {
+    background: #f3f0ff;
+}
+
+.admin-mobile-notification-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+    background: #e11d48;
+    color: #ffffff !important;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 2px 7px rgba(225, 29, 72, 0.22);
+}
+
+/* MOBILE MENU TOTAL BADGE */
+
+.admin-menu-notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -7px;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e11d48;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 50px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* DARK THEME */
+
+html[data-theme="dark"] .admin-mobile-notification-link,
+.dark-theme .admin-mobile-notification-link {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .admin-mobile-notification-link:hover,
+.dark-theme .admin-mobile-notification-link:hover {
+    background: #293449;
+}
