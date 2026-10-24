@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import logging
-
+import random
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -11,6 +11,16 @@ reviews_bp = Blueprint("reviews", __name__)
 
 ALLOWED_STATUSES = {"pending", "approved", "hidden"}
 MAX_COMMENT_LENGTH = 1000
+
+
+def generate_review_id():
+    collection = review_collection()
+
+    while True:
+        review_id = f"REV-{random.randint(100000, 999999)}"
+
+        if not collection.find_one({"review_id": review_id}):
+            return review_id
 
 
 def get_current_user():
@@ -34,7 +44,7 @@ def serialize_review(review):
     updated_at = review.get("updated_at")
 
     return {
-        "review_id": str(review["_id"]),
+        "review_id": review.get("review_id", str(review["_id"])),
         "user_id": review.get("user_id", ""),
         "name": review.get("name", "User"),
         "rating": review.get("rating", 0),
@@ -79,6 +89,20 @@ def validate_review(data):
         return None, None, "Review cannot exceed 1000 characters."
 
     return rating, comment, None
+
+
+def find_review_filter(review_id):
+    collection = review_collection()
+
+    review = collection.find_one({"review_id": review_id})
+
+    if review:
+        return {"review_id": review_id}
+
+    if ObjectId.is_valid(review_id):
+        return {"_id": ObjectId(review_id)}
+
+    return None
 
 
 # ==========================================
@@ -196,6 +220,7 @@ def create_review():
         now = datetime.now(timezone.utc)
 
         review = {
+            "review_id": generate_review_id(),
             "user_id": user_id,
             "name": user.get("name", "User"),
             "rating": rating,
@@ -460,8 +485,9 @@ def admin_update_review_status(review_id):
         if not admin or admin.get("role") != "admin":
             return jsonify({"success": False, "message": "Admin access required."}), 403
 
-        if not ObjectId.is_valid(review_id):
-            return jsonify({"success": False, "message": "Invalid review ID."}), 400
+        review_filter = find_review_filter(review_id)
+        if not review_filter:
+            return jsonify({"success": False, "message": "Review not found."}), 404
 
         data = request.get_json(silent=True)
 
@@ -487,7 +513,7 @@ def admin_update_review_status(review_id):
             )
 
         result = review_collection().update_one(
-            {"_id": ObjectId(review_id)},
+            review_filter,
             {
                 "$set": {
                     "status": status,
@@ -540,10 +566,12 @@ def admin_delete_review(review_id):
         if not admin or admin.get("role") != "admin":
             return jsonify({"success": False, "message": "Admin access required."}), 403
 
-        if not ObjectId.is_valid(review_id):
-            return jsonify({"success": False, "message": "Invalid review ID."}), 400
+        review_filter = find_review_filter(review_id)
 
-        result = review_collection().delete_one({"_id": ObjectId(review_id)})
+        if not review_filter:
+            return jsonify({"success": False, "message": "Review not found."}), 404
+
+        result = review_collection().delete_one(review_filter)
 
         if result.deleted_count == 0:
             return jsonify({"success": False, "message": "Review not found."}), 404
