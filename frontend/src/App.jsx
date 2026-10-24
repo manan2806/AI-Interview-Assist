@@ -21,6 +21,7 @@ import PerformanceChart from "./pages/User/PerformanceChart";
 import Support from "./pages/User/Support";
 import Settings from "./pages/User/Settings";
 import Announcements from "./pages/User/Announcements";
+import Reviews from "./pages/User/Reviews";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -30,6 +31,7 @@ import AdminProfile from "./pages/Admin/AdminProfile";
 import AdminSettings from "./pages/Admin/AdminSettings";
 import AdminProblemReports from "./pages/Admin/AdminProblemReports";
 import AdminAnnouncements from "./pages/Admin/AdminAnnouncements";
+import AdminReviews from "./pages/Admin/AdminReviews";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -159,6 +161,12 @@ function App() {
                         path="/announcements"
                         element={<Announcements />}
                     />
+
+                    {/* Review */}
+                    <Route
+                        path="/reviews"
+                        element={<Reviews />}
+                    />
                 </Route>
 
                 {/* ==================================
@@ -198,6 +206,11 @@ function App() {
                     <Route
                         path="/admin-announcements"
                         element={<AdminAnnouncements />}
+                    />
+
+                    <Route
+                        path="/admin-reviews"
+                        element={<AdminReviews />}
                     />
                 </Route>
 

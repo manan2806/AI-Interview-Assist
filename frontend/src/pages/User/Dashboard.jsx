@@ -832,6 +832,25 @@ function Dashboard() {
                             <span className="arrow">→</span>
                         </Link>
 
+
+                        {/* WRITE A REVIEW */}
+                        <Link
+                            to="/reviews"
+                            className="action-card"
+                        >
+                            <div className="action-icon">⭐</div>
+
+                            <div>
+                                <h3>Write a Review</h3>
+
+                                <p>
+                                    Share your experience and help us improve AI Interview Assist.
+                                </p>
+                            </div>
+
+                            <span className="arrow">→</span>
+                        </Link>
+
                     </div>
 
                 </section>

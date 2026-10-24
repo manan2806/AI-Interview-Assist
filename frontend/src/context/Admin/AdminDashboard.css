@@ -649,6 +649,15 @@
     background: #fbcfe8;
 }
 
+.admin-action-card:nth-child(6) {
+    background: linear-gradient(135deg, #fff, #e0f7f5);
+    border: 1px solid #b8e8e2;
+}
+
+.admin-action-card:nth-child(6)::after {
+    background: #b2e8e1;
+}
+
 .admin-action-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 13px 27px rgba(31, 41, 55, .075)

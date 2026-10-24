@@ -741,9 +741,25 @@
     background: #ffe1b5;
 }
 
+.action-card:nth-child(5) {
+    background: linear-gradient(135deg, #ffffff, #ffe8f3);
+    border: 1px solid #f5c6df;
+}
+
+.action-card:nth-child(5)::after {
+    background: #ffc6e2;
+}
+
 .action-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 13px 27px rgba(31, 41, 55, 0.075);
+}
+
+@media (max-width: 768px) {
+    .action-card {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
 
 /* ACTION ICON */

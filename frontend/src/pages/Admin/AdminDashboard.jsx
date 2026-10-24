@@ -558,6 +558,27 @@ function AdminDashboard() {
                             </div>
                             <span className="admin-action-arrow">→</span>
                         </Link>
+
+                        {/* REVIEWS MANAGEMENT */}
+                        <Link
+                            to="/admin-reviews"
+                            className="admin-action-card"
+                        >
+                            <div className="admin-action-icon orange">
+                                ⭐
+                            </div>
+
+                            <div className="admin-action-content">
+                                <h3>Review Management</h3>
+                                <p>
+                                    View user reviews, approve feedback, hide reviews,
+                                    and manage published ratings.
+                                </p>
+                            </div>
+
+                            <span className="admin-action-arrow">→</span>
+                        </Link>
+                        
                     </div>
                 </section>
 
