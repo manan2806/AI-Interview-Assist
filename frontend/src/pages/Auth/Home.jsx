@@ -1,9 +1,48 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../../context/Auth/Home.css";
+import api from "../../services/api";
 
 function Home() {
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const [reviews, setReviews] = useState([]);
+    const [reviewStats, setReviewStats] = useState({
+        total: 0,
+        average_rating: 0,
+    });
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchReviews = async () => {
+            try {
+                const response = await api.get("/api/reviews");
+                const data = response.data;
+
+                if (isMounted && data.success) {
+                    setReviews(data.reviews || []);
+                    setReviewStats({
+                        total: data.total || 0,
+                        average_rating: data.average_rating || 0,
+                    });
+                }
+            } catch (error) {
+                console.error("Unable to fetch public reviews:", error);
+            } finally {
+                if (isMounted) {
+                    setReviewsLoading(false);
+                }
+            }
+        };
+
+        fetchReviews();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const closeMenu = () => {
         setMenuOpen(false);
@@ -681,6 +720,129 @@ function Home() {
                         </p>
                     </div>
                 </div>
+            </section>
+
+            {/* ================= USER REVIEWS ================= */}
+            <section id="reviews" className="home-reviews">
+                <div className="section-heading">
+                    <span className="home-reviews-eyebrow">
+                        REAL EXPERIENCES
+                    </span>
+
+                    <h2>What Our Users Say</h2>
+
+                    <p>
+                        Discover how AI Interview Assist helps users practice,
+                        improve their skills and prepare for interviews.
+                    </p>
+                </div>
+
+                {!reviewsLoading && reviews.length > 0 && (
+                    <div className="home-review-summary">
+                        <div className="home-review-summary-icon">⭐</div>
+
+                        <div>
+                            <strong>
+                                {Number(reviewStats.average_rating).toFixed(1)} / 5
+                            </strong>
+
+                            <div className="home-review-summary-stars">
+                                {"★".repeat(
+                                    Math.round(reviewStats.average_rating)
+                                )}
+                                {"☆".repeat(
+                                    5 - Math.round(reviewStats.average_rating)
+                                )}
+                            </div>
+
+                            <p>
+                                Based on {reviewStats.total} approved{" "}
+                                {reviewStats.total === 1 ? "review" : "reviews"}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {reviewsLoading ? (
+                    <div className="home-reviews-message">
+                        Loading reviews...
+                    </div>
+                ) : reviews.length > 0 ? (
+                    <>
+                        <div className="home-reviews-grid">
+                            {reviews.slice(0, 6).map((review) => (
+                                <article
+                                    className="home-review-card"
+                                    key={review.review_id}
+                                >
+                                    <div className="home-review-card-top">
+                                        <div className="home-review-quote">“</div>
+
+                                        <div
+                                            className="home-review-stars"
+                                            aria-label={`${review.rating} out of 5 stars`}
+                                        >
+                                            {"★".repeat(review.rating)}
+                                            {"☆".repeat(5 - review.rating)}
+                                        </div>
+                                    </div>
+
+                                    <p className="home-review-comment">
+                                        {review.comment}
+                                    </p>
+
+                                    <div className="home-review-user">
+                                        <div className="home-review-avatar">
+                                            {(review.name || "U")
+                                                .trim()
+                                                .charAt(0)
+                                                .toUpperCase()}
+                                        </div>
+
+                                        <div className="home-review-user-info">
+                                            <strong>{review.name || "User"}</strong>
+                                            <span>
+                                                <span className="home-review-verified">
+                                                    ✓
+                                                </span>{" "}
+                                                Verified Platform Review
+                                            </span>
+                                        </div>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+
+                        {reviewStats.total > 6 && (
+                            <p className="home-reviews-footer-note">
+                                Showing 6 of {reviewStats.total} approved reviews.
+                            </p>
+                        )}
+
+                        <div className="home-reviews-cta">
+                            <p>
+                                Have you used AI Interview Assist?
+                                Share your experience with us.
+                            </p>
+
+                            <Link to="/login" className="home-review-btn">
+                                Write a Review <span>↗</span>
+                            </Link>
+                        </div>
+                    </>
+                ) : (
+                    <div className="home-reviews-empty">
+                        <div className="home-reviews-empty-icon">⭐</div>
+                        <h3>Be the First to Share Your Experience!</h3>
+                        <p>
+                            Your feedback can help others prepare for their next interview.
+                        </p>
+
+                        <Link to="/login" className="home-review-btn">
+                            Login to Write a Review <span>↗</span>
+                        </Link>
+                    </div>
+                )}
             </section>
 
             {/* ================= CONTACT ================= */}
