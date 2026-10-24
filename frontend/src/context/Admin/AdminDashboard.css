@@ -2900,3 +2900,354 @@ html[data-theme="dark"] .admin-menu-button,
     background: #1e293b;
     color: #f8fafc;
 }
+
+/* =========================================
+   ADMIN DASHBOARD - PROFESSIONAL FOOTER
+========================================= */
+
+.admin-dashboard-footer {
+    width: 100%;
+    margin-top: 40px;
+    padding: 26px 30px 0;
+    background: #ffffff;
+    border: 1px solid #e8eaf3;
+    border-bottom: none;
+    border-radius: 18px 18px 0 0;
+    box-sizing: border-box;
+    color: #27324a;
+    box-shadow: 0 -5px 25px rgba(30, 41, 59, 0.035);
+}
+
+.admin-footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 24px;
+}
+
+.admin-footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.admin-footer-logo {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #6c63ff, #5148d8);
+    box-shadow: 0 6px 14px rgba(108, 99, 255, 0.25);
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.admin-footer-brand-info h3 {
+    margin: 0 0 5px;
+    color: #202944;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.admin-footer-brand-info p {
+    margin: 0;
+    color: #7b8498;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.admin-footer-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-footer-link,
+.admin-footer-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 12px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #58627a;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.admin-footer-link span,
+.admin-footer-logout span {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.admin-footer-link:hover {
+    background: #f1efff;
+    border-color: #e1ddff;
+    color: #5148d8;
+    transform: translateY(-1px);
+}
+
+.admin-footer-logout {
+    border-color: #ffe0e5;
+    background: #fff4f5;
+    color: #d63352;
+}
+
+.admin-footer-logout:hover {
+    background: #ffe4e8;
+    border-color: #ffc4ce;
+    color: #b91c3b;
+    transform: translateY(-1px);
+}
+
+.admin-footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 52px;
+    padding: 13px 0;
+    border-top: 1px solid #edf0f6;
+    color: #8991a4;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.admin-footer-admin-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-footer-status-dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+/* Dark Theme */
+html[data-theme="dark"] .admin-dashboard-footer,
+.dark-theme .admin-dashboard-footer {
+    background: #111827;
+    border-color: #2d3748;
+    color: #f1f5f9;
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="dark"] .admin-footer-brand-info h3,
+.dark-theme .admin-footer-brand-info h3 {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .admin-footer-brand-info p,
+.dark-theme .admin-footer-brand-info p {
+    color: #a7b1c4;
+}
+
+html[data-theme="dark"] .admin-footer-link,
+.dark-theme .admin-footer-link {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-footer-link:hover,
+.dark-theme .admin-footer-link:hover {
+    background: #292449;
+    border-color: #494080;
+    color: #c4baff;
+}
+
+html[data-theme="dark"] .admin-footer-logout,
+.dark-theme .admin-footer-logout {
+    background: #351b27;
+    border-color: #5b2839;
+    color: #fda4af;
+}
+
+html[data-theme="dark"] .admin-footer-logout:hover,
+.dark-theme .admin-footer-logout:hover {
+    background: #4a202e;
+}
+
+html[data-theme="dark"] .admin-footer-bottom,
+.dark-theme .admin-footer-bottom {
+    border-top-color: #2d3748;
+    color: #9ca8ba;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .admin-dashboard-footer {
+        margin-top: 30px;
+        padding: 22px 22px 0;
+    }
+
+    .admin-footer-content {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .admin-footer-links {
+        justify-content: flex-start;
+        width: 100%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+    .admin-dashboard-footer {
+        margin-top: 24px;
+        padding: 20px 16px 0;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .admin-footer-brand {
+        gap: 11px;
+    }
+
+    .admin-footer-logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 17px;
+    }
+
+    .admin-footer-brand-info h3 {
+        font-size: 14px;
+    }
+
+    .admin-footer-brand-info p {
+        font-size: 11px;
+    }
+
+    .admin-footer-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .admin-footer-link,
+    .admin-footer-logout {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 10px 6px;
+        font-size: 11px;
+    }
+
+    .admin-footer-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px;
+        padding: 13px 0;
+        font-size: 10px;
+    }
+}
+
+
+/* DARK BLUE ADMIN FOOTER */
+
+.admin-dashboard-footer {
+    background: linear-gradient(135deg, #0b1535 0%, #14264d 100%);
+    border: 1px solid #263b65;
+    border-bottom: none;
+    color: #ffffff;
+    box-shadow: 0 -8px 28px rgba(11, 21, 53, 0.15);
+}
+
+.admin-footer-brand-info h3 {
+    color: #ffffff;
+}
+
+.admin-footer-brand-info p {
+    color: #b8c7e6;
+}
+
+.admin-footer-bottom {
+    border-top-color: #2b3d61;
+    color: #aebdd8;
+}
+
+.admin-footer-link {
+    color: #dbe7ff;
+}
+
+.admin-footer-link:hover {
+    background: #243966;
+    border-color: #3d5487;
+    color: #ffffff;
+}
+
+.admin-footer-logout {
+    background: #472338;
+    border-color: #71334a;
+    color: #ffc2cd;
+}
+
+.admin-footer-logout:hover {
+    background: #63283e;
+    color: #ffffff;
+}
+
+/* Dark blue footer - mobile and desktop */
+html[data-theme="dark"] .admin-dashboard-footer,
+.dark-theme .admin-dashboard-footer {
+    background: linear-gradient(135deg, #0b1535 0%, #14264d 100%);
+    border-color: #263b65;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .admin-footer-brand-info h3,
+.dark-theme .admin-footer-brand-info h3 {
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .admin-footer-brand-info p,
+.dark-theme .admin-footer-brand-info p {
+    color: #b8c7e6;
+}
+
+html[data-theme="dark"] .admin-footer-bottom,
+.dark-theme .admin-footer-bottom {
+    border-top-color: #2b3d61;
+    color: #aebdd8;
+}
+
+html[data-theme="dark"] .admin-footer-link,
+.dark-theme .admin-footer-link {
+    color: #dbe7ff;
+}
+
+html[data-theme="dark"] .admin-footer-link:hover,
+.dark-theme .admin-footer-link:hover {
+    background: #243966;
+    border-color: #3d5487;
+    color: #ffffff;
+}

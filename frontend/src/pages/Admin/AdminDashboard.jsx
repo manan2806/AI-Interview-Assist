@@ -773,38 +773,61 @@ function AdminDashboard() {
             </main>
 
             {/* FOOTER */}
-
             <footer className="admin-dashboard-footer">
                 <div className="admin-footer-content">
+                    {/* Brand Section */}
                     <div className="admin-footer-brand">
-                        <div className="admin-footer-logo">AI</div>
+                        <div className="admin-footer-logo">
+                            <span>AI</span>
+                        </div>
 
-                        <div>
+                        <div className="admin-footer-brand-info">
                             <h3>AI Interview Assist</h3>
                             <p>Manage smarter. Perform better.</p>
                         </div>
                     </div>
 
+                    {/* Footer Navigation */}
                     <div className="admin-footer-links">
-                        <Link to="/admin-dashboard">
-                            Admin Dashboard
+                        <Link to="/admin-dashboard" className="admin-footer-link">
+                            <span>⌂</span>
+                            Dashboard
+                        </Link>
+
+                        <Link to="/admin-reviews" className="admin-footer-link">
+                            <span>★</span>
+                            Reviews
+                        </Link>
+
+                        <Link
+                            to="/admin-problem-reports"
+                            className="admin-footer-link"
+                        >
+                            <span>✉</span>
+                            Problem Reports
                         </Link>
 
                         <button
                             type="button"
+                            className="admin-footer-logout"
                             onClick={handleLogout}
                         >
+                            <span>↪</span>
                             Logout
                         </button>
                     </div>
                 </div>
 
+                {/* Bottom Section */}
                 <div className="admin-footer-bottom">
                     <span>
-                        © {new Date().getFullYear()} AI Interview Assist
+                        © {new Date().getFullYear()} AI Interview Assist. All rights reserved.
                     </span>
 
-                    <span>Administrator Dashboard</span>
+                    <span className="admin-footer-admin-label">
+                        <span className="admin-footer-status-dot"></span>
+                        Administrator Panel
+                    </span>
                 </div>
             </footer>
 
