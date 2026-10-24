@@ -185,41 +185,25 @@ function AdminDashboard() {
 
     // LOAD PENDING REVIEW COUNT
     useEffect(() => {
-        if (!user) return;
+        const handleOutsideClick = (event) => {
+            if (
+                !event.target.closest(".admin-menu-button") &&
+                !event.target.closest(".admin-mobile-dropdown")
+            ) {
+                setMobileMenuOpen(false);
+            }
 
-        let active = true;
-
-        const fetchPendingReviews = async () => {
-            try {
-                const response = await api.get("/api/admin/reviews");
-
-                if (active && response.data?.success) {
-                    const reviews = Array.isArray(response.data.reviews)
-                        ? response.data.reviews
-                        : [];
-
-                    setPendingReviewCount(
-                        reviews.filter(
-                            (review) =>
-                                String(review.status || "pending").toLowerCase() ===
-                                "pending"
-                        ).length
-                    );
-                }
-            } catch (err) {
-                console.error("Review notification error:", err);
+            if (!event.target.closest(".admin-notifications-wrapper")) {
+                setNotificationsOpen(false);
             }
         };
 
-        fetchPendingReviews();
-
-        const intervalId = setInterval(fetchPendingReviews, 30000);
+        document.addEventListener("click", handleOutsideClick);
 
         return () => {
-            active = false;
-            clearInterval(intervalId);
+            document.removeEventListener("click", handleOutsideClick);
         };
-    }, [user]);
+    }, []);
 
     // ==========================================
     // CLOSE MOBILE MENU ON OUTSIDE CLICK
@@ -406,13 +390,16 @@ function AdminDashboard() {
                     <button
                         type="button"
                         className="admin-menu-button"
-                        onClick={() =>
-                            setMobileMenuOpen((previous) => !previous)
-                        }
-                        aria-label="Toggle menu"
+                        onClick={() => {
+                            setMobileMenuOpen((previous) => !previous);
+                            setNotificationsOpen(false);
+                        }}
+                        aria-label="Toggle admin menu"
                         aria-expanded={mobileMenuOpen}
                     >
-                        <span className="admin-menu-icon">☰</span>
+                        <span className="admin-menu-icon">
+                            {mobileMenuOpen ? "✕" : "☰"}
+                        </span>
 
                         {!mobileMenuOpen && totalNotifications > 0 && (
                             <span className="admin-menu-notification-badge">
@@ -422,79 +409,116 @@ function AdminDashboard() {
                     </button>
 
                     {mobileMenuOpen && (
-                        <div className="admin-mobile-dropdown">
-
-                            {/* MOBILE PROBLEM REPORT NOTIFICATION */}
-                            <Link
-                                to="/admin-problem-reports"
-                                className="admin-mobile-notification-link"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <span>📨 Problem Reports</span>
-
-                                <span className="admin-mobile-notification-count">
-                                    {openReportCount > 99 ? "99+" : openReportCount}
-                                </span>
-                            </Link>
-
-                            {/* MOBILE REVIEW NOTIFICATION */}
-                            <Link
-                                to="/admin-reviews"
-                                className="admin-mobile-notification-link"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <span>⭐ Reviews</span>
-
-                                <span className="admin-mobile-notification-count">
-                                    {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
-                                </span>
-                            </Link>
-
-                            <Link
-                                to="/admin-profile"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <span>👤</span>
-                                <span>My Profile</span>
-                            </Link>
-
-                            <Link
-                                to="/admin-settings"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <span>⚙️</span>
-                                <span>Settings</span>
-                            </Link>
-
-                            <Link
-                                to="/admin-problem-reports"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <span className="admin-mobile-report-icon">
-                                    📨
-                                    {openReportCount > 0 && (
-                                        <span className="admin-mobile-report-badge">
-                                            {openReportCount > 99 ? "99+" : openReportCount}
-                                        </span>
-                                    )}
-                                </span>
-
-                                <span>Problem Reports</span>
-                            </Link>
-
+                        <>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setMobileMenuOpen(false);
-                                    handleLogout();
-                                }}
-                            >
-                                <span>🚪</span>
-                                <span>Logout</span>
-                            </button>
-                        </div>
+                                className="admin-mobile-menu-backdrop"
+                                aria-label="Close menu"
+                                onClick={() => setMobileMenuOpen(false)}
+                            />
+
+                            <div className="admin-mobile-dropdown">
+                                <div className="admin-mobile-menu-heading">
+                                    <strong>Admin Menu</strong>
+                                    <span>
+                                        {totalNotifications} pending
+                                    </span>
+                                </div>
+
+                                <Link
+                                    to="/admin-problem-reports"
+                                    className="admin-mobile-notification-link"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span className="admin-mobile-link-label">
+                                        📨 Problem Reports
+                                    </span>
+                                    <span className="admin-mobile-notification-count">
+                                        {openReportCount > 99 ? "99+" : openReportCount}
+                                    </span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-reviews"
+                                    className="admin-mobile-notification-link"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span className="admin-mobile-link-label">
+                                        ⭐ User Reviews
+                                    </span>
+                                    <span className="admin-mobile-notification-count">
+                                        {pendingReviewCount > 99
+                                            ? "99+"
+                                            : pendingReviewCount}
+                                    </span>
+                                </Link>
+
+                                <div className="admin-mobile-menu-divider" />
+
+                                <Link
+                                    to="/admin-dashboard"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>🏠</span>
+                                    <span>Dashboard</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-profile"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>👤</span>
+                                    <span>My Profile</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-settings"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>⚙️</span>
+                                    <span>Settings</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-users"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>👥</span>
+                                    <span>User Management</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-interviews"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>📋</span>
+                                    <span>Interview Management</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-announcements"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>📢</span>
+                                    <span>Announcements</span>
+                                </Link>
+
+                                <button
+                                    type="button"
+                                    className="admin-mobile-logout"
+                                    onClick={() => {
+                                        setMobileMenuOpen(false);
+                                        handleLogout();
+                                    }}
+                                >
+                                    <span>🚪</span>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </>
                     )}
                 </div>
+
 
             </nav>
 
