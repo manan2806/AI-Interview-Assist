@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, redirect, session
 from flask_bcrypt import Bcrypt
-import uuid, os, hmac, secrets, hashlib, logging, time
+import uuid, os, hmac, secrets, hashlib, logging, time, random
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import limiter
 
@@ -115,9 +115,9 @@ def register():
 
         # Generate role-specific user ID
         if role == "admin":
-            user_id = "ADM-" + str(uuid.uuid4())[:8].upper()
+            user_id = "ADM-" + str(random.randint(100000, 999999))
         else:
-            user_id = "USR-" + str(uuid.uuid4())[:8].upper()
+            user_id = "USR-" + str(random.randint(100000, 999999))
 
         # Common fields for both account types
         user = {
