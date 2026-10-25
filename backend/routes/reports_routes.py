@@ -19,7 +19,7 @@ REPORT_CONFIG = {
             "email",
             "target_role",
             "experience_level",
-            "created_at",
+            "skills",
         ],
         "date_field": "created_at",
         "exclude_admins": True,
@@ -34,8 +34,11 @@ REPORT_CONFIG = {
             "interview_type",
             "difficulty",
             "status",
-            "score",
+            "overall_result.overall_score",
+            "overall_result.average_score",
+            "overall_result.performance_level",
             "created_at",
+            "completed_at",
             "duration",
         ],
         "date_field": "created_at",
@@ -46,11 +49,13 @@ REPORT_CONFIG = {
         "fields": [
             "report_id",
             "user_id",
-            "title",
-            "category",
+            "user_name",
+            "user_email",
+            "subject",
+            "problem_type",
+            "description",
             "status",
             "created_at",
-            "updated_at",
         ],
         "date_field": "created_at",
         "exclude_admins": False,
@@ -66,6 +71,7 @@ REPORT_CONFIG = {
             "status",
             "created_at",
             "updated_at",
+            "moderated_by",
         ],
         "date_field": "created_at",
         "exclude_admins": False,
@@ -93,6 +99,7 @@ def report_value(value):
         value = "'" + value
 
     return value
+
 
 # ==========================================
 # ADMIN REPORTS CENTER - CSV EXPORT

@@ -151,8 +151,7 @@ function AdminReports() {
                     className="admin-reports-back-btn"
                     onClick={() => navigate("/admin-dashboard")}
                 >
-                    <span aria-hidden="true">←</span>
-                    Back to Dashboard
+                    ← Dashboard
                 </button>
             </header>
 
