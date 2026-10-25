@@ -472,14 +472,6 @@ function AdminDashboard() {
                                 </Link>
 
                                 <Link
-                                    to="/admin-settings"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    <span>⚙️</span>
-                                    <span>Settings</span>
-                                </Link>
-
-                                <Link
                                     to="/admin-users"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -503,6 +495,22 @@ function AdminDashboard() {
                                     <span>Announcements</span>
                                 </Link>
 
+                                <Link
+                                    to="/admin-reports"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>📊</span>
+                                    <span>Reports Center</span>
+                                </Link>
+
+                                <Link
+                                    to="/admin-settings"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>⚙️</span>
+                                    <span>Settings</span>
+                                </Link>
+
                                 <button
                                     type="button"
                                     className="admin-mobile-logout"
@@ -518,8 +526,6 @@ function AdminDashboard() {
                         </>
                     )}
                 </div>
-
-
             </nav>
 
             {/* MAIN CONTENT */}
@@ -734,6 +740,26 @@ function AdminDashboard() {
                                 <p>
                                     View user reviews, approve feedback, hide reviews,
                                     and manage published ratings.
+                                </p>
+                            </div>
+
+                            <span className="admin-action-arrow">→</span>
+                        </Link>
+
+                        {/* REPORTS CENTER */}
+                        <Link
+                            to="/admin-reports"
+                            className="admin-action-card"
+                        >
+                            <div className="admin-action-icon blue">
+                                📊
+                            </div>
+
+                            <div className="admin-action-content">
+                                <h3>Reports Center</h3>
+                                <p>
+                                    Export users, interviews, problem reports, and
+                                    reviews as CSV files with optional date filters.
                                 </p>
                             </div>
 

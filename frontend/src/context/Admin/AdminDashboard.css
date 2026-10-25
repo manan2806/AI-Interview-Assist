@@ -604,63 +604,70 @@
     opacity: .6
 }
 
-.admin-action-card:nth-child(1) {
+.admin-action-grid .admin-action-card {
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.admin-action-grid .admin-action-card:nth-child(6n + 1) {
     background: linear-gradient(135deg, #fff, #eeeaff);
-    border: 1px solid #d8d1ff
+    border-color: #d8d1ff;
 }
 
-.admin-action-card:nth-child(1)::after {
-    background: #d2cbff
+.admin-action-grid .admin-action-card:nth-child(6n + 1)::after {
+    background: #d2cbff;
 }
 
-.admin-action-card:nth-child(2) {
+.admin-action-grid .admin-action-card:nth-child(6n + 2) {
     background: linear-gradient(135deg, #fff, #e8f3ff);
-    border: 1px solid #cce2ff
+    border-color: #cce2ff;
 }
 
-.admin-action-card:nth-child(2)::after {
-    background: #c9e2ff
+.admin-action-grid .admin-action-card:nth-child(6n + 2)::after {
+    background: #c9e2ff;
 }
 
-.admin-action-card:nth-child(3) {
+.admin-action-grid .admin-action-card:nth-child(6n + 3) {
     background: linear-gradient(135deg, #fff, #e5f8ee);
-    border: 1px solid #c9ecd9
+    border-color: #c9ecd9;
 }
 
-.admin-action-card:nth-child(3)::after {
-    background: #c5edd7
+.admin-action-grid .admin-action-card:nth-child(6n + 3)::after {
+    background: #c5edd7;
 }
 
-.admin-action-card:nth-child(4) {
+.admin-action-grid .admin-action-card:nth-child(6n + 4) {
     background: linear-gradient(135deg, #fff, #fff0da);
-    border: 1px solid #f1ddbd
+    border-color: #f1ddbd;
 }
 
-.admin-action-card:nth-child(4)::after {
-    background: #ffe1b5
+.admin-action-grid .admin-action-card:nth-child(6n + 4)::after {
+    background: #ffe1b5;
 }
 
-.admin-action-card:nth-child(5) {
+.admin-action-grid .admin-action-card:nth-child(6n + 5) {
     background: linear-gradient(135deg, #fff, #fce7f3);
-    border: 1px solid #f5c2df;
+    border-color: #f5c2df;
 }
 
-.admin-action-card:nth-child(5)::after {
+.admin-action-grid .admin-action-card:nth-child(6n + 5)::after {
     background: #fbcfe8;
 }
 
-.admin-action-card:nth-child(6) {
+.admin-action-grid .admin-action-card:nth-child(6n) {
     background: linear-gradient(135deg, #fff, #e0f7f5);
-    border: 1px solid #b8e8e2;
+    border-color: #b8e8e2;
 }
 
-.admin-action-card:nth-child(6)::after {
+.admin-action-grid .admin-action-card:nth-child(6n)::after {
     background: #b2e8e1;
 }
 
-.admin-action-card:hover {
+.admin-action-grid .admin-action-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 13px 27px rgba(31, 41, 55, .075)
+    box-shadow: 0 13px 27px rgba(31, 41, 55, 0.075);
 }
 
 .admin-action-icon {
@@ -1575,61 +1582,136 @@ html[data-theme="dark"] .admin-stat-progress {
 }
 
 /* ==========================================
-   PLATFORM ACTIVITY CARDS
+   ADMIN ACTION CARDS - DARK THEME
 ========================================== */
 
-html[data-theme="dark"] .admin-action-card {
-    background: #1e293b;
+html[data-theme="dark"] .admin-action-grid .admin-action-card {
     border: 1px solid #334155;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
-    transition:
-        transform 0.2s ease,
-        border-color 0.2s ease,
-        background 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-html[data-theme="dark"] .admin-action-card:hover {
-    background: #263449;
-    border-color: #818cf8;
+/* Purple Card */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 1) {
+    background: linear-gradient(135deg, #1e1b3a, #29234d);
+    border-color: #494078;
+}
+
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 1)::after {
+    background: #6d5bd0;
+}
+
+/* Blue Card */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 2) {
+    background: linear-gradient(135deg, #17263e, #1e3555);
+    border-color: #34547c;
+}
+
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 2)::after {
+    background: #3b82f6;
+}
+
+/* Green Card */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 3) {
+    background: linear-gradient(135deg, #142e28, #1b4035);
+    border-color: #2c6550;
+}
+
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 3)::after {
+    background: #10b981;
+}
+
+/* Orange Card */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 4) {
+    background: linear-gradient(135deg, #382619, #4a3020);
+    border-color: #765032;
+}
+
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 4)::after {
+    background: #f59e0b;
+}
+
+/* Pink Card */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 5) {
+    background: linear-gradient(135deg, #381d30, #4a2440);
+    border-color: #713956;
+}
+
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n + 5)::after {
+    background: #ec4899;
+}
+
+/* Teal Card */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n) {
+    background: linear-gradient(135deg, #153331, #1c4542);
+    border-color: #326d68;
+}
+
+html[data-theme="dark"] .admin-action-grid .admin-action-card:nth-child(6n)::after {
+    background: #14b8a6;
+}
+
+/* Hover Effect */
+html[data-theme="dark"] .admin-action-grid .admin-action-card:hover {
     transform: translateY(-3px);
+    box-shadow: 0 13px 27px rgba(0, 0, 0, 0.3);
 }
 
-html[data-theme="dark"] .admin-action-content h3 {
-    color: #f8fafc;
+/* Card Headings */
+html[data-theme="dark"] .admin-action-content h3,
+html[data-theme="dark"] .admin-action-content h4 {
+    color: #f1f5f9;
 }
 
+/* Card Description */
 html[data-theme="dark"] .admin-action-content p {
+    color: #cbd5e1;
+}
+
+/* Arrow */
+html[data-theme="dark"] .admin-action-arrow {
     color: #94a3b8;
 }
 
-html[data-theme="dark"] .admin-action-arrow {
-    color: #a5b4fc;
+html[data-theme="dark"] .admin-action-card:hover .admin-action-arrow {
+    color: #c4b5fd;
 }
 
-/* Colourful action icons */
+/* ==========================================
+   ACTION ICONS - DARK THEME
+========================================== */
+
+/* Purple Icon */
+html[data-theme="dark"] .admin-action-icon {
+    background: #3b326c;
+    color: #c4b5fd;
+}
 
 html[data-theme="dark"] .admin-action-icon.purple {
-    color: #ddd6fe;
-    background: #4c1d95;
+    background: linear-gradient(135deg, #403675, #51438f);
+    color: #d8ccff;
 }
 
+/* Blue Icon */
 html[data-theme="dark"] .admin-action-icon.blue {
+    background: linear-gradient(135deg, #234574, #2c568d);
     color: #bfdbfe;
-    background: #1e40af;
 }
 
+/* Green Icon */
 html[data-theme="dark"] .admin-action-icon.green {
-    color: #a7f3d0;
-    background: #065f46;
+    background: linear-gradient(135deg, #20543e, #28694d);
+    color: #bbf7d0;
 }
 
+/* Orange Icon */
 html[data-theme="dark"] .admin-action-icon.orange {
-    color: #fed7aa;
-    background: #9a3412;
+    background: linear-gradient(135deg, #69451f, #805528);
+    color: #fde68a;
 }
 
+/* Pink Icon */
 html[data-theme="dark"] .admin-action-icon.pink {
-    background: #831843;
+    background: linear-gradient(135deg, #6b294f, #80335e);
     color: #fbcfe8;
 }
 

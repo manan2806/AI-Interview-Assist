@@ -32,6 +32,7 @@ import AdminSettings from "./pages/Admin/AdminSettings";
 import AdminProblemReports from "./pages/Admin/AdminProblemReports";
 import AdminAnnouncements from "./pages/Admin/AdminAnnouncements";
 import AdminReviews from "./pages/Admin/AdminReviews";
+import AdminReports from "./pages/Admin/AdminReports";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -211,6 +212,13 @@ function App() {
                     <Route
                         path="/admin-reviews"
                         element={<AdminReviews />}
+                    />
+
+                    <Route
+                        path="/admin-reports"
+                        element={
+                            <AdminReports />
+                        }
                     />
                 </Route>
 
