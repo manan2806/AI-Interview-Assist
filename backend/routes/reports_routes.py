@@ -7,6 +7,23 @@ from utils.auth_utils import admin_required
 
 reports_bp = Blueprint("reports", __name__)
 
+
+def get_nested_value(document, field):
+    """Get values from nested MongoDB documents using dot notation."""
+    value = document
+
+    for key in field.split("."):
+        if not isinstance(value, dict):
+            return ""
+
+        value = value.get(key)
+
+        if value is None:
+            return ""
+
+    return value
+
+
 # ==========================================
 # REPORT CONFIGURATION
 # ==========================================
@@ -77,6 +94,7 @@ REPORT_CONFIG = {
         "exclude_admins": False,
     },
 }
+
 
 # ==========================================
 # CSV VALUE HELPER
@@ -216,7 +234,7 @@ def export_admin_report(current_user, report_type):
         exported_count = 0
 
         for document in cursor:
-            writer.writerow([report_value(document.get(field)) for field in fields])
+            writer.writerow([report_value(get_nested_value(document, field)) for field in fields])
             exported_count += 1
 
         response = make_response("\ufeff" + output.getvalue())

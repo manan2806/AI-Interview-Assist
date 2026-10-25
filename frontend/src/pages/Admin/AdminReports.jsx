@@ -35,6 +35,7 @@ const REPORTS = [
     },
 ];
 
+
 function AdminReports() {
     const navigate = useNavigate();
 
