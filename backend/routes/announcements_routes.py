@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from functools import wraps
+import random
 
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
@@ -36,6 +37,16 @@ ANNOUNCEMENT_STATUSES = {
 }
 
 
+def generate_announcement_code():
+    while True:
+        code = f"ANC-{random.randint(100000, 999999)}"
+
+        existing = announcements.find_one({"announcement_code": code})
+
+        if not existing:
+            return code
+
+
 def utc_now():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
@@ -65,6 +76,7 @@ def serialize_announcement(item, user_id=None):
 
     return {
         "id": str(item["_id"]),
+        "announcement_code": item.get("announcement_code", ""),
         "title": item.get("title", ""),
         "message": item.get("message", ""),
         "type": item.get("type", "general"),
@@ -255,6 +267,7 @@ def create_announcement():
 
     item = {
         **validated,
+        "announcement_code": generate_announcement_code(),
         "created_by": admin.get("user_id", ""),
         "created_by_name": admin.get("name", "Admin"),
         "created_at": now,

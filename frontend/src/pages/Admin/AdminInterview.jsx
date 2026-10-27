@@ -522,7 +522,7 @@ function AdminInterview() {
                                         }
                                     >
                                         <td>
-                                            <span className="admin-interviews-interview-id">
+                                            <span className="admin-interviews-user-id">
                                                 {interview.interview_code || "—"}
                                             </span>
                                         </td>

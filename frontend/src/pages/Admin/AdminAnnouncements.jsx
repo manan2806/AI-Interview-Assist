@@ -532,6 +532,7 @@ function AdminAnnouncements() {
                         <table className="announcement-table">
                             <thead>
                                 <tr>
+                                    <th>Announcement ID</th>
                                     <th>Announcement</th>
                                     <th>Type</th>
                                     <th>Status</th>
@@ -543,6 +544,10 @@ function AdminAnnouncements() {
                             <tbody>
                                 {filteredAnnouncements.map((item) => (
                                     <tr key={item.id}>
+                                        <td>
+                                            {item.announcement_code || "—"}
+                                        </td>
+
                                         <td>
                                             <div className="announcement-table-title">
                                                 {item.title}

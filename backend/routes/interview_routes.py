@@ -39,7 +39,7 @@ def get_interview_object_id(interview_id):
 # ==========================================
 def generate_interview_code():
     while True:
-        code = f"INT{random.randint(100000, 999999)}"
+        code = f"INT-{random.randint(100000, 999999)}"
         existing_interview = interviews.find_one({"interview_code": code})
         if not existing_interview:
             return code
