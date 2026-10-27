@@ -545,7 +545,9 @@ function AdminAnnouncements() {
                                 {filteredAnnouncements.map((item) => (
                                     <tr key={item.id}>
                                         <td>
-                                            {item.announcement_code || "—"}
+                                            <span className="admin-announcement-code">
+                                                {item.announcement_code || "—"}
+                                            </span>
                                         </td>
 
                                         <td>

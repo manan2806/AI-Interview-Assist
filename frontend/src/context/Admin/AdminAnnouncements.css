@@ -717,6 +717,11 @@
     background: rgba(108, 99, 255, 0.035);
 }
 
+.admin-announcement-code {
+    color: #2563eb;
+    font-weight: 600;
+}
+
 .announcement-table-title {
     min-width: 160px;
     max-width: 320px;
