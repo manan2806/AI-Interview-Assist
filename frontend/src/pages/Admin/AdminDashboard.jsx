@@ -185,6 +185,43 @@ function AdminDashboard() {
 
     // LOAD PENDING REVIEW COUNT
     useEffect(() => {
+        if (!user) return;
+
+        let active = true;
+
+        const fetchPendingReviewCount = async () => {
+            try {
+                const response = await api.get("/api/admin/reviews");
+
+                if (active && response.data?.success) {
+                    const reviews = Array.isArray(response.data.reviews)
+                        ? response.data.reviews
+                        : [];
+
+                    const count = reviews.filter(
+                        (review) =>
+                            String(review.status || "pending").toLowerCase() ===
+                            "pending"
+                    ).length;
+
+                    setPendingReviewCount(count);
+                }
+            } catch (err) {
+                console.error("Pending Review Notification Error:", err);
+            }
+        };
+
+        fetchPendingReviewCount();
+
+        const intervalId = setInterval(fetchPendingReviewCount, 30000);
+
+        return () => {
+            active = false;
+            clearInterval(intervalId);
+        };
+    }, [user]);
+
+    useEffect(() => {
         const handleOutsideClick = (event) => {
             if (
                 !event.target.closest(".admin-menu-button") &&

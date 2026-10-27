@@ -500,6 +500,7 @@ function AdminInterview() {
                         <table className="admin-interviews-table">
                             <thead>
                                 <tr>
+                                    <th>Interview ID</th>
                                     <th>User ID</th>
                                     <th>Job Role</th>
                                     <th>Type</th>
@@ -521,6 +522,12 @@ function AdminInterview() {
                                         }
                                     >
                                         <td>
+                                            <span className="admin-interviews-interview-id">
+                                                {interview.interview_code || "—"}
+                                            </span>
+                                        </td>
+
+                                        <td>
                                             <span className="admin-interviews-user-id">
                                                 {interview.user_id || "—"}
                                             </span>
@@ -532,13 +539,9 @@ function AdminInterview() {
                                             </span>
                                         </td>
 
-                                        <td>
-                                            {interview.interview_type || "—"}
-                                        </td>
+                                        <td>{interview.interview_type || "—"}</td>
 
-                                        <td>
-                                            {interview.experience_level || "—"}
-                                        </td>
+                                        <td>{interview.experience_level || "—"}</td>
 
                                         <td>
                                             <span
@@ -550,9 +553,7 @@ function AdminInterview() {
                                             </span>
                                         </td>
 
-                                        <td>
-                                            {interview.number_of_questions ?? "—"}
-                                        </td>
+                                        <td>{interview.number_of_questions ?? "—"}</td>
 
                                         <td>
                                             <span

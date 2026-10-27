@@ -742,6 +742,491 @@
     text-decoration: underline;
 }
 
+
+/* =========================================================
+   REVIEWS PAGE — DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .reviews-page,
+body.dark .reviews-page,
+.dark .reviews-page {
+    background:
+        radial-gradient(circle at 8% 5%,
+            rgba(124, 58, 237, 0.13),
+            transparent 29%),
+        radial-gradient(circle at 95% 95%,
+            rgba(59, 130, 246, 0.10),
+            transparent 32%),
+        #111827;
+    color: #e5e7eb;
+}
+
+/* Main card */
+
+html[data-theme="dark"] .reviews-layout,
+body.dark .reviews-layout,
+.dark .reviews-layout {
+    background: #1b2434;
+    border-color: #344055;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* Top bar */
+
+html[data-theme="dark"] .reviews-topbar,
+body.dark .reviews-topbar,
+.dark .reviews-topbar {
+    background: linear-gradient(120deg,
+            #38263f 0%,
+            #302b50 35%,
+            #20334e 72%,
+            #1d3b37 100%);
+    border-bottom-color: #344055;
+}
+
+html[data-theme="dark"] .reviews-back-btn,
+body.dark .reviews-back-btn,
+.dark .reviews-back-btn {
+    color: #b4aaff;
+}
+
+html[data-theme="dark"] .topbar-btn-text,
+body.dark .topbar-btn-text,
+.dark .topbar-btn-text {
+    background: #242d40;
+    border-color: #454064;
+    color: #b4aaff;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .reviews-back-btn:hover .topbar-btn-text,
+body.dark .reviews-back-btn:hover .topbar-btn-text,
+.dark .reviews-back-btn:hover .topbar-btn-text {
+    background: #302b50;
+}
+
+html[data-theme="dark"] .reviews-top-label,
+body.dark .reviews-top-label,
+.dark .reviews-top-label {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .yellow-star,
+body.dark .yellow-star,
+.dark .yellow-star {
+    background: linear-gradient(135deg, #443a23, #514222);
+    border-color: #78602b;
+    color: #fcd34d;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .blue-star,
+body.dark .blue-star,
+.dark .blue-star {
+    background: linear-gradient(135deg, #302b50, #233752);
+    border-color: #49416f;
+    color: #b4aaff;
+    box-shadow: none;
+}
+
+/* Left intro panel */
+
+html[data-theme="dark"] .reviews-intro,
+body.dark .reviews-intro,
+.dark .reviews-intro {
+    background: linear-gradient(135deg,
+            #38263f 0%,
+            #302b50 35%,
+            #20334e 70%,
+            #1d3b37 100%);
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .reviews-intro::before,
+body.dark .reviews-intro::before,
+.dark .reviews-intro::before {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+html[data-theme="dark"] .reviews-intro::after,
+body.dark .reviews-intro::after,
+.dark .reviews-intro::after {
+    background: rgba(52, 211, 153, 0.06);
+}
+
+html[data-theme="dark"] .reviews-intro-icon,
+body.dark .reviews-intro-icon,
+.dark .reviews-intro-icon {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .reviews-eyebrow,
+body.dark .reviews-eyebrow,
+.dark .reviews-eyebrow {
+    color: #b4aaff;
+}
+
+html[data-theme="dark"] .reviews-intro h1,
+body.dark .reviews-intro h1,
+.dark .reviews-intro h1 {
+    color: #f1f0ff;
+}
+
+html[data-theme="dark"] .reviews-intro h1 span,
+body.dark .reviews-intro h1 span,
+.dark .reviews-intro h1 span {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .reviews-intro-text,
+body.dark .reviews-intro-text,
+.dark .reviews-intro-text {
+    color: #c0cadb;
+}
+
+html[data-theme="dark"] .reviews-benefit-icon,
+body.dark .reviews-benefit-icon,
+.dark .reviews-benefit-icon {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .reviews-benefit strong,
+body.dark .reviews-benefit strong,
+.dark .reviews-benefit strong {
+    color: #f1f0ff;
+}
+
+html[data-theme="dark"] .reviews-benefit p,
+body.dark .reviews-benefit p,
+.dark .reviews-benefit p {
+    color: #c0cadb;
+}
+
+html[data-theme="dark"] .reviews-quote,
+body.dark .reviews-quote,
+.dark .reviews-quote {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="dark"] .reviews-quote-mark,
+body.dark .reviews-quote-mark,
+.dark .reviews-quote-mark {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .reviews-quote p,
+body.dark .reviews-quote p,
+.dark .reviews-quote p {
+    color: #c0cadb;
+}
+
+/* Right form panel */
+
+html[data-theme="dark"] .reviews-form-card,
+body.dark .reviews-form-card,
+.dark .reviews-form-card {
+    background: #1b2434;
+    border-left-color: #344055;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .reviews-form-heading,
+body.dark .reviews-form-heading,
+.dark .reviews-form-heading {
+    border-bottom-color: #344055;
+}
+
+html[data-theme="dark"] .reviews-section-label,
+body.dark .reviews-section-label,
+.dark .reviews-section-label {
+    color: #b4aaff;
+}
+
+html[data-theme="dark"] .reviews-form-heading h2,
+body.dark .reviews-form-heading h2,
+.dark .reviews-form-heading h2 {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .reviews-form-heading p,
+body.dark .reviews-form-heading p,
+.dark .reviews-form-heading p {
+    color: #aab6ca;
+}
+
+html[data-theme="dark"] .reviews-heading-star,
+body.dark .reviews-heading-star,
+.dark .reviews-heading-star {
+    background: linear-gradient(135deg, #302b50, #253653);
+    color: #c4b5fd;
+}
+
+/* Success and error messages */
+
+html[data-theme="dark"] .review-message.success,
+body.dark .review-message.success,
+.dark .review-message.success {
+    background: #15372e;
+    border-color: #28634e;
+    color: #86efac;
+}
+
+html[data-theme="dark"] .review-message.error,
+body.dark .review-message.error,
+.dark .review-message.error {
+    background: #40232d;
+    border-color: #743b4b;
+    color: #fda4af;
+}
+
+/* Rating form */
+
+html[data-theme="dark"] .review-label,
+body.dark .review-label,
+.dark .review-label {
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .rating-star,
+body.dark .rating-star,
+.dark .rating-star {
+    background: #252e40;
+    border-color: #4a4352;
+    color: #64748b;
+}
+
+html[data-theme="dark"] .rating-star:hover,
+body.dark .rating-star:hover,
+.dark .rating-star:hover {
+    border-color: #c49b42;
+}
+
+html[data-theme="dark"] .rating-star.active,
+body.dark .rating-star.active,
+.dark .rating-star.active {
+    background: #3b321e;
+    border-color: #a8842f;
+    color: #fbbf24;
+}
+
+html[data-theme="dark"] .rating-caption,
+body.dark .rating-caption,
+.dark .rating-caption {
+    color: #fcd34d;
+}
+
+/* Textarea */
+
+html[data-theme="dark"] .review-textarea,
+body.dark .review-textarea,
+.dark .review-textarea {
+    background: #151e2d;
+    border-color: #3b475d;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .review-textarea::placeholder,
+body.dark .review-textarea::placeholder,
+.dark .review-textarea::placeholder {
+    color: #8996ab;
+}
+
+html[data-theme="dark"] .review-textarea:focus,
+body.dark .review-textarea:focus,
+.dark .review-textarea:focus {
+    background: #182234;
+    border-color: #9486ff;
+    box-shadow: 0 0 0 4px rgba(148, 134, 255, 0.12);
+}
+
+html[data-theme="dark"] .review-character-count,
+body.dark .review-character-count,
+.dark .review-character-count {
+    color: #8996ab;
+}
+
+/* Buttons */
+
+html[data-theme="dark"] .review-btn.primary,
+body.dark .review-btn.primary,
+.dark .review-btn.primary {
+    background: linear-gradient(135deg, #7561f6, #5148d8);
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .review-btn.secondary,
+body.dark .review-btn.secondary,
+.dark .review-btn.secondary {
+    background: #302b50;
+    border-color: #49416f;
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .review-btn.secondary:hover:not(:disabled),
+body.dark .review-btn.secondary:hover:not(:disabled),
+.dark .review-btn.secondary:hover:not(:disabled) {
+    background: #3a345f;
+}
+
+html[data-theme="dark"] .review-btn.danger,
+body.dark .review-btn.danger,
+.dark .review-btn.danger {
+    background: #40232d;
+    border-color: #743b4b;
+    color: #fda4af;
+}
+
+html[data-theme="dark"] .review-btn.danger:hover:not(:disabled),
+body.dark .review-btn.danger:hover:not(:disabled),
+.dark .review-btn.danger:hover:not(:disabled) {
+    background: #512936;
+}
+
+/* Review note */
+
+html[data-theme="dark"] .review-note,
+body.dark .review-note,
+.dark .review-note {
+    background: #202b43;
+    border-color: #37476d;
+    color: #c0cadb;
+}
+
+html[data-theme="dark"] .review-note span,
+body.dark .review-note span,
+.dark .review-note span {
+    color: #a5b4fc;
+}
+
+/* Existing review */
+
+html[data-theme="dark"] .my-review-top h3,
+body.dark .my-review-top h3,
+.dark .my-review-top h3 {
+    color: #e0dcff;
+}
+
+html[data-theme="dark"] .review-status.approved,
+body.dark .review-status.approved,
+.dark .review-status.approved {
+    background: #15372e;
+    color: #86efac;
+}
+
+html[data-theme="dark"] .review-status.pending,
+body.dark .review-status.pending,
+.dark .review-status.pending {
+    background: #40351b;
+    color: #fcd34d;
+}
+
+html[data-theme="dark"] .review-status.hidden,
+body.dark .review-status.hidden,
+.dark .review-status.hidden {
+    background: #40232d;
+    color: #fda4af;
+}
+
+html[data-theme="dark"] .review-stars,
+body.dark .review-stars,
+.dark .review-stars {
+    color: #fbbf24;
+}
+
+html[data-theme="dark"] .reviews-rating-summary strong,
+body.dark .reviews-rating-summary strong,
+.dark .reviews-rating-summary strong {
+    color: #e0dcff;
+}
+
+html[data-theme="dark"] .reviews-rating-summary span,
+body.dark .reviews-rating-summary span,
+.dark .reviews-rating-summary span {
+    color: #aab6ca;
+}
+
+html[data-theme="dark"] .my-review-comment,
+body.dark .my-review-comment,
+.dark .my-review-comment {
+    background: #151e2d;
+    border-color: #344055;
+    color: #d5dceb;
+}
+
+/* Loading */
+
+html[data-theme="dark"] .reviews-loading-card,
+body.dark .reviews-loading-card,
+.dark .reviews-loading-card {
+    background: #1b2434;
+    border-color: #344055;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);
+}
+
+html[data-theme="dark"] .reviews-loader,
+body.dark .reviews-loader,
+.dark .reviews-loader {
+    border-color: #3b365e;
+    border-top-color: #a29aff;
+}
+
+html[data-theme="dark"] .reviews-loading-card h2,
+body.dark .reviews-loading-card h2,
+.dark .reviews-loading-card h2 {
+    color: #e0dcff;
+}
+
+html[data-theme="dark"] .reviews-loading-card p,
+body.dark .reviews-loading-card p,
+.dark .reviews-loading-card p {
+    color: #aab6ca;
+}
+
+/* Footer */
+
+html[data-theme="dark"] .reviews-footer,
+body.dark .reviews-footer,
+.dark .reviews-footer {
+    color: #aab6ca;
+}
+
+html[data-theme="dark"] .reviews-footer a,
+body.dark .reviews-footer a,
+.dark .reviews-footer a {
+    color: #b4aaff;
+}
+
+/* Keyboard focus */
+
+html[data-theme="dark"] .rating-star:focus-visible,
+html[data-theme="dark"] .review-btn:focus-visible,
+html[data-theme="dark"] .reviews-back-btn:focus-visible,
+body.dark .rating-star:focus-visible,
+body.dark .review-btn:focus-visible,
+body.dark .reviews-back-btn:focus-visible,
+.dark .rating-star:focus-visible,
+.dark .review-btn:focus-visible,
+.dark .reviews-back-btn:focus-visible {
+    outline-color: rgba(196, 181, 253, 0.65);
+}
+
+/* Responsive dark mode border */
+
+@media (max-width: 900px) {
+
+    html[data-theme="dark"] .reviews-form-card,
+    body.dark .reviews-form-card,
+    .dark .reviews-form-card {
+        border-top-color: #344055;
+        border-left: none;
+    }
+}
+
 /* =========================================================
    TABLET
 ========================================================= */

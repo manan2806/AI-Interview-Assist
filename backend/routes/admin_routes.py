@@ -127,6 +127,7 @@ def admin_get_interviews(current_user):
                 {},
                 {
                     "_id": 1,
+                    "interview_code": 1,
                     "user_id": 1,
                     "job_role": 1,
                     "experience_level": 1,
@@ -155,6 +156,7 @@ def admin_get_interviews(current_user):
             interview_list.append(
                 {
                     "interview_id": str(interview["_id"]),
+                    "interview_code": interview.get("interview_code", ""),
                     "user_id": str(interview.get("user_id", "")),
                     "job_role": interview.get("job_role", ""),
                     "experience_level": interview.get("experience_level", ""),
