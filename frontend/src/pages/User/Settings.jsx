@@ -119,26 +119,25 @@ function Settings() {
     // ==========================================
     // HANDLE SETTINGS CHANGE
     // ==========================================
+
+
     const handleSettingChange = (field, value) => {
         setSettings((previousSettings) => ({
-            ...previousSettings, [field]:
+            ...previousSettings,
+            [field]:
                 field === "number_of_questions"
                     ? Number(value)
                     : value,
         }));
 
-        // Apply appearance changes immediately
-        if (field === "theme" && ["Light", "Dark"].includes(value)) {
-            setTheme(value);
-        }
         setSuccessMessage("");
         setErrorMessage("");
     };
 
+
     // ==========================================
     // HANDLE SAVE
     // ==========================================
-
     const handleSaveSettings = async () => {
         try {
             setSaving(true);
@@ -148,49 +147,47 @@ function Settings() {
             const data = await updateSettings(settings);
 
             if (!data?.success) {
-                setErrorMessage(data?.message || "Unable to save settings.");
-                return;
-            }
-
-            // Keep the global theme synchronized after a successful save
-            setTheme(settings.theme);
-
-            if (!data?.success) {
                 setErrorMessage(
-                    data?.message ||
-                    "Unable to save settings."
+                    data?.message || "Unable to save settings."
                 );
                 return;
             }
 
-            if (data?.settings) {
-                setSettings({
-                    interview_type:
-                        data.settings.interview_type || "Technical",
-                    difficulty:
-                        data.settings.difficulty || "Medium",
-                    number_of_questions:
-                        Number(data.settings.number_of_questions) || 10,
-                    theme: ["Light", "Dark"].includes(data.settings.theme)
-                        ? data.settings.theme
-                        : "Light",
+            // Use the settings returned by the backend when available.
+            const savedSettings = data?.settings || settings;
 
-                });
-            }
+            const savedTheme = ["Light", "Dark", "System"].includes(
+                savedSettings.theme
+            )
+                ? savedSettings.theme
+                : "Light";
+
+            setSettings({
+                interview_type:
+                    savedSettings.interview_type || "Technical",
+                difficulty:
+                    savedSettings.difficulty || "Medium",
+                number_of_questions:
+                    Number(savedSettings.number_of_questions) || 10,
+                theme: savedTheme,
+            });
+
+            // Apply the theme ONLY after the backend confirms success.
+            setTheme(savedTheme);
 
             setSuccessMessage("Settings saved successfully.");
         } catch (error) {
             console.error("Save Settings Error:", error);
 
-            const message =
+            setErrorMessage(
                 error?.response?.data?.message ||
-                "Unable to save settings. Please try again.";
-
-            setErrorMessage(message);
+                "Unable to save settings. Please try again."
+            );
         } finally {
             setSaving(false);
         }
     };
+
 
     // ==========================================
     // HANDLE CHANGE PASSWORD
@@ -704,6 +701,9 @@ function Settings() {
                                         </button>
                                     ))}
                                 </div>
+                                <p className="admin-settings-note">
+                                    Select your preferred theme and click Save Changes to apply it.
+                                </p>
                             </div>
                         )}
 

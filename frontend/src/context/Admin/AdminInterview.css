@@ -1,20 +1,44 @@
+/* =========================================================
+   ADMIN INTERVIEW MANAGEMENT
+   Light + Dark Theme | Responsive | Filter Dropdown Fix
+========================================================= */
+
 .admin-interviews-page {
+    --ai-bg: #f5f7fc;
+    --ai-card: #ffffff;
+    --ai-text: #172033;
+    --ai-muted: #64748b;
+    --ai-border: #e2e8f0;
+    --ai-input: #ffffff;
+    --ai-input-bg: #f8fafc;
+    --ai-hover: #f1f5ff;
+    --ai-primary: #4f46e5;
+    --ai-primary-hover: #4338ca;
+    --ai-shadow: 0 5px 24px rgb(15 23 42 / 5%);
+
     min-height: 100vh;
     padding: 32px;
-    color: #1e293b;
-    background: #f8fafc;
+    color: var(--ai-text);
+    background: var(--ai-bg);
+    font-family: Inter, Arial, sans-serif;
+    box-sizing: border-box;
 }
 
-.admin-interviews-header,
-.admin-interviews-toolbar,
-.admin-interviews-table-heading {
+.admin-interviews-page *,
+.admin-interviews-page *::before,
+.admin-interviews-page *::after {
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.admin-interviews-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-}
-
-.admin-interviews-header {
+    gap: 20px;
     margin-bottom: 28px;
 }
 
@@ -28,302 +52,247 @@
 
 .admin-interviews-header h1 {
     margin: 0 0 8px;
-    font-size: clamp(26px, 4vw, 36px);
+    color: var(--ai-text);
+    font-size: clamp(26px, 4vw, 38px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .admin-interviews-header p:last-child {
     margin: 0;
-    color: #64748b;
+    color: var(--ai-muted);
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 .admin-interviews-back {
-    padding: 11px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 12px 18px;
     color: #4338ca;
-    text-decoration: none;
-    font-weight: 700;
     background: #eef2ff;
-    border-radius: 10px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 750;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.admin-interviews-toolbar,
-.admin-interviews-table-card {
-    padding: 20px;
-    margin-bottom: 24px;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    box-shadow: 0 5px 20px rgb(15 23 42 / 4%);
+.admin-interviews-back:hover {
+    background: #e0e7ff;
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.admin-interviews-toolbar {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    width: 100%;
+    min-width: 0;
+    padding: 20px 22px;
+    margin-bottom: 26px;
+
+    background: var(--ai-card);
+    border: 1px solid var(--ai-border);
+    border-radius: 18px;
+    box-shadow: var(--ai-shadow);
 }
 
 .admin-interviews-count {
     display: flex;
+    flex: 0 0 140px;
     flex-direction: column;
     gap: 5px;
-    min-width: 120px;
 }
 
-.admin-interviews-count span,
-.admin-interviews-table-heading span {
-    color: #64748b;
+.admin-interviews-count span {
+    color: var(--ai-muted);
     font-size: 13px;
 }
 
 .admin-interviews-count strong {
-    font-size: 27px;
-}
-
-.admin-interviews-search,
-.admin-interviews-filter {
-    min-width: 160px;
-    padding: 11px 12px;
-    color: #334155;
-    background: #fff;
-    border: 1px solid #cbd5e1;
-    border-radius: 9px;
-    outline: none;
+    color: var(--ai-text);
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
 }
 
 .admin-interviews-search {
-    flex: 1;
-}
-
-.admin-interviews-search:focus,
-.admin-interviews-filter:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgb(99 102 241 / 12%);
-}
-
-.admin-interviews-refresh,
-.admin-interviews-error button {
-    padding: 11px 16px;
-    color: #fff;
-    font-weight: 700;
-    background: #4f46e5;
-    border: none;
-    border-radius: 9px;
-    cursor: pointer;
-}
-
-.admin-interviews-refresh:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.admin-interviews-table-heading {
-    margin-bottom: 18px;
-}
-
-.admin-interviews-table-heading h2 {
-    margin: 0;
-    font-size: 19px;
-}
-
-.admin-interviews-table-wrapper {
-    overflow-x: auto;
-}
-
-.admin-interviews-table {
+    flex: 1 1 240px;
     width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    white-space: nowrap;
+    min-width: 0;
+    min-height: 46px;
+    padding: 12px 15px;
+
+    color: var(--ai-text);
+    background: var(--ai-input);
+    border: 1px solid #cbd5e1;
+    border-radius: 11px;
+    outline: none;
+
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.admin-interviews-table th {
-    font-weight: 800;
-    padding: 14px 12px;
-    color: #64748b;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: #f8fafc;
+.admin-interviews-search::placeholder {
+    color: #94a3b8;
 }
 
-.admin-interviews-table td {
-    padding: 15px 12px;
-    border-bottom: 1px solid #edf2f7;
-    font-size: 13px;
+.admin-interviews-search:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 13%);
 }
 
-.admin-interviews-table tbody tr:hover {
-    background: #f8faff;
-}
+/* =========================================================
+   FILTER BUTTON
+========================================================= */
 
-.admin-interviews-status {
-    display: inline-block;
-    padding: 5px 9px;
-    font-size: 11px;
-    font-weight: 800;
-    border-radius: 20px;
-    background: #f1f5f9;
-    color: #475569;
-}
-
-.admin-interviews-status.status-completed {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.admin-interviews-status.status-in_progress {
-    background: #dbeafe;
-    color: #1d4ed8;
-}
-
-.admin-interviews-status.status-created {
-    background: #ede9fe;
-    color: #6d28d9;
-}
-
-.admin-interviews-status.status-evaluation_pending {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.admin-interviews-id {
-    display: inline-block;
-    max-width: 145px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-}
-
-.admin-interviews-empty {
-    padding: 40px 16px;
-    color: #64748b;
-    text-align: center;
-}
-
-.admin-interviews-error {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 15px;
-    margin-bottom: 20px;
-    color: #991b1b;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 12px;
-}
-
-@media (max-width: 760px) {
-    .admin-interviews-page {
-        padding: 18px 12px;
-    }
-
-    .admin-interviews-header,
-    .admin-interviews-toolbar {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .admin-interviews-search,
-    .admin-interviews-filter {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .admin-interviews-back {
-        align-self: flex-start;
-    }
-
-    .admin-interviews-table-card {
-        padding: 14px;
-    }
-}
-
-
-/* FILTER DROPDOWN */
 .admin-filter-wrapper {
     position: relative;
     display: inline-flex;
-    flex-shrink: 0;
-    z-index: 50;
+    flex: 0 0 auto;
+    min-width: 0;
+    z-index: 20;
 }
 
 .admin-filter-button {
-    min-height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 11px 15px;
-    color: #334155;
-    background: #fff;
-    border: 1px solid #cbd5e1;
-    border-radius: 9px;
+
+    min-height: 46px;
+    padding: 11px 14px;
+
+    color: var(--ai-text);
+    background: var(--ai-input);
+    border: 1px solid var(--ai-border);
+    border-radius: 11px;
+
+    font-family: inherit;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 750;
+    white-space: nowrap;
     cursor: pointer;
-    transition: all 0.2s ease;
+
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .admin-filter-button:hover,
 .admin-filter-button.active {
     color: #4338ca;
     background: #eef2ff;
-    border-color: #6366f1;
+    border-color: #a5b4fc;
 }
 
-.admin-filter-button:focus-visible {
-    outline: 3px solid rgb(99 102 241 / 20%);
-    outline-offset: 2px;
+.admin-filter-button:focus-visible,
+.admin-filter-clear:focus-visible {
+    outline: 3px solid rgb(99 102 241 / 25%);
+    outline-offset: 3px;
 }
 
-/* ACTIVE FILTER LABEL */
 .admin-filter-count {
-    padding: 3px 7px;
-    color: #fff;
+    padding: 4px 7px;
+    color: #ffffff;
     background: #4f46e5;
     border-radius: 20px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
-/* DROPDOWN PANEL */
+/* =========================================================
+   FILTER DROPDOWN - OVERLAP FIX
+========================================================= */
+
 .admin-filter-dropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 280px;
-    max-width: calc(100vw - 40px);
+
+    width: 320px;
+    max-width: calc(100vw - 32px);
     max-height: min(70vh, 520px);
-    overflow-y: auto;
+
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    padding: 18px;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    box-shadow: 0 12px 35px rgb(15 23 42 / 14%);
+    align-items: stretch;
+    gap: 18px;
+
+    padding: 20px;
+    margin: 0;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    color: var(--ai-text);
+    background: var(--ai-card);
+    border: 1px solid var(--ai-border);
+    border-radius: 15px;
+    box-shadow: 0 16px 45px rgb(15 23 42 / 18%);
+
+    z-index: 1000;
+    isolation: isolate;
+    scrollbar-width: thin;
+
     animation: adminFilterAppear 0.18s ease-out;
 }
 
-/* HEADER */
+/* Dropdown header */
+
 .admin-filter-dropdown-header {
+    position: static;
+
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e2e8f0;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 0 14px;
+
+    border-bottom: 1px solid var(--ai-border);
 }
 
 .admin-filter-dropdown-header strong {
-    color: #1e293b;
+    color: var(--ai-text);
     font-size: 15px;
     font-weight: 800;
+    line-height: 1.4;
 }
 
+/* Clear filters */
+
 .admin-filter-clear {
+    position: static;
+    flex: 0 0 auto;
+
     padding: 6px 8px;
     color: #4f46e5;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: 7px;
+
+    font-family: inherit;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 750;
+    white-space: nowrap;
     cursor: pointer;
 }
 
@@ -331,44 +300,73 @@
     background: #eef2ff;
 }
 
-/* LABELS */
-.admin-filter-dropdown label {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    color: #475569;
-    font-size: 12px;
-    font-weight: 700;
-}
+/* Labels: one separate row per filter */
 
-/* SELECT INPUTS */
-.admin-filter-dropdown select {
+.admin-filter-dropdown>label {
+    position: static;
+
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 8px;
+
     width: 100%;
-    min-height: 40px;
-    box-sizing: border-box;
-    padding: 9px 11px;
-    color: #334155;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    outline: none;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+
+    margin: 0;
+    padding: 0;
+
+    color: var(--ai-text);
     font-family: inherit;
     font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    transform: none;
+}
+
+/* Select controls */
+
+.admin-filter-dropdown>label>select {
+    position: static;
+    display: block;
+    flex: 0 0 auto;
+
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 43px;
+    min-height: 43px;
+
+    margin: 0;
+    padding: 0 12px;
+
+    color: var(--ai-text);
+    background: var(--ai-input-bg);
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    outline: none;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: normal;
+
+    box-sizing: border-box;
     cursor: pointer;
-    transition: border-color 0.2s ease,
-        box-shadow 0.2s ease;
 }
 
-.admin-filter-dropdown select:hover {
-    border-color: #a5b4fc;
-}
-
-.admin-filter-dropdown select:focus {
+.admin-filter-dropdown>label>select:focus {
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgb(99 102 241 / 12%);
 }
 
-/* ANIMATION */
+/* Dropdown animation */
+
 @keyframes adminFilterAppear {
     from {
         opacity: 0;
@@ -381,24 +379,456 @@
     }
 }
 
-/* RESPONSIVE */
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
+
+.admin-interviews-refresh,
+.admin-interviews-error button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 46px;
+    padding: 12px 17px;
+
+    color: #ffffff;
+    background: var(--ai-primary);
+    border: 1px solid transparent;
+    border-radius: 11px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-interviews-refresh:hover,
+.admin-interviews-error button:hover {
+    background: var(--ai-primary-hover);
+}
+
+.admin-interviews-refresh:disabled,
+.admin-interviews-error button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.admin-interviews-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 16px;
+    margin-bottom: 22px;
+
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+}
+
+.admin-interviews-error span {
+    overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.admin-interviews-table-card {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    min-width: 0;
+    padding: 22px;
+
+    background: var(--ai-card);
+    border: 1px solid var(--ai-border);
+    border-radius: 18px;
+    box-shadow: var(--ai-shadow);
+}
+
+.admin-interviews-table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.admin-interviews-table-heading h2 {
+    margin: 0;
+    color: var(--ai-text);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.admin-interviews-table-heading span {
+    color: var(--ai-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* Horizontal scroll only for table */
+
+.admin-interviews-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+}
+
+.admin-interviews-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.admin-interviews-table th {
+    padding: 15px 14px;
+
+    color: #64748b;
+    background: #f8fafc;
+
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    border-bottom: 1px solid var(--ai-border);
+}
+
+.admin-interviews-table td {
+    padding: 16px 14px;
+
+    color: var(--ai-text);
+    font-size: 13px;
+
+    border-bottom: 1px solid var(--ai-border);
+}
+
+.admin-interviews-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.admin-interviews-table tbody tr:hover {
+    background: var(--ai-hover);
+}
+
+.admin-interviews-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-interviews-id {
+    display: inline-block;
+    max-width: 145px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+/* Status badges */
+
+.admin-interviews-table .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 100%;
+    padding: 5px 10px;
+
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid transparent;
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.admin-interviews-table .status-badge.completed {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.admin-interviews-table .status-badge.in_progress {
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+.admin-interviews-table .status-badge.created {
+    color: #6d28d9;
+    background: #ede9fe;
+}
+
+.admin-interviews-table .status-badge.evaluation_pending {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.admin-interviews-empty {
+    padding: 42px 16px;
+    color: var(--ai-muted);
+    text-align: center;
+    font-size: 14px;
+}
+
+/* =========================================================
+   DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .admin-interviews-page {
+    --ai-bg: #0b1220;
+    --ai-card: #172235;
+    --ai-text: #f1f5f9;
+    --ai-muted: #b3c0d3;
+    --ai-border: #344258;
+    --ai-input: #111c2e;
+    --ai-input-bg: #111c2e;
+    --ai-hover: #202e45;
+    --ai-primary: #6366f1;
+    --ai-primary-hover: #4f46e5;
+    --ai-shadow: 0 5px 24px rgb(0 0 0 / 16%);
+
+    color: var(--ai-text);
+    background: var(--ai-bg);
+}
+
+html[data-theme="dark"] .admin-interviews-eyebrow {
+    color: #a5b4fc;
+}
+
+html[data-theme="dark"] .admin-interviews-back {
+    color: #c7d2fe;
+    background: #252c4b;
+}
+
+html[data-theme="dark"] .admin-interviews-back:hover {
+    background: #343b68;
+}
+
+html[data-theme="dark"] .admin-interviews-search,
+html[data-theme="dark"] .admin-filter-button {
+    color: var(--ai-text);
+    background: var(--ai-input);
+    border-color: var(--ai-border);
+}
+
+html[data-theme="dark"] .admin-interviews-search::placeholder {
+    color: #93a4bc;
+}
+
+html[data-theme="dark"] .admin-filter-button:hover,
+html[data-theme="dark"] .admin-filter-button.active {
+    color: #c7d2fe;
+    background: #282e50;
+    border-color: #818cf8;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown {
+    color: var(--ai-text);
+    background: #172235;
+    border-color: #40506a;
+    box-shadow: 0 18px 50px rgb(0 0 0 / 45%);
+}
+
+html[data-theme="dark"] .admin-filter-dropdown-header {
+    border-bottom-color: #344258;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown-header strong,
+html[data-theme="dark"] .admin-filter-dropdown>label {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .admin-filter-clear {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-filter-clear:hover {
+    background: #292d4e;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown>label>select {
+    color: #f1f5f9;
+    background: #0f192a;
+    border-color: #46566e;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] .admin-filter-dropdown>label>select option {
+    color: #f1f5f9;
+    background: #172235;
+}
+
+html[data-theme="dark"] .admin-interviews-table th {
+    color: #c3cede;
+    background: #111c2e;
+    border-bottom-color: var(--ai-border);
+}
+
+html[data-theme="dark"] .admin-interviews-table td {
+    color: #e2e8f0;
+    border-bottom-color: #344258;
+}
+
+html[data-theme="dark"] .admin-interviews-table tbody tr:hover {
+    background: #202e45;
+}
+
+html[data-theme="dark"] .admin-interviews-table .status-badge {
+    color: #dbe4f0;
+    background: #344258;
+}
+
+html[data-theme="dark"] .admin-interviews-table .status-badge.completed {
+    color: #bbf7d0;
+    background: #14532d;
+}
+
+html[data-theme="dark"] .admin-interviews-table .status-badge.in_progress {
+    color: #bfdbfe;
+    background: #1e3a8a;
+}
+
+html[data-theme="dark"] .admin-interviews-table .status-badge.created {
+    color: #ddd6fe;
+    background: #4c1d95;
+}
+
+html[data-theme="dark"] .admin-interviews-table .status-badge.evaluation_pending {
+    color: #fde68a;
+    background: #78350f;
+}
+
+html[data-theme="dark"] .admin-interviews-error {
+    color: #fecaca;
+    background: #35191f;
+    border-color: #7f303b;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+    .admin-interviews-page {
+        padding: 24px;
+    }
+
+    .admin-interviews-toolbar {
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .admin-interviews-count {
+        flex-basis: 120px;
+    }
+
+    .admin-interviews-search {
+        flex-basis: 220px;
+    }
+}
+
 @media (max-width: 760px) {
+    .admin-interviews-page {
+        padding: 18px 12px;
+    }
+
+    .admin-interviews-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .admin-interviews-header p:last-child {
+        font-size: 14px;
+    }
+
+    .admin-interviews-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+        padding: 16px;
+    }
+
+    .admin-interviews-count {
+        flex: 0 0 auto;
+    }
+
+    .admin-interviews-search {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+
     .admin-filter-wrapper {
+        display: flex;
         width: 100%;
     }
 
     .admin-filter-button {
         width: 100%;
         justify-content: space-between;
-        box-sizing: border-box;
     }
 
     .admin-filter-dropdown {
         left: 0;
         right: auto;
+
         width: 100%;
         max-width: 100%;
-        box-sizing: border-box;
+        max-height: 65vh;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .admin-interviews-refresh {
+        width: 100%;
+    }
+
+    .admin-interviews-table-card {
+        padding: 16px 12px;
+    }
+
+    .admin-interviews-table-heading h2 {
+        font-size: 17px;
+    }
+
+    .admin-interviews-table {
+        min-width: 850px;
+    }
+}
+
+@media (max-width: 400px) {
+    .admin-interviews-page {
+        padding: 14px 9px;
+    }
+
+    .admin-filter-dropdown {
+        padding: 13px;
+    }
+
+    .admin-interviews-table-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
     }
 }
 
@@ -408,209 +838,8 @@
     }
 
     .admin-filter-button,
-    .admin-filter-dropdown select {
+    .admin-interviews-back,
+    .admin-interviews-refresh {
         transition: none;
     }
-}
-
-
-/* ==========================================
-   DARK THEME - ADMIN INTERVIEWS
-========================================== */
-html[data-theme="dark"] .admin-interviews-page {
-    color: #e2e8f0;
-    background: #0f172a;
-}
-
-/* Header */
-html[data-theme="dark"] .admin-interviews-eyebrow {
-    color: #a5b4fc;
-}
-
-html[data-theme="dark"] .admin-interviews-header h1,
-html[data-theme="dark"] .admin-interviews-table-heading h2 {
-    color: #f8fafc;
-}
-
-html[data-theme="dark"] .admin-interviews-header p:last-child {
-    color: #cbd5e1;
-}
-
-/* Back button */
-html[data-theme="dark"] .admin-interviews-back {
-    color: #c7d2fe;
-    background: #252449;
-}
-
-html[data-theme="dark"] .admin-interviews-back:hover {
-    color: #ffffff;
-    background: #4338ca;
-}
-
-/* Toolbar and table cards */
-html[data-theme="dark"] .admin-interviews-toolbar,
-html[data-theme="dark"] .admin-interviews-table-card {
-    color: #e2e8f0;
-    background: #1e293b;
-    border-color: #334155;
-    box-shadow: 0 5px 20px rgb(0 0 0 / 15%);
-}
-
-/* Count and table heading description */
-html[data-theme="dark"] .admin-interviews-count span,
-html[data-theme="dark"] .admin-interviews-table-heading span {
-    color: #cbd5e1;
-}
-
-html[data-theme="dark"] .admin-interviews-count strong {
-    color: #c4b5fd;
-}
-
-/* Search and filter inputs */
-html[data-theme="dark"] .admin-interviews-search,
-html[data-theme="dark"] .admin-interviews-filter {
-    color: #f1f5f9;
-    background: #0f172a;
-    border-color: #475569;
-}
-
-html[data-theme="dark"] .admin-interviews-search::placeholder {
-    color: #94a3b8;
-}
-
-html[data-theme="dark"] .admin-interviews-search:focus,
-html[data-theme="dark"] .admin-interviews-filter:focus {
-    border-color: #818cf8;
-}
-
-/* Refresh button */
-html[data-theme="dark"] .admin-interviews-refresh {
-    color: #ffffff;
-    background: #4f46e5;
-}
-
-/* Table */
-html[data-theme="dark"] .admin-interviews-table th {
-    color: #cbd5e1;
-    background: #0f172a;
-}
-
-html[data-theme="dark"] .admin-interviews-table td {
-    color: #e2e8f0;
-    border-bottom-color: #334155;
-}
-
-html[data-theme="dark"] .admin-interviews-table tbody tr:hover {
-    background: #283449;
-}
-
-html[data-theme="dark"] .admin-interviews-table tbody tr:hover td {
-    color: #ffffff;
-}
-
-/* Status badges */
-html[data-theme="dark"] .admin-interviews-status {
-    color: #e2e8f0;
-    background: #334155;
-}
-
-html[data-theme="dark"] .admin-interviews-status.status-completed {
-    color: #86efac;
-    background: #14532d;
-}
-
-html[data-theme="dark"] .admin-interviews-status.status-in_progress {
-    color: #bfdbfe;
-    background: #1e3a8a;
-}
-
-html[data-theme="dark"] .admin-interviews-status.status-created {
-    color: #ddd6fe;
-    background: #4c1d95;
-}
-
-html[data-theme="dark"] .admin-interviews-status.status-evaluation_pending {
-    color: #fde68a;
-    background: #78350f;
-}
-
-/* Empty state and error */
-html[data-theme="dark"] .admin-interviews-empty {
-    color: #cbd5e1;
-}
-
-html[data-theme="dark"] .admin-interviews-error {
-    color: #fecaca;
-    background: #450a0a;
-    border-color: #7f1d1d;
-}
-
-/* DARK THEME - FILTER DROPDOWN */
-html[data-theme="dark"] .admin-filter-button {
-    color: #e2e8f0;
-    background: #1e293b;
-    border-color: #475569;
-}
-
-html[data-theme="dark"] .admin-filter-button:hover,
-html[data-theme="dark"] .admin-filter-button.active {
-    color: #c4b5fd;
-    background: #312e63;
-    border-color: #818cf8;
-}
-
-html[data-theme="dark"] .admin-filter-count {
-    color: #ffffff;
-    background: #6366f1;
-}
-
-html[data-theme="dark"] .admin-filter-dropdown {
-    background: #1e293b;
-    border-color: #475569;
-    box-shadow: 0 12px 35px rgb(0 0 0 / 35%);
-}
-
-html[data-theme="dark"] .admin-filter-dropdown-header {
-    border-bottom-color: #475569;
-}
-
-html[data-theme="dark"] .admin-filter-dropdown-header strong {
-    color: #f8fafc;
-}
-
-html[data-theme="dark"] .admin-filter-clear {
-    color: #c4b5fd;
-}
-
-html[data-theme="dark"] .admin-filter-clear:hover {
-    background: #312e63;
-}
-
-html[data-theme="dark"] .admin-filter-dropdown label {
-    color: #cbd5e1;
-}
-
-html[data-theme="dark"] .admin-filter-dropdown select {
-    color: #f1f5f9;
-    background: #0f172a;
-    border-color: #475569;
-}
-
-html[data-theme="dark"] .admin-filter-dropdown select:focus {
-    border-color: #818cf8;
-}
-
-/* Dropdown options */
-html[data-theme="dark"] .admin-filter-dropdown select option {
-    color: #f1f5f9;
-    background: #1e293b;
-}
-
-/* Keyboard focus */
-html[data-theme="dark"] .admin-filter-button:focus-visible,
-html[data-theme="dark"] .admin-filter-clear:focus-visible,
-html[data-theme="dark"] .admin-interviews-back:focus-visible,
-html[data-theme="dark"] .admin-interviews-refresh:focus-visible {
-    outline: 2px solid #a5b4fc;
-    outline-offset: 3px;
 }

@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import limiter
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
 from google_auth_oauthlib.flow import Flow
 import database, base64
@@ -126,6 +126,7 @@ def register():
             "email": email,
             "password": hashed_password,
             "role": role,
+            "created_at": datetime.now(timezone.utc).replace(tzinfo=None),
         }
 
         # Add profile fields only for normal users

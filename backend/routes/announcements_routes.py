@@ -431,6 +431,28 @@ def get_user_announcements():
     activate_due_announcements()
 
     now = utc_now()
+    user_id = str(user.get("user_id", ""))
+
+    # User registration date
+    registered_at = user.get("created_at")
+
+    # Support timezone-aware and naive datetimes
+    if isinstance(registered_at, datetime) and registered_at.tzinfo:
+        registered_at = registered_at.astimezone(timezone.utc).replace(tzinfo=None)
+
+    # If registration date is missing, don't expose old announcements.
+    # Return no announcements until the registration date is corrected.
+    if not isinstance(registered_at, datetime):
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "announcements": [],
+                    "unread_count": 0,
+                }
+            ),
+            200,
+        )
 
     items = list(
         announcements.find(
@@ -444,14 +466,26 @@ def get_user_announcements():
         ).sort("publish_at", -1)
     )
 
-    result = [
-        serialize_announcement(
-            item,
-            user_id=str(user.get("user_id", "")),
-        )
-        for item in items
-    ]
+    visible_items = []
 
+    for item in items:
+        published_at = item.get("publish_at")
+
+        # Older announcements may not have publish_at.
+        # For those, use created_at as a fallback.
+        if not isinstance(published_at, datetime):
+            published_at = item.get("created_at")
+
+        if not isinstance(published_at, datetime):
+            continue
+
+        if published_at.tzinfo:
+            published_at = published_at.astimezone(timezone.utc).replace(tzinfo=None)
+
+        if published_at >= registered_at:
+            visible_items.append(item)
+
+    result = [serialize_announcement(item, user_id=user_id) for item in visible_items]
     unread_count = sum(1 for item in result if not item["is_read"])
 
     return (
