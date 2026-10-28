@@ -189,6 +189,10 @@ function Reviews() {
                         {/* TOP BAR INSIDE THE MAIN CARD */}
                         <div className="reviews-topbar">
 
+                            <div className="reviews-top-label">
+                                <span>Your Feedback Matters</span>
+                            </div>
+
                             <Link
                                 to="/dashboard"
                                 className="reviews-back-btn"
@@ -200,10 +204,6 @@ function Reviews() {
                                     Back to Dashboard
                                 </span>
                             </Link>
-
-                            <div className="reviews-top-label">
-                                <span>Your Feedback Matters</span>
-                            </div>
 
                         </div>
 

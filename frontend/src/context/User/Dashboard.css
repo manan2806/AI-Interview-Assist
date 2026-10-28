@@ -1620,6 +1620,23 @@ html[data-theme="dark"] .dashboard-footer {
         width: 100%;
         box-sizing: border-box;
     }
+
+    .dashboard-mobile-menu-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .dashboard-mobile-menu-heading strong {
+        display: block;
+        width: 100%;
+    }
+
+    .dashboard-mobile-menu-heading span {
+        display: inline-block;
+        align-self: flex-start;
+    }
 }
 
 @media (max-width: 1000px) {
@@ -1978,5 +1995,257 @@ html[data-theme="dark"] .dashboard-footer {
     html body .dashboard-navbar .dashboard-menu-button {
         width: 40px;
         height: 40px;
+    }
+}
+
+/* Hide mobile menu on desktop */
+.dashboard-mobile-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .dashboard-navbar {
+        position: relative;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .dashboard-logo {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .dashboard-logo span {
+        font-size: 15px;
+    }
+
+    /* Hide desktop links */
+    .dashboard-nav-right {
+        display: none !important;
+    }
+
+    /* Show hamburger */
+    .dashboard-mobile-nav {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
+    .dashboard-menu-button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 1px solid #e1e5ef;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #25304a;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .dashboard-menu-button:hover {
+        background: #f3f0ff;
+    }
+
+    .dashboard-menu-icon {
+        font-size: 24px;
+        line-height: 1;
+    }
+
+    /* Notification badge on hamburger */
+    .dashboard-menu-notification-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 19px;
+        height: 19px;
+        padding: 0 5px;
+        box-sizing: border-box;
+        border: 2px solid #ffffff;
+        border-radius: 20px;
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    /* Dropdown menu */
+    .dashboard-mobile-dropdown {
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: min(310px, calc(100vw - 28px));
+        max-height: calc(100dvh - 110px);
+        padding: 12px;
+        overflow-y: auto;
+        box-sizing: border-box;
+        border: 1px solid #e3e6ee;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #172033;
+        box-shadow: 0 16px 45px rgba(15, 23, 42, 0.20);
+        animation: dashboard-menu-appear 0.18s ease-out;
+    }
+
+    @keyframes dashboard-menu-appear {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Menu heading */
+    .dashboard-mobile-menu-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 7px 13px;
+        margin-bottom: 5px;
+        border-bottom: 1px solid #e8eaf1;
+    }
+
+    .dashboard-mobile-menu-heading strong {
+        font-size: 15px;
+        font-weight: 800;
+        color: #172033;
+    }
+
+    .dashboard-mobile-menu-heading span {
+        padding: 5px 8px;
+        border-radius: 20px;
+        background: #f0edff;
+        color: #6355d1;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    /* Menu links and buttons */
+    .dashboard-mobile-dropdown>a,
+    .dashboard-mobile-dropdown>button {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 11px;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: transparent;
+        color: #25304a;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dashboard-mobile-dropdown>a:hover {
+        border-color: #dedbff;
+        background: #f3f1ff;
+        color: #5d52d8;
+    }
+
+    /* Keep icons aligned */
+    .dashboard-mobile-dropdown>a>span:first-child,
+    .dashboard-mobile-dropdown>button>span:first-child {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 23px;
+        flex-shrink: 0;
+        font-size: 17px;
+    }
+
+    /* Announcements icon and badge */
+    .dashboard-mobile-bell {
+        position: relative;
+    }
+
+    .dashboard-mobile-notification-badge {
+        position: absolute;
+        top: -9px;
+        right: -10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 3px;
+        box-sizing: border-box;
+        border: 1px solid #ffffff;
+        border-radius: 20px;
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    /* Logout */
+    .dashboard-mobile-dropdown>button {
+        margin-top: 6px;
+        border-color: #fecaca;
+        background: #fff1f2;
+        color: #b91c1c;
+    }
+
+    .dashboard-mobile-dropdown>button:hover {
+        background: #ffe4e6;
+    }
+}
+
+@media (max-width: 380px) {
+    .dashboard-navbar {
+        gap: 8px;
+    }
+
+    .dashboard-logo span {
+        font-size: 13px;
+    }
+
+    .dashboard-menu-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .dashboard-mobile-dropdown {
+        right: -4px;
+        width: calc(100vw - 24px);
+        padding: 10px;
+    }
+
+    .dashboard-mobile-dropdown>a,
+    .dashboard-mobile-dropdown>button {
+        min-height: 42px;
+        padding: 9px;
+        font-size: 12px;
     }
 }

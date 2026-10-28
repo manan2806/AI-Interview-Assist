@@ -783,3 +783,36 @@ html[data-theme="dark"] .admin-profile-save-btn:focus-visible,
 html[data-theme="dark"] .admin-profile-cancel-btn:focus-visible {
     outline-color: #a5b4fc;
 }
+
+
+/* ==========================================
+   ADMIN PROFILE - MOBILE FULL-WIDTH BACK BUTTON
+========================================== */
+
+@media (max-width: 560px) {
+    .admin-profile-heading {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .admin-profile-back-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        align-self: stretch;
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        box-sizing: border-box;
+
+        margin-top: 0;
+        padding: 0 12px;
+
+        border-radius: 10px;
+        font-size: 13px;
+        text-align: center;
+    }
+}

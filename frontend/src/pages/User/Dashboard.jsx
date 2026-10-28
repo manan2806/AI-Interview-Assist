@@ -328,6 +328,11 @@ function Dashboard() {
                     {mobileMenuOpen && (
                         <div className="dashboard-mobile-dropdown">
 
+                            <div className="dashboard-mobile-menu-heading">
+                                <strong>My Dashboard</strong>
+                                <span>User Panel</span>
+                            </div>
+
                             {/* ANNOUNCEMENTS */}
                             <Link
                                 to="/announcements"
@@ -346,6 +351,15 @@ function Dashboard() {
                                 <span>Announcements</span>
                             </Link>
 
+                            {/* DASHBOARD */}
+                            <Link
+                                to="/dashboard"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>🏠</span>
+                                <span>Dashboard</span>
+                            </Link>
+
                             {/* PROFILE */}
                             <Link
                                 to="/profile"
@@ -353,6 +367,24 @@ function Dashboard() {
                             >
                                 <span>👤</span>
                                 <span>Profile</span>
+                            </Link>
+
+                            {/* INTERVIEW HISTORY */}
+                            <Link
+                                to="/interview/history"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>📋</span>
+                                <span>Interview History</span>
+                            </Link>
+
+                            {/* WRITE A REVIEW */}
+                            <Link
+                                to="/reviews"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span>⭐</span>
+                                <span>Write a Review</span>
                             </Link>
 
                             {/* SETTINGS */}

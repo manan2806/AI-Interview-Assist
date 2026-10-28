@@ -262,7 +262,7 @@ function Profile() {
                         className="result-back-btn"
                         onClick={() => navigate(-1)}
                     >
-                        Back
+                        Dashboard
                     </button>
 
                 </div>

@@ -906,13 +906,6 @@ body.dark .admin-interviews-page .admin-interviews-error {
         margin-bottom: 19px;
     }
 
-    .admin-interviews-back-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        font-size: 18px;
-    }
-
     .admin-interviews-heading h1 {
         font-size: 22px;
     }
@@ -1033,5 +1026,67 @@ body.dark .admin-interviews-page .admin-interviews-error {
     .admin-interviews-page .admin-filter-dropdown {
         width: calc(100vw - 32px);
         padding: 14px;
+    }
+}
+
+/* Mobile: Full-width Dashboard Button */
+@media (max-width: 600px) {
+    .admin-interviews-heading {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding-top: 0;
+    }
+
+    .admin-interviews-back-btn {
+        position: static;
+        order: 2;
+        display: flex;
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        min-height: 42px;
+        box-sizing: border-box;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0;
+        padding: 0 12px;
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .admin-interviews-refresh-btn {
+        order: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        margin-left: 0;
+        padding: 0 14px;
+        box-sizing: border-box;
+        border-radius: 10px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .admin-interviews-page .admin-filter-wrapper {
+        order: 4;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .admin-interviews-page .admin-filter-button {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .admin-interviews-page .admin-filter-dropdown {
+        right: auto;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
     }
 }
