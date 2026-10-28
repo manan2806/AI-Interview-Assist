@@ -432,12 +432,10 @@ def get_user_announcements():
 
     if not user:
         return (
-            jsonify(
-                {
-                    "success": False,
-                    "message": "User account not found.",
-                }
-            ),
+            jsonify({
+                "success": False,
+                "message": "User account not found.",
+            }),
             404,
         )
 
@@ -446,69 +444,81 @@ def get_user_announcements():
     now = utc_now()
     user_id = str(user.get("user_id", ""))
 
+    def normalize_datetime(value):
+        """Convert datetime or ISO date string to UTC-naive datetime."""
+        if isinstance(value, str):
+            try:
+                value = datetime.fromisoformat(
+                    value.replace("Z", "+00:00")
+                )
+            except (ValueError, TypeError):
+                return None
+
+        if not isinstance(value, datetime):
+            return None
+
+        if value.tzinfo is not None:
+            value = value.astimezone(timezone.utc).replace(tzinfo=None)
+
+        return value
+
     # User registration date
-    registered_at = user.get("created_at")
+    registered_at = normalize_datetime(user.get("created_at"))
 
-    # Support timezone-aware and naive datetimes
-    if isinstance(registered_at, datetime) and registered_at.tzinfo:
-        registered_at = registered_at.astimezone(timezone.utc).replace(tzinfo=None)
-
-    # If registration date is missing, don't expose old announcements.
-    # Return no announcements until the registration date is corrected.
-    if not isinstance(registered_at, datetime):
+    # Without a valid registration date, don't expose announcements.
+    if registered_at is None:
         return (
-            jsonify(
-                {
-                    "success": True,
-                    "announcements": [],
-                    "unread_count": 0,
-                }
-            ),
+            jsonify({
+                "success": True,
+                "announcements": [],
+                "unread_count": 0,
+            }),
             200,
         )
 
+    # Fetch currently published announcements only.
     items = list(
-        announcements.find(
-            {
-                "status": "published",
-                "$or": [
-                    {"publish_at": None},
-                    {"publish_at": {"$lte": now}},
-                ],
-            }
-        ).sort("publish_at", -1)
+        announcements.find({
+            "status": "published",
+            "$or": [
+                {"publish_at": None},
+                {"publish_at": {"$lte": now}},
+            ],
+        }).sort("publish_at", -1)
     )
 
     visible_items = []
 
     for item in items:
-        published_at = item.get("publish_at")
+        # Prefer the actual publication/scheduled publication date.
+        published_at = normalize_datetime(item.get("publish_at"))
 
-        # Older announcements may not have publish_at.
-        # For those, use created_at as a fallback.
-        if not isinstance(published_at, datetime):
-            published_at = item.get("created_at")
+        # Legacy announcements may not have publish_at.
+        if published_at is None:
+            published_at = normalize_datetime(item.get("created_at"))
 
-        if not isinstance(published_at, datetime):
+        if published_at is None:
             continue
 
-        if published_at.tzinfo:
-            published_at = published_at.astimezone(timezone.utc).replace(tzinfo=None)
-
+        # Only show announcements published at or after registration.
         if published_at >= registered_at:
             visible_items.append(item)
 
-    result = [serialize_announcement(item, user_id=user_id) for item in visible_items]
-    unread_count = sum(1 for item in result if not item["is_read"])
+    result = [
+        serialize_announcement(item, user_id=user_id)
+        for item in visible_items
+    ]
+
+    unread_count = sum(
+        1 for item in result if not item.get("is_read", False)
+    )
 
     return (
-        jsonify(
-            {
-                "success": True,
-                "announcements": result,
-                "unread_count": unread_count,
-            }
-        ),
+        jsonify({
+            "success": True,
+            "announcements": result,
+            "unread_count": unread_count,
+        }),
         200,
     )
 
