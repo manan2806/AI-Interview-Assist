@@ -7,8 +7,8 @@ from utils.auth_utils import admin_required
 from flask import send_file
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A3, landscape
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
@@ -69,11 +69,8 @@ REPORT_CONFIG = {
             "difficulty",
             "status",
             "overall_result.overall_score",
-            "overall_result.average_score",
             "overall_result.performance_level",
             "created_at",
-            "completed_at",
-            "duration",
         ],
         "date_field": "created_at",
         "exclude_admins": False,
@@ -140,8 +137,6 @@ def report_value(value):
 # REPORT FILE GENERATION HELPER
 # ==========================================
 def generate_report_file(report_type, fields, rows, export_format):
-    """Generate report in CSV, PDF, Word, or Excel format."""
-
     filename = f"{report_type}-report"
 
     # CSV
@@ -161,9 +156,11 @@ def generate_report_file(report_type, fields, rows, export_format):
     elif export_format == "pdf":
         buffer = io.BytesIO()
 
+        page_width, page_height = landscape(A3)
+
         document = SimpleDocTemplate(
             buffer,
-            pagesize=landscape(A4),
+            pagesize=landscape(A3),
             rightMargin=25,
             leftMargin=25,
             topMargin=25,
@@ -171,38 +168,106 @@ def generate_report_file(report_type, fields, rows, export_format):
         )
 
         styles = getSampleStyleSheet()
+
+        header_style = ParagraphStyle(
+            "ReportHeader",
+            parent=styles["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=7,
+            leading=9,
+            textColor=colors.white,
+            alignment=1,
+        )
+
+        cell_style = ParagraphStyle(
+            "ReportCell",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=7,
+            leading=9,
+            wordWrap="CJK",
+        )
+
         elements = [
             Paragraph(
-                f"{report_type.replace('-', ' ').title()} Report", styles["Title"]
+                f"{report_type.replace('-', ' ').title()} Report",
+                styles["Title"],
             ),
             Spacer(1, 15),
         ]
 
-        table_data = [fields]
+        header_labels = {
+            "interview_code": "Interview Code",
+            "user_id": "User ID",
+            "job_role": "Job Role",
+            "experience_level": "Experience Level",
+            "interview_type": "Interview Type",
+            "difficulty": "Difficulty",
+            "status": "Status",
+            "overall_result.overall_score": "Overall Score",
+            "overall_result.performance_level": "Performance Level",
+            "created_at": "Created At",
+        }
+
+        table_data = [
+            [
+                Paragraph(
+                    header_labels.get(field, field.replace("_", " ").title()),
+                    header_style,
+                )
+                for field in fields
+            ]
+        ]
 
         for row in rows:
             table_data.append(
                 [
                     Paragraph(
-                        str(value)
+                        str(value if value is not None else "")
                         .replace("&", "&amp;")
                         .replace("<", "&lt;")
                         .replace(">", "&gt;"),
-                        styles["BodyText"],
+                        cell_style,
                     )
                     for value in row
                 ]
             )
 
-        table = Table(table_data, repeatRows=1)
+        available_width = page_width - 50
+
+        if report_type == "interviews":
+            weights = [
+                1.1,  # Interview Code
+                0.9,  # User ID
+                1.5,  # Job Role
+                1.2,  # Experience Level
+                1.1,  # Interview Type
+                0.8,  # Difficulty
+                0.9,  # Status
+                0.9,  # Overall Score
+                1.3,  # Performance Level
+                1.5,  # Created At
+            ]
+        else:
+            weights = [1] * len(fields)
+
+        total_weight = sum(weights)
+
+        col_widths = [available_width * weight / total_weight for weight in weights]
+
+        table = Table(
+            table_data,
+            colWidths=col_widths,
+            repeatRows=1,
+            splitByRow=1,
+        )
+
         table.setStyle(
             TableStyle(
                 [
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5146d8")),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     (
                         "ROWBACKGROUNDS",
                         (0, 1),
@@ -212,7 +277,10 @@ def generate_report_file(report_type, fields, rows, export_format):
                             colors.HexColor("#f2f3f8"),
                         ],
                     ),
-                    ("PADDING", (0, 0), (-1, -1), 6),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
                 ]
             )
         )
@@ -221,7 +289,12 @@ def generate_report_file(report_type, fields, rows, export_format):
         document.build(elements)
 
         buffer.seek(0)
-        return buffer, "application/pdf", f"{filename}.pdf"
+
+        return (
+            buffer,
+            "application/pdf",
+            f"{filename}.pdf",
+        )
 
     # Word
     elif export_format == "docx":
