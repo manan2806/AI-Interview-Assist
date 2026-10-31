@@ -60,6 +60,7 @@ function AdminActivityLogs() {
     const [perPage] = useState(20);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
+    const [overallTotal, setOverallTotal] = useState(0);
 
     const fetchFilterOptions = useCallback(async () => {
         try {
@@ -105,6 +106,7 @@ function AdminActivityLogs() {
             const data = response.data;
             setActivities(data.activities || []);
             setTotal(data.total || 0);
+            setOverallTotal(data.overall_total || 0);
             setTotalPages(data.total_pages || 1);
         } catch (err) {
             const status = err?.response?.status;
@@ -205,7 +207,7 @@ function AdminActivityLogs() {
                 <div className="admin-interviews-summary-icon">📜</div>
                 <div className="admin-interviews-summary-info">
                     <span>Total Activity Logs</span>
-                    <strong>{total}</strong>
+                    <strong>{overallTotal.toLocaleString("en-IN")}</strong>
                 </div>
                 <div className="admin-interviews-search">
                     <span aria-hidden="true">⌕</span>
@@ -346,7 +348,9 @@ function AdminActivityLogs() {
                 <div className="admin-interviews-table-heading">
                     <div>
                         <h2>All Activity Logs</h2>
-                        <p>Showing {activities.length} of {total} activities</p>
+                        <p>
+                            Showing {total === 0 ? 0 : activities.length} of {overallTotal} activities
+                        </p>
                     </div>
 
                     <div className="activity-logs-heading-right">

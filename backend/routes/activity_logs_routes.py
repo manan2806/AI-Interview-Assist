@@ -136,8 +136,13 @@ def admin_get_activity_logs(current_user):
                 400,
             )
 
+        # TOTAL DATABASE RECORDS (WITHOUT FILTERS)
+        overall_total = activity_collection.count_documents({})
+
+        # TOTAL FILTERED RECORDS
         total = activity_collection.count_documents(filters)
 
+        # FETCH PAGINATED RECORDS
         logs = list(
             activity_collection.find(filters)
             .sort([("created_at", -1), ("_id", -1)])
@@ -151,6 +156,7 @@ def admin_get_activity_logs(current_user):
             jsonify(
                 {
                     "success": True,
+                    "overall_total": overall_total,
                     "total": total,
                     "page": page,
                     "per_page": per_page,
