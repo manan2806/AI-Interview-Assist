@@ -107,6 +107,22 @@ REPORT_CONFIG = {
         "date_field": "created_at",
         "exclude_admins": False,
     },
+    "activity-logs": {
+        "collection": "activity_logs",
+        "fields": [
+            "log_id",
+            "user_id",
+            "user_name",
+            "user_email",
+            "role",
+            "action",
+            "description",
+            "ip_address",
+            "created_at",
+        ],
+        "date_field": "created_at",
+        "exclude_admins": False,
+    },
 }
 
 

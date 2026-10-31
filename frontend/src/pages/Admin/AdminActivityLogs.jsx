@@ -348,15 +348,20 @@ function AdminActivityLogs() {
                         <h2>All Activity Logs</h2>
                         <p>Showing {activities.length} of {total} activities</p>
                     </div>
-                    {(search || activeFilterCount > 0) && (
-                        <button
-                            type="button"
-                            className="admin-interviews-reset-btn"
-                            onClick={clearFilters}
-                        >
-                            Reset filters
-                        </button>
-                    )}
+
+                    <div className="activity-logs-heading-right">
+                        <p>Page {page} of {totalPages}</p>
+
+                        {(search || activeFilterCount > 0) && (
+                            <button
+                                type="button"
+                                className="admin-interviews-reset-btn"
+                                onClick={clearFilters}
+                            >
+                                Reset filters
+                            </button>
+                        )}
+                    </div>
                 </div>
                 {error && (
                     <div className="admin-interviews-error" role="alert">
@@ -437,7 +442,6 @@ function AdminActivityLogs() {
                             </table>
                         </div>
                         <div className="activity-logs-pagination">
-                            <p>Page {page} of {totalPages}</p>
                             <div>
                                 <button
                                     type="button"
@@ -446,7 +450,9 @@ function AdminActivityLogs() {
                                 >
                                     ← Previous
                                 </button>
+
                                 <span>{page}</span>
+
                                 <button
                                     type="button"
                                     disabled={page >= totalPages}

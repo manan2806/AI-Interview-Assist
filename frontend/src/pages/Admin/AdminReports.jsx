@@ -34,6 +34,13 @@ const REPORTS = [
         icon: "⭐",
         color: "green",
     },
+    {
+        id: "activity-logs",
+        title: "Activity Logs Report",
+        description: "Export user and admin activities, login history, actions, IP addresses, and timestamps.",
+        icon: "📜",
+        color: "blue",
+    },
 ];
 
 function AdminReports() {
@@ -55,6 +62,7 @@ function AdminReports() {
         interviews: "csv",
         "problem-reports": "csv",
         reviews: "csv",
+        "activity-logs": "csv",
     });
 
     // ==========================================

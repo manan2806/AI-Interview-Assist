@@ -252,6 +252,18 @@
     font-size: 13px;
 }
 
+.activity-logs-heading-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.activity-logs-heading-right p {
+    margin: 0;
+    white-space: nowrap;
+}
+
 /* ==========================================
    ACTIVITY TABLE
 ========================================== */
@@ -455,55 +467,49 @@
 /* ==========================================
    PAGINATION
 ========================================== */
-.admin-activity-page .activity-logs-pagination {
+.activity-logs-pagination {
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 20px 22px;
-    border-top: 1px solid #edf0f5;
+    width: 100%;
+    margin-top: 25px;
 }
 
-.admin-activity-page .activity-logs-pagination p {
-    margin: 0;
-    color: #778196;
-    font-size: 13px;
-}
-
-.admin-activity-page .activity-logs-pagination>div {
+.activity-logs-pagination>div {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
-.admin-activity-page .activity-logs-pagination button,
-.admin-activity-page .activity-logs-pagination span {
-    min-width: 38px;
-    height: 36px;
-    display: grid;
-    place-items: center;
-    padding: 0 12px;
-    border: 1px solid #e0e4ed;
-    border-radius: 7px;
-    background: white;
-    color: #39445a;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.admin-activity-page .activity-logs-pagination button {
+.activity-logs-pagination button {
+    padding: 9px 18px;
+    border: 1px solid #d8ddeb;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
+    transition: 0.2s ease;
 }
 
-.admin-activity-page .activity-logs-pagination button:disabled {
-    opacity: 0.4;
+.activity-logs-pagination button:hover:not(:disabled) {
+    background: #5b4bdb;
+    color: #fff;
+    border-color: #5b4bdb;
+}
+
+.activity-logs-pagination button:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
 }
 
-.admin-activity-page .activity-logs-pagination span {
-    background: #6254d9;
-    border-color: #6254d9;
-    color: white;
+.activity-logs-pagination span {
+    min-width: 36px;
+    text-align: center;
+    font-weight: 700;
+    color: #5b4bdb;
 }
 
 /* ==========================================
@@ -778,6 +784,11 @@
 
     .admin-activity-page .admin-interviews-heading h1 {
         font-size: 27px;
+    }
+
+    .activity-logs-heading-right {
+        width: 100%;
+        justify-content: space-between;
     }
 
     .admin-activity-page .combined-toolbar {
