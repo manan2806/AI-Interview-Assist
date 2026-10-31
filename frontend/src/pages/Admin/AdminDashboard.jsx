@@ -273,11 +273,17 @@ function AdminDashboard() {
     // ==========================================
     // LOGOUT
     // ==========================================
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+    const handleLogout = async () => {
+        try {
+            await api.post("/api/logout");
+        } catch (err) {
+            console.error("Admin Logout Activity Error:", err);
+        } finally {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
 
-        navigate("/home", { replace: true });
+            navigate("/home", { replace: true });
+        }
     };
 
     // ==========================================
@@ -541,6 +547,14 @@ function AdminDashboard() {
                                 </Link>
 
                                 <Link
+                                    to="/admin-activity-logs"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span>📜</span>
+                                    <span>Activity Logs</span>
+                                </Link>
+
+                                <Link
                                     to="/admin-settings"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -797,6 +811,27 @@ function AdminDashboard() {
                                 <p>
                                     Export users, interviews, problem reports, and
                                     reviews as CSV files with optional date filters.
+                                </p>
+                            </div>
+
+                            <span className="admin-action-arrow">→</span>
+                        </Link>
+
+                        {/* ACTIVITY LOGS */}
+                        <Link
+                            to="/admin-activity-logs"
+                            className="admin-action-card"
+                        >
+                            <div className="admin-action-icon purple">
+                                📜
+                            </div>
+
+                            <div className="admin-action-content">
+                                <h3>Activity Logs</h3>
+                                <p>
+                                    Monitor login, logout, profile updates,
+                                    interview activities, and account deletions
+                                    of all users and administrators.
                                 </p>
                             </div>
 

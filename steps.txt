@@ -40,7 +40,7 @@
 17.18 Final UI polish + testing
 
 
-*** Extra STEP ***
+*** Extra STEP (In Future) ***
 1 — AI Avatar
 2 — Voice + Lip Sync + Eye Expressions
 3 — Support Diff. Language
@@ -51,3 +51,22 @@
 ✅ 1. Announcements & Broadcasts
 ✅ 2. Export & Reports Center
 3. User Activity Logs
+
+*** User Activity Logs Page Design ***
+All Activities        : Sabhi users ke combined logs.
+User Filter           : Particular user select karke logs dekho.
+Activity Filter       : Login, Logout, Interview, Profile Update etc.
+Date Filter           : Specific date ke logs.
+View Details          : Kisi activity ki complete details.
+Export                : CSV/Excel download.
+
+-> Implementation plan:
+1. MongoDB Activity Logs Collection Setup
+2. Activity Logs Backend API
+3. Automatically Record User Activities
+4. Admin Activity Logs Page (React)
+5. Individual User Activity Details
+6. Search, Filter & Pagination
+7. Export CSV / Excel
+8. CSS, Responsive Design & Dark Mode
+9. Testing

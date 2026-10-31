@@ -1,0 +1,836 @@
+/* ==========================================
+   ADMIN ACTIVITY LOGS
+   ADMIN INTERVIEW STYLE LAYOUT
+========================================== */
+.admin-activity-page {
+    min-height: 100vh;
+    padding: 35px 5%;
+    background: #f5f7fc;
+    color: #172033;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==========================================
+   PAGE HEADER
+========================================== */
+.admin-activity-page .admin-interviews-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.admin-activity-page .admin-interviews-heading h1 {
+    margin: 8px 0;
+    font-size: 32px;
+    font-weight: 800;
+    color: #172033;
+}
+
+.admin-activity-page .admin-interviews-heading p {
+    margin: 8px 0 0;
+    color: #68738a;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   TOOLBAR
+========================================== */
+.admin-activity-page .combined-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.admin-activity-page .admin-interviews-summary-icon {
+    flex-shrink: 0;
+}
+
+.admin-activity-page .admin-interviews-summary-info {
+    min-width: 125px;
+}
+
+.admin-activity-page .admin-interviews-summary-info span {
+    display: block;
+    margin-bottom: 5px;
+    color: #778196;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-activity-page .admin-interviews-summary-info strong {
+    color: #172033;
+    font-size: 23px;
+    font-weight: 800;
+}
+
+/* SEARCH */
+.admin-activity-page .admin-interviews-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 900px;
+}
+
+/* FILTER WRAPPER */
+.admin-activity-page .admin-filter-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    z-index: 20;
+}
+
+.admin-activity-page .admin-filter-button {
+    min-height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 15px;
+    border: 1px solid #dce1eb;
+    border-radius: 9px;
+    background: white;
+    color: #39445a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.admin-activity-page .admin-filter-button:hover,
+.admin-activity-page .admin-filter-button.active {
+    border-color: #7565e8;
+    color: #6254d9;
+    background: #f8f7ff;
+}
+
+.admin-activity-page .admin-filter-count {
+    padding: 4px 7px;
+    border-radius: 20px;
+    background: #eeecff;
+    color: #6254d9;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.admin-activity-page .admin-filter-chevron {
+    font-size: 9px;
+}
+
+/* FILTER DROPDOWN */
+.admin-activity-page .admin-filter-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 310px;
+    max-height: 75vh;
+    overflow-y: auto;
+    padding: 20px;
+    border: 1px solid #e5e7ef;
+    border-radius: 13px;
+    background: white;
+    box-shadow: 0 12px 35px rgba(25, 35, 60, 0.14);
+    z-index: 100;
+}
+
+.admin-activity-page .admin-filter-dropdown-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.admin-activity-page .admin-filter-dropdown-header h3 {
+    margin: 0;
+    color: #172033;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.admin-activity-page .admin-filter-dropdown-header p {
+    margin: 6px 0 0;
+    color: #7b8497;
+    font-size: 12px;
+}
+
+.admin-activity-page .admin-filter-clear {
+    padding: 5px 0;
+    border: none;
+    background: transparent;
+    color: #6254d9;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* FILTER FIELDS */
+.admin-activity-page .admin-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.admin-activity-page .admin-filter-field label {
+    color: #384258;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-activity-page .admin-filter-field input,
+.admin-activity-page .admin-filter-field select {
+    width: 100%;
+    height: 42px;
+    padding: 0 11px;
+    border: 1px solid #dce1eb;
+    border-radius: 8px;
+    outline: none;
+    background: white;
+    color: #273248;
+    font-size: 13px;
+}
+
+.admin-activity-page .admin-filter-field input:focus,
+.admin-activity-page .admin-filter-field select:focus {
+    border-color: #7062e5;
+    box-shadow: 0 0 0 3px rgba(112, 98, 229, 0.1);
+}
+
+.admin-activity-page .admin-filter-apply {
+    width: 100%;
+    min-height: 42px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 8px;
+    background: #6254d9;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.admin-activity-page .admin-filter-apply:hover {
+    background: #5143c4;
+}
+
+/* REFRESH */
+.admin-activity-page .admin-interviews-refresh-btn {
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   TABLE CARD
+========================================== */
+.admin-activity-page .admin-interviews-table-card {
+    width: 100%;
+    overflow: visible;
+}
+
+.admin-activity-page .admin-interviews-table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 22px 22px 18px;
+}
+
+.admin-activity-page .admin-interviews-table-heading h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.admin-activity-page .admin-interviews-table-heading p {
+    margin: 7px 0 0;
+    color: #778196;
+    font-size: 13px;
+}
+
+/* ==========================================
+   ACTIVITY TABLE
+========================================== */
+.admin-activity-page .admin-interviews-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-activity-page .activity-logs-table {
+    width: 100%;
+    min-width: 1250px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-activity-page .activity-logs-table thead {
+    background: #f5f6fb;
+}
+
+.admin-activity-page .activity-logs-table th {
+    padding: 15px 13px;
+    color: #69748a;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+}
+
+.admin-activity-page .activity-logs-table td {
+    padding: 16px 13px;
+    border-bottom: 1px solid #edf0f5;
+    color: #39445a;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.admin-activity-page .activity-logs-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.admin-activity-page .activity-logs-table tbody tr:hover {
+    background: #fafaff;
+}
+
+/* LOG ID */
+.admin-activity-page .admin-interviews-user-id {
+    color: #6254d9;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* USER DETAILS */
+.admin-activity-page .activity-table-user {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 170px;
+}
+
+.admin-activity-page .activity-table-user strong {
+    color: #263248;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.admin-activity-page .activity-table-user span,
+.admin-activity-page .activity-table-user small {
+    color: #7a8497;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+/* ROLE BADGES */
+.admin-activity-page .activity-role-tag,
+.admin-activity-page .activity-action-tag {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-transform: capitalize;
+}
+
+.admin-activity-page .activity-role-tag.admin {
+    color: #6941c6;
+    background: #f0eaff;
+}
+
+.admin-activity-page .activity-role-tag.user {
+    color: #1874bc;
+    background: #e8f4ff;
+}
+
+/* ACTION BADGES */
+.admin-activity-page .activity-action-tag.activity-success {
+    color: #16804b;
+    background: #e7f8ef;
+}
+
+.admin-activity-page .activity-action-tag.activity-logout {
+    color: #68738a;
+    background: #edf0f5;
+}
+
+.admin-activity-page .activity-action-tag.activity-delete {
+    color: #c33b46;
+    background: #ffebed;
+}
+
+.admin-activity-page .activity-action-tag.activity-password {
+    color: #a56a12;
+    background: #fff5dc;
+}
+
+.admin-activity-page .activity-action-tag.activity-interview {
+    color: #2867bb;
+    background: #e9f2ff;
+}
+
+.admin-activity-page .activity-action-tag.activity-profile {
+    color: #7951b9;
+    background: #f2eaff;
+}
+
+.admin-activity-page .activity-action-tag.activity-default {
+    color: #515b70;
+    background: #eff1f5;
+}
+
+/* DESCRIPTION */
+.admin-activity-page .activity-table-description {
+    min-width: 190px;
+    max-width: 280px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* DATE */
+.admin-activity-page .admin-interviews-date {
+    min-width: 155px;
+    color: #69748a;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* ==========================================
+   LOADING / EMPTY STATE
+========================================== */
+.admin-activity-page .admin-interviews-state {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 35px 20px;
+    text-align: center;
+}
+
+.admin-activity-page .admin-interviews-state h3 {
+    margin: 12px 0 5px;
+    color: #344057;
+    font-size: 17px;
+}
+
+.admin-activity-page .admin-interviews-state p {
+    color: #7c879a;
+    font-size: 13px;
+}
+
+.admin-activity-page .admin-interviews-empty-icon {
+    font-size: 38px;
+}
+
+/* ==========================================
+   ERROR
+========================================== */
+.admin-activity-page .admin-interviews-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 15px 20px;
+    padding: 14px;
+    border: 1px solid #ffcaca;
+    border-radius: 9px;
+    background: #fff0f0;
+    color: #b42332;
+    font-size: 13px;
+}
+
+.admin-activity-page .admin-interviews-error button {
+    border: none;
+    background: transparent;
+    color: #b42332;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* ==========================================
+   PAGINATION
+========================================== */
+.admin-activity-page .activity-logs-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 20px 22px;
+    border-top: 1px solid #edf0f5;
+}
+
+.admin-activity-page .activity-logs-pagination p {
+    margin: 0;
+    color: #778196;
+    font-size: 13px;
+}
+
+.admin-activity-page .activity-logs-pagination>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-activity-page .activity-logs-pagination button,
+.admin-activity-page .activity-logs-pagination span {
+    min-width: 38px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0 12px;
+    border: 1px solid #e0e4ed;
+    border-radius: 7px;
+    background: white;
+    color: #39445a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-activity-page .activity-logs-pagination button {
+    cursor: pointer;
+}
+
+.admin-activity-page .activity-logs-pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.admin-activity-page .activity-logs-pagination span {
+    background: #6254d9;
+    border-color: #6254d9;
+    color: white;
+}
+
+/* ==========================================
+   DARK THEME
+========================================== */
+[data-theme="dark"] .admin-activity-page {
+    background: #111827;
+    color: #e5e7eb;
+}
+
+/* HEADER */
+[data-theme="dark"] .admin-activity-page .admin-interviews-heading h1 {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-heading p {
+    color: #9ca3af;
+}
+
+/* TOOLBAR */
+[data-theme="dark"] .admin-activity-page .admin-interviews-summary-info span {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-summary-info strong {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .admin-activity-page .combined-toolbar {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-search input {
+    background: #111827;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-search input::placeholder {
+    color: #8792a5;
+}
+
+/* FILTER BUTTON */
+[data-theme="dark"] .admin-activity-page .admin-filter-button {
+    background: #111827;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-button:hover,
+[data-theme="dark"] .admin-activity-page .admin-filter-button.active {
+    background: #332c5e;
+    border-color: #7565e8;
+    color: #c4b5fd;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-count {
+    background: #453879;
+    color: #ddd6fe;
+}
+
+/* FILTER DROPDOWN */
+[data-theme="dark"] .admin-activity-page .admin-filter-dropdown {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-dropdown-header h3 {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-dropdown-header p {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-clear {
+    color: #a99cff;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-field label {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-field input,
+[data-theme="dark"] .admin-activity-page .admin-filter-field select {
+    background: #111827;
+    border-color: #4b5563;
+    color: #e5e7eb;
+    color-scheme: dark;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-apply {
+    background: #7565e8;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-filter-apply:hover {
+    background: #6254d9;
+}
+
+/* TABLE CARD */
+[data-theme="dark"] .admin-activity-page .admin-interviews-table-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-table-heading h2 {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-table-heading p {
+    color: #9ca3af;
+}
+
+/* TABLE */
+[data-theme="dark"] .admin-activity-page .activity-logs-table thead {
+    background: #283548;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-logs-table th {
+    color: #aeb9ca;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-logs-table td {
+    border-bottom-color: #374151;
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-logs-table tbody tr:hover {
+    background: #283548;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-user-id {
+    color: #a99cff;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-table-user strong {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-table-user span,
+[data-theme="dark"] .admin-activity-page .activity-table-user small {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-date {
+    color: #aeb9ca;
+}
+
+/* DARK ROLE BADGES */
+[data-theme="dark"] .admin-activity-page .activity-role-tag.admin {
+    color: #c4b5fd;
+    background: #3b2d5e;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-role-tag.user {
+    color: #7dd3fc;
+    background: #173b52;
+}
+
+/* DARK ACTION BADGES */
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-success {
+    color: #86efac;
+    background: #17432f;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-logout {
+    color: #cbd5e1;
+    background: #374151;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-delete {
+    color: #fca5a5;
+    background: #51272d;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-password {
+    color: #fcd34d;
+    background: #493a1d;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-interview {
+    color: #93c5fd;
+    background: #1e3a5f;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-profile {
+    color: #d8b4fe;
+    background: #42265c;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-action-tag.activity-default {
+    color: #d1d5db;
+    background: #374151;
+}
+
+/* EMPTY STATE */
+[data-theme="dark"] .admin-activity-page .admin-interviews-state h3 {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-state p {
+    color: #9ca3af;
+}
+
+/* ERROR */
+[data-theme="dark"] .admin-activity-page .admin-interviews-error {
+    background: #451f27;
+    border-color: #7f303b;
+    color: #fca5a5;
+}
+
+[data-theme="dark"] .admin-activity-page .admin-interviews-error button {
+    color: #fca5a5;
+}
+
+/* PAGINATION */
+[data-theme="dark"] .admin-activity-page .activity-logs-pagination {
+    border-top-color: #374151;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-logs-pagination p {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-logs-pagination button,
+[data-theme="dark"] .admin-activity-page .activity-logs-pagination span {
+    background: #283548;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-activity-page .activity-logs-pagination span {
+    background: #6254d9;
+    border-color: #6254d9;
+    color: white;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+@media (max-width: 900px) {
+    .admin-activity-page {
+        padding: 28px 3%;
+    }
+
+    .admin-activity-page .combined-toolbar {
+        gap: 12px;
+    }
+
+    .admin-activity-page .admin-interviews-search {
+        order: 5;
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+
+    .admin-activity-page .admin-filter-dropdown {
+        right: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-activity-page {
+        padding: 22px 15px;
+    }
+
+    .admin-activity-page .admin-interviews-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-activity-page .admin-interviews-heading h1 {
+        font-size: 27px;
+    }
+
+    .admin-activity-page .combined-toolbar {
+        align-items: center;
+        gap: 12px;
+    }
+
+    .admin-activity-page .admin-interviews-summary-info {
+        flex: 1;
+    }
+
+    .admin-activity-page .admin-interviews-search {
+        order: 5;
+        flex-basis: 100%;
+        min-width: 100%;
+    }
+
+    .admin-activity-page .admin-filter-wrapper {
+        flex: 1;
+    }
+
+    .admin-activity-page .admin-filter-button {
+        width: 100%;
+    }
+
+    .admin-activity-page .admin-filter-dropdown {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        width: calc(100% - 30px);
+        max-width: 360px;
+        max-height: 80vh;
+        transform: translate(-50%, -50%);
+    }
+
+    .admin-activity-page .admin-interviews-refresh-btn {
+        flex: 1;
+    }
+
+    .admin-activity-page .admin-interviews-table-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 18px;
+    }
+
+    .admin-activity-page .activity-logs-pagination {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 18px;
+    }
+
+    .admin-activity-page .activity-logs-pagination>div {
+        flex-wrap: wrap;
+    }
+}

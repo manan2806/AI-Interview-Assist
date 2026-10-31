@@ -22,6 +22,7 @@ import Support from "./pages/User/Support";
 import Settings from "./pages/User/Settings";
 import Announcements from "./pages/User/Announcements";
 import Reviews from "./pages/User/Reviews";
+import AdminActivityLogs from "./pages/Admin/AdminActivityLogs";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -219,6 +220,12 @@ function App() {
                         element={
                             <AdminReports />
                         }
+                    />
+
+                    {/* Activity Logs */}
+                    <Route
+                        path="/admin-activity-logs"
+                        element={<AdminActivityLogs />}
                     />
                 </Route>
 

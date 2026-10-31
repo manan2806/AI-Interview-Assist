@@ -124,13 +124,15 @@ function Dashboard() {
     // ==========================================
     // LOGOUT
     // ==========================================
-    const handleLogout = () => {
+    const handleLogout = async () => {
         try {
-            logout();
-            navigate("/", { replace: true });
+            await api.post("/api/logout");
         } catch (err) {
-            console.error("Logout Error:", err);
-            navigate("/", { replace: true });
+            console.error("User Logout Activity Error:", err);
+        } finally {
+            logout();
+
+            navigate("/home", { replace: true });
         }
     };
 
