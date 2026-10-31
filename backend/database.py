@@ -14,6 +14,7 @@ db = None
 users = None
 interviews = None
 problem_reports = None
+activity_logs = None
 
 # MONGODB CONNECTION
 try:
@@ -23,10 +24,7 @@ try:
     if not DB_NAME:
         raise Exception("DB_NAME is missing")
 
-    client = MongoClient(
-        MONGO_URI,
-        serverSelectionTimeoutMS=10000
-    )
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000)
 
     # Test connection
     client.admin.command("ping")
@@ -34,13 +32,18 @@ try:
     # Select database
     db = client[DB_NAME]
 
-    # Collections
+    # COLLECTIONS
     users = db["users"]
     interviews = db["interviews"]
     problem_reports = db["problem_reports"]
+    activity_logs = db["activity_logs"]
+
+    # ACTIVITY LOGS INDEXES
+    activity_logs.create_index([("user_id", 1), ("created_at", -1)])
+    activity_logs.create_index([("created_at", -1)])
+    activity_logs.create_index([("action", 1)])
 
     print("✅ MongoDB Connected Successfully!")
-
 except Exception as e:
 
     print("❌ MongoDB Connection Error:", e)
@@ -50,3 +53,4 @@ except Exception as e:
     users = None
     interviews = None
     problem_reports = None
+    activity_logs = None

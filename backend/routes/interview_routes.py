@@ -5,9 +5,10 @@ from datetime import datetime
 from google import genai
 from bson import ObjectId
 from dotenv import load_dotenv
-from database import interviews, users
+from database import interviews, users, activity_logs
 from utils.pdf_generator import generate_interview_pdf
 from utils.email_service import send_interview_report_email
+from utils.activity_logger import log_activity
 
 # LOAD ENVIRONMENT VARIABLES
 load_dotenv()
@@ -1799,6 +1800,25 @@ def start_interview(interview_id):
                 },
             )
 
+            # SAVE INTERVIEW START ACTIVITY
+            user = users.find_one(
+                {"user_id": user_id}, {"_id": 0, "name": 1, "email": 1, "role": 1}
+            )
+
+            log_activity(
+                user_id=user_id,
+                user_name=user.get("name", "") if user else "",
+                user_email=user.get("email", "") if user else "",
+                role=user.get("role", "user") if user else "user",
+                action="interview_started",
+                description="User started an interview",
+                metadata={
+                    "interview_id": interview_id,
+                    "job_role": interview.get("job_role", ""),
+                    "experience_level": interview.get("experience_level", ""),
+                },
+            )
+
             return (
                 jsonify(
                     {
@@ -2741,6 +2761,27 @@ def evaluate_interview(interview_id):
         if update_result.modified_count == 0:
             print("⚠️ Evaluation data was not modified.")
 
+        # SAVE INTERVIEW COMPLETED ACTIVITY
+        user = users.find_one(
+            {"user_id": user_id}, {"_id": 0, "name": 1, "email": 1, "role": 1}
+        )
+
+        log_activity(
+            user_id=user_id,
+            user_name=user.get("name", "") if user else "",
+            user_email=user.get("email", "") if user else "",
+            role=user.get("role", "user") if user else "user",
+            action="interview_completed",
+            description="User completed an interview successfully",
+            metadata={
+                "interview_id": interview_id,
+                "job_role": interview.get("job_role", ""),
+                "experience_level": interview.get("experience_level", ""),
+                "difficulty": interview.get("difficulty", ""),
+                "evaluation_count": len(evaluations),
+            },
+        )
+
         # SUCCESS
         print("✅ Complete interview evaluation " "saved successfully.")
         return (
@@ -3279,6 +3320,26 @@ def retake_interview(interview_id):
 
         result = interviews.insert_one(new_interview)
         new_interview_id = str(result.inserted_id)
+
+        # SAVE INTERVIEW RETAKE ACTIVITY
+        user = users.find_one(
+            {"user_id": user_id}, {"_id": 0, "name": 1, "email": 1, "role": 1}
+        )
+
+        log_activity(
+            user_id=user_id,
+            user_name=user.get("name", "") if user else "",
+            user_email=user.get("email", "") if user else "",
+            role=user.get("role", "user") if user else "user",
+            action="interview_retaken",
+            description="User created a new interview retake",
+            metadata={
+                "original_interview_id": str(original_interview["_id"]),
+                "new_interview_id": new_interview_id,
+                "job_role": new_interview.get("job_role", ""),
+                "attempt_number": attempt_number,
+            },
+        )
 
         return (
             jsonify(

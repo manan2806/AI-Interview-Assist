@@ -1,8 +1,10 @@
 from flask import Blueprint, jsonify, request
 from database import db
 from utils.auth_utils import token_required
+from utils.activity_logger import log_activity
 
 user_bp = Blueprint("user", __name__)
+
 
 # ==================================
 # GET USER PROFILE
@@ -12,40 +14,38 @@ user_bp = Blueprint("user", __name__)
 def get_profile(current_user):
     try:
         if db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = db["users"]
-        user = users.find_one({
-            "user_id": current_user["user_id"]
-        })
+        user = users.find_one({"user_id": current_user["user_id"]})
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "User not found"
-            }), 404
+            return jsonify({"success": False, "message": "User not found"}), 404
 
-        return jsonify({
-            "success": True,
-            "message": "User profile fetched successfully",
-            "user": {
-                "user_id": user.get("user_id"),
-                "name": user.get("name"),
-                "email": user.get("email"),
-                "skills": user.get("skills", []),
-                "target_role": user.get("target_role", ""),
-                "experience_level": user.get("experience_level", "Fresher")
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "User profile fetched successfully",
+                    "user": {
+                        "user_id": user.get("user_id"),
+                        "name": user.get("name"),
+                        "email": user.get("email"),
+                        "skills": user.get("skills", []),
+                        "target_role": user.get("target_role", ""),
+                        "experience_level": user.get("experience_level", "Fresher"),
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 # ==================================
 # UPDATE USER PROFILE
@@ -57,16 +57,16 @@ def update_profile(current_user):
         data = request.get_json(silent=True)
 
         if not data:
-            return jsonify({
-                "success": False,
-                "message": "Please send valid JSON data"
-            }), 400
+            return (
+                jsonify({"success": False, "message": "Please send valid JSON data"}),
+                400,
+            )
 
         if db is None:
-            return jsonify({
-                "success": False,
-                "message": "Database is not connected"
-            }), 500
+            return (
+                jsonify({"success": False, "message": "Database is not connected"}),
+                500,
+            )
 
         users = db["users"]
         update_data = {}
@@ -85,48 +85,55 @@ def update_profile(current_user):
 
         # Check if anything to update
         if not update_data:
-            return jsonify({
-                "success": False,
-                "message": "No profile data provided to update"
-            }), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "No profile data provided to update"}
+                ),
+                400,
+            )
 
         # UPDATE MONGODB
         result = users.update_one(
-            {
-                "user_id": current_user["user_id"]
-            },
-            {
-                "$set": update_data
-            }
+            {"user_id": current_user["user_id"]}, {"$set": update_data}
         )
 
         # User not found
         if result.matched_count == 0:
-            return jsonify({
-                "success": False,
-                "message": "User not found"
-            }), 404
+            return jsonify({"success": False, "message": "User not found"}), 404
 
         # GET UPDATED USER
-        updated_user = users.find_one({
-            "user_id": current_user["user_id"]
-        })
+        updated_user = users.find_one({"user_id": current_user["user_id"]})
 
-        return jsonify({
-            "success": True,
-            "message": "Profile updated successfully 🎉",
-            "user": {
-                "user_id": updated_user.get("user_id"),
-                "name": updated_user.get("name"),
-                "email": updated_user.get("email"),
-                "skills": updated_user.get("skills", []),
-                "target_role": updated_user.get("target_role", ""),
-                "experience_level": updated_user.get("experience_level", "Fresher")
-            }
-        }), 200
+        # SAVE PROFILE UPDATE ACTIVITY
+        log_activity(
+            user_id=updated_user.get("user_id"),
+            user_name=updated_user.get("name", ""),
+            user_email=updated_user.get("email", ""),
+            role=updated_user.get("role", "user"),
+            action="profile_updated",
+            description="User updated their profile successfully",
+            metadata={"updated_fields": list(update_data.keys())},
+        )
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Profile updated successfully 🎉",
+                    "user": {
+                        "user_id": updated_user.get("user_id"),
+                        "name": updated_user.get("name"),
+                        "email": updated_user.get("email"),
+                        "skills": updated_user.get("skills", []),
+                        "target_role": updated_user.get("target_role", ""),
+                        "experience_level": updated_user.get(
+                            "experience_level", "Fresher"
+                        ),
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        return jsonify({"success": False, "message": str(e)}), 500

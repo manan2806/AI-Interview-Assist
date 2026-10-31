@@ -11,6 +11,7 @@ from google_auth_oauthlib.flow import Flow
 import database, base64
 from utils.auth_utils import generate_token
 from utils.gmail_service import get_gmail_service
+from utils.activity_logger import log_activity
 
 auth_bp = Blueprint("auth", __name__)
 bcrypt = Bcrypt()
@@ -136,6 +137,16 @@ def register():
             )
 
         result = users.insert_one(user)
+
+        # SAVE REGISTRATION ACTIVITY
+        log_activity(
+            user_id=user["user_id"],
+            user_name=user["name"],
+            user_email=user["email"],
+            role=user["role"],
+            action="register",
+            description=f"{role.capitalize()} registered successfully",
+        )
 
         # Success response
         return (
@@ -296,6 +307,16 @@ def login():
             )
         token = generate_token(user)
 
+        # SAVE LOGIN ACTIVITY
+        log_activity(
+            user_id=user["user_id"],
+            user_name=user["name"],
+            user_email=user["email"],
+            role=role,
+            action="login",
+            description="User logged in successfully",
+        )
+
         return (
             jsonify(
                 {
@@ -326,6 +347,51 @@ def login():
             ),
             500,
         )
+
+
+# ==========================================
+# USER / ADMIN LOGOUT
+# ==========================================
+@auth_bp.route("/api/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    try:
+        user_id = get_jwt_identity()
+
+        if database.db is None:
+            return (
+                jsonify({"success": False, "message": "Database is not connected."}),
+                500,
+            )
+
+        users = database.db["users"]
+        user = users.find_one({"user_id": user_id})
+
+        if not user:
+            return jsonify({"success": False, "message": "User not found."}), 404
+
+        role = user.get("role", "user")
+
+        log_activity(
+            user_id=user["user_id"],
+            user_name=user.get("name", ""),
+            user_email=user.get("email", ""),
+            role=role,
+            action="logout",
+            description=(
+                "Admin logged out successfully"
+                if role == "admin"
+                else "User logged out successfully"
+            ),
+            metadata={"account_type": role},
+        )
+
+        return jsonify({"success": True, "message": "Logged out successfully."}), 200
+
+    except Exception as e:
+        print("Logout Error:", repr(e))
+
+        return jsonify({"success": False, "message": "Unable to logout."}), 500
 
 
 # ==========================================
@@ -1017,6 +1083,16 @@ def reset_password():
             },
         )
 
+        # SAVE PASSWORD RESET ACTIVITY
+        log_activity(
+            user_id=user["user_id"],
+            user_name=user.get("name", ""),
+            user_email=user.get("email", ""),
+            role=user.get("role", "user"),
+            action="password_reset",
+            description="User successfully changed their password using the Forgot Password feature",
+        )
+
         return (
             jsonify({"success": True, "message": "Password reset successfully 🎉"}),
             200,
@@ -1384,6 +1460,16 @@ def change_password():
                 500,
             )
 
+        # SAVE PASSWORD CHANGE ACTIVITY
+        log_activity(
+            user_id=user["user_id"],
+            user_name=user.get("name", ""),
+            user_email=user.get("email", ""),
+            role=user.get("role", "user"),
+            action="password_changed",
+            description="User changed their account password",
+        )
+
         return (
             jsonify({"success": True, "message": "Password changed successfully."}),
             200,
@@ -1468,6 +1554,21 @@ def delete_account():
                 jsonify({"success": False, "message": "Account could not be deleted."}),
                 500,
             )
+
+        # Save account deletion activity
+        log_activity(
+            user_id=user["user_id"],
+            user_name=user.get("name", ""),
+            user_email=user.get("email", ""),
+            role=user.get("role", "user"),
+            action="account_deleted",
+            description="User successfully deleted their account",
+            metadata={
+                "account_type": "user",
+                "deleted_interviews": interview_delete_result.deleted_count,
+                "deleted_problem_reports": problem_report_delete_result.deleted_count,
+            },
+        )
 
         return (
             jsonify(

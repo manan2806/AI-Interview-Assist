@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 from datetime import datetime
 from utils.auth_utils import admin_required
+from utils.activity_logger import log_activity
 from routes.auth_routes import bcrypt
 
 admin_bp = Blueprint("admin", __name__)
@@ -691,6 +692,16 @@ def admin_delete_account(current_user):
                 ),
                 500,
             )
+
+        log_activity(
+            user_id=admin["user_id"],
+            user_name=admin.get("name", ""),
+            user_email=admin.get("email", ""),
+            role="admin",
+            action="account_deleted",
+            description="Admin successfully deleted their account",
+            metadata={"account_type": "admin"},
+        )
 
         return (
             jsonify(
