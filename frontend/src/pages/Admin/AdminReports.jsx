@@ -46,6 +46,14 @@ function AdminReports() {
     const [error, setError] = useState("");
     const [datesChanged, setDatesChanged] = useState(false);
 
+    // REPORT FORMAT SELECTION
+    const [selectedFormats, setSelectedFormats] = useState({
+        users: "csv",
+        interviews: "csv",
+        "problem-reports": "csv",
+        reviews: "csv",
+    });
+
     const downloadReport = async (reportType) => {
         setMessage("");
         setError("");
@@ -58,7 +66,8 @@ function AdminReports() {
         try {
             setLoadingReport(reportType);
 
-            const params = { format: "csv" };
+            const selectedFormat = selectedFormats[reportType];
+            const params = { format: selectedFormat };
 
             if (startDate) params.start_date = startDate;
             if (endDate) params.end_date = endDate;
@@ -73,14 +82,17 @@ function AdminReports() {
 
             const blob = new Blob(
                 [response.data],
-                { type: "text/csv;charset=utf-8;" }
+                {
+                    type: response.headers["content-type"] ||
+                        "application/octet-stream"
+                }
             );
 
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
 
             link.href = url;
-            link.download = `${reportType}-report.csv`;
+            link.download = `${reportType}-report.${selectedFormat}`;
 
             document.body.appendChild(link);
             link.click();
@@ -94,7 +106,9 @@ function AdminReports() {
                 (report) => report.id === reportType
             )?.title;
 
-            setMessage(`${reportTitle} download has started successfully.`);
+            setMessage(
+                `${reportTitle} (${selectedFormat.toUpperCase()}) download has started successfully.`
+            );
         } catch (err) {
             let errorMessage = "Failed to download the report.";
 
@@ -262,9 +276,27 @@ function AdminReports() {
                                     {report.icon}
                                 </div>
 
-                                <span className="admin-report-format">
-                                    CSV
-                                </span>
+                                {/* REPORT FORMAT DROPDOWN */}
+                                <select
+                                    className="admin-report-format-select"
+                                    value={selectedFormats[report.id]}
+                                    onChange={(e) => {
+                                        setSelectedFormats((prev) => ({
+                                            ...prev,
+                                            [report.id]: e.target.value,
+                                        }));
+
+                                        setMessage("");
+                                        setError("");
+                                    }}
+                                    aria-label={`Select ${report.title} download format`}
+                                    disabled={Boolean(loadingReport)}
+                                >
+                                    <option value="csv">CSV</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="docx">Word (.docx)</option>
+                                    <option value="xlsx">Excel (.xlsx)</option>
+                                </select>
                             </div>
 
                             <h3>{report.title}</h3>
@@ -279,7 +311,7 @@ function AdminReports() {
                             >
                                 {loadingReport === report.id
                                     ? "Downloading..."
-                                    : "↓ Download CSV"}
+                                    : `↓ Download ${selectedFormats[report.id].toUpperCase()}`}
                             </button>
                         </article>
                     ))}

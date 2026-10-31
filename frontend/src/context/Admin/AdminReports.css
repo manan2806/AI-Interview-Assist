@@ -391,6 +391,37 @@
     font-size: 22px;
 }
 
+/* REPORT FORMAT DROPDOWN */
+.admin-report-format-select {
+    min-width: 105px;
+    max-width: 145px;
+    min-height: 32px;
+    padding: 6px 25px 6px 9px;
+    border: 1px solid rgba(110, 100, 180, 0.2);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #586176;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.admin-report-format-select:hover {
+    border-color: #6558dc;
+}
+
+.admin-report-format-select:focus {
+    border-color: #6558dc;
+    box-shadow: 0 0 0 3px rgba(101, 88, 220, 0.12);
+}
+
+.admin-report-format-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .admin-report-format {
     display: inline-flex;
     align-items: center;
@@ -632,8 +663,20 @@
     color: #e5e7eb;
 }
 
-/* Dark information note */
+.dark .admin-report-format-select,
+[data-theme="dark"] .admin-report-format-select {
+    background: #293449;
+    border-color: #465168;
+    color: #e5e7eb;
+}
 
+.dark .admin-report-format-select option,
+[data-theme="dark"] .admin-report-format-select option {
+    background: #293449;
+    color: #ffffff;
+}
+
+/* Dark information note */
 .dark .admin-reports-note,
 [data-theme="dark"] .admin-reports-note {
     background: #1f2937;
@@ -819,6 +862,14 @@
         font-size: 13px;
         text-align: center;
         white-space: normal;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-report-format-select {
+        min-width: 95px;
+        max-width: 125px;
+        font-size: 11px;
     }
 }
 

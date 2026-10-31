@@ -4,6 +4,23 @@ from flask import Blueprint, jsonify, request, make_response
 
 from database import db
 from utils.auth_utils import admin_required
+from flask import send_file
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+)
+
+from docx import Document
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 
 reports_bp = Blueprint("reports", __name__)
 
@@ -120,26 +137,178 @@ def report_value(value):
 
 
 # ==========================================
-# ADMIN REPORTS CENTER - CSV EXPORT
+# REPORT FILE GENERATION HELPER
 # ==========================================
-@reports_bp.route(
-    "/api/admin/reports/<report_type>/export",
-    methods=["GET"],
-)
+def generate_report_file(report_type, fields, rows, export_format):
+    """Generate report in CSV, PDF, Word, or Excel format."""
+
+    filename = f"{report_type}-report"
+
+    # CSV
+    if export_format == "csv":
+        output = io.StringIO(newline="")
+        writer = csv.writer(output)
+        writer.writerow(fields)
+        writer.writerows(rows)
+
+        buffer = io.BytesIO()
+        buffer.write(("\ufeff" + output.getvalue()).encode("utf-8"))
+        buffer.seek(0)
+
+        return buffer, "text/csv", f"{filename}.csv"
+
+    # PDF
+    elif export_format == "pdf":
+        buffer = io.BytesIO()
+
+        document = SimpleDocTemplate(
+            buffer,
+            pagesize=landscape(A4),
+            rightMargin=25,
+            leftMargin=25,
+            topMargin=25,
+            bottomMargin=25,
+        )
+
+        styles = getSampleStyleSheet()
+        elements = [
+            Paragraph(
+                f"{report_type.replace('-', ' ').title()} Report", styles["Title"]
+            ),
+            Spacer(1, 15),
+        ]
+
+        table_data = [fields]
+
+        for row in rows:
+            table_data.append(
+                [
+                    Paragraph(
+                        str(value)
+                        .replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;"),
+                        styles["BodyText"],
+                    )
+                    for value in row
+                ]
+            )
+
+        table = Table(table_data, repeatRows=1)
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5146d8")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    (
+                        "ROWBACKGROUNDS",
+                        (0, 1),
+                        (-1, -1),
+                        [
+                            colors.white,
+                            colors.HexColor("#f2f3f8"),
+                        ],
+                    ),
+                    ("PADDING", (0, 0), (-1, -1), 6),
+                ]
+            )
+        )
+
+        elements.append(table)
+        document.build(elements)
+
+        buffer.seek(0)
+        return buffer, "application/pdf", f"{filename}.pdf"
+
+    # Word
+    elif export_format == "docx":
+        document = Document()
+        document.add_heading(
+            f"{report_type.replace('-', ' ').title()} Report",
+            level=1,
+        )
+
+        table = document.add_table(rows=1, cols=len(fields))
+        table.style = "Table Grid"
+
+        for index, field in enumerate(fields):
+            table.rows[0].cells[index].text = str(field)
+
+        for row in rows:
+            cells = table.add_row().cells
+            for index, value in enumerate(row):
+                cells[index].text = str(value)
+
+        buffer = io.BytesIO()
+        document.save(buffer)
+        buffer.seek(0)
+
+        return (
+            buffer,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            f"{filename}.docx",
+        )
+
+    # Excel
+    elif export_format == "xlsx":
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet.title = "Report"
+
+        worksheet.append(fields)
+
+        for row in rows:
+            worksheet.append(row)
+
+        header_fill = PatternFill(
+            start_color="5146D8",
+            end_color="5146D8",
+            fill_type="solid",
+        )
+
+        for cell in worksheet[1]:
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+
+        for column in worksheet.columns:
+            max_length = max(len(str(cell.value or "")) for cell in column)
+            worksheet.column_dimensions[column[0].column_letter].width = min(
+                max_length + 3, 40
+            )
+
+        buffer = io.BytesIO()
+        workbook.save(buffer)
+        buffer.seek(0)
+
+        return (
+            buffer,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            f"{filename}.xlsx",
+        )
+
+    else:
+        raise ValueError("Unsupported export format.")
+
+
+# ==========================================
+# ADMIN REPORT EXPORT API
+# ==========================================
+@reports_bp.route("/api/admin/reports/<report_type>/export", methods=["GET"])
 @admin_required
 def export_admin_report(current_user, report_type):
+
     try:
         if db is None:
             return (
-                jsonify(
-                    {
-                        "success": False,
-                        "message": "Database is not connected.",
-                    }
-                ),
+                jsonify({"success": False, "message": "Database is not connected."}),
                 500,
             )
 
+        # REPORT TYPE VALIDATION
         config = REPORT_CONFIG.get(report_type)
 
         if not config:
@@ -154,33 +323,42 @@ def export_admin_report(current_user, report_type):
                 400,
             )
 
+        # EXPORT FORMAT VALIDATION
         export_format = request.args.get("format", "csv").strip().lower()
 
-        if export_format != "csv":
+        allowed_formats = ["csv", "pdf", "docx", "xlsx"]
+
+        if export_format not in allowed_formats:
             return (
                 jsonify(
                     {
                         "success": False,
-                        "message": "Currently, only CSV export is supported.",
+                        "message": "Unsupported export format.",
+                        "allowed_formats": allowed_formats,
                     }
                 ),
                 400,
             )
 
+        # BASE QUERY
         query = {}
 
-        # Exclude admin accounts from the users report.
         if config["exclude_admins"]:
             query["role"] = {"$ne": "admin"}
 
+        # DATE FILTER
         start_date = request.args.get("start_date", "").strip()
+
         end_date = request.args.get("end_date", "").strip()
+
         date_query = {}
 
         if start_date:
             try:
                 start = datetime.strptime(start_date, "%Y-%m-%d")
+
                 date_query["$gte"] = start
+
             except ValueError:
                 return (
                     jsonify(
@@ -195,7 +373,9 @@ def export_admin_report(current_user, report_type):
         if end_date:
             try:
                 end = datetime.strptime(end_date, "%Y-%m-%d")
+
                 date_query["$lt"] = end + timedelta(days=1)
+
             except ValueError:
                 return (
                     jsonify(
@@ -221,40 +401,36 @@ def export_admin_report(current_user, report_type):
         if date_query:
             query[config["date_field"]] = date_query
 
+        # FETCH REPORT DATA
         collection = db[config["collection"]]
         fields = config["fields"]
-        cursor = collection.find(
-            query,
-            {field: 1 for field in fields},
-        ).sort(config["date_field"], -1)
 
-        output = io.StringIO(newline="")
-        writer = csv.writer(output)
-        writer.writerow(fields)
-        exported_count = 0
-
-        for document in cursor:
-            writer.writerow([report_value(get_nested_value(document, field)) for field in fields])
-            exported_count += 1
-
-        response = make_response("\ufeff" + output.getvalue())
-        response.headers["Content-Type"] = "text/csv; charset=utf-8"
-        response.headers["Content-Disposition"] = (
-            f'attachment; filename="{report_type}-report.csv"'
+        cursor = collection.find(query, {field: 1 for field in fields}).sort(
+            config["date_field"], -1
         )
 
-        response.headers["X-Exported-Count"] = str(exported_count)
+        rows = []
+
+        for document in cursor:
+            row = [report_value(get_nested_value(document, field)) for field in fields]
+
+            rows.append(row)
+
+        # GENERATE REPORT FILE
+        buffer, mimetype, download_name = generate_report_file(
+            report_type, fields, rows, export_format
+        )
+
+        # SEND DOWNLOAD RESPONSE
+        response = send_file(
+            buffer, mimetype=mimetype, as_attachment=True, download_name=download_name
+        )
+
+        response.headers["X-Exported-Count"] = str(len(rows))
+
         return response
 
     except Exception:
-        logging.exception("Admin CSV report export error")
+        logging.exception("Admin report export error")
 
-        return (
-            jsonify(
-                {
-                    "success": False,
-                    "message": "Unable to export report.",
-                }
-            ),
-            500,
-        )
+        return jsonify({"success": False, "message": "Unable to export report."}), 500
