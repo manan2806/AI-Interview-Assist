@@ -324,14 +324,15 @@
 
 .admin-reports-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 17px;
-    align-items: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    width: 100%;
 }
 
 .admin-report-card {
     display: flex;
     flex-direction: column;
+    width: 100%;
     min-width: 0;
     padding: 19px;
     overflow: hidden;
@@ -389,6 +390,23 @@
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.85);
     font-size: 22px;
+}
+
+.admin-report-format-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-report-format-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--admin-text, #172033);
+    white-space: nowrap;
+}
+
+.admin-report-format-select {
+    min-width: 140px;
 }
 
 /* REPORT FORMAT DROPDOWN */
@@ -616,6 +634,26 @@
     background: #302b52;
     border-color: #4b437b;
     color: #d6d0ff;
+}
+
+[data-theme="dark"] .admin-report-format-label {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-report-format-select {
+    background: #1e293b;
+    color: #f1f5f9;
+    border-color: #475569;
+}
+
+[data-theme="dark"] .admin-report-format-select option {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+.admin-report-format-select:focus {
+    border-color: #7167ef;
+    box-shadow: 0 0 0 3px rgba(113, 103, 239, 0.15);
 }
 
 /* Dark report cards */

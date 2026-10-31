@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -35,16 +36,18 @@ const REPORTS = [
     },
 ];
 
-
 function AdminReports() {
     const navigate = useNavigate();
 
+    // DATE FILTER STATES
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [datesChanged, setDatesChanged] = useState(false);
+
+    // DOWNLOAD STATES
     const [loadingReport, setLoadingReport] = useState("");
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-    const [datesChanged, setDatesChanged] = useState(false);
 
     // REPORT FORMAT SELECTION
     const [selectedFormats, setSelectedFormats] = useState({
@@ -54,12 +57,18 @@ function AdminReports() {
         reviews: "csv",
     });
 
+    // ==========================================
+    // DOWNLOAD REPORT
+    // ==========================================
+
     const downloadReport = async (reportType) => {
         setMessage("");
         setError("");
 
         if (startDate && endDate && startDate > endDate) {
-            setError("The start date cannot be later than the end date.");
+            setError(
+                "The start date cannot be later than the end date."
+            );
             return;
         }
 
@@ -67,10 +76,18 @@ function AdminReports() {
             setLoadingReport(reportType);
 
             const selectedFormat = selectedFormats[reportType];
-            const params = { format: selectedFormat };
 
-            if (startDate) params.start_date = startDate;
-            if (endDate) params.end_date = endDate;
+            const params = {
+                format: selectedFormat,
+            };
+
+            if (startDate) {
+                params.start_date = startDate;
+            }
+
+            if (endDate) {
+                params.end_date = endDate;
+            }
 
             const response = await api.get(
                 `/api/admin/reports/${reportType}/export`,
@@ -83,8 +100,9 @@ function AdminReports() {
             const blob = new Blob(
                 [response.data],
                 {
-                    type: response.headers["content-type"] ||
-                        "application/octet-stream"
+                    type:
+                        response.headers["content-type"] ||
+                        "application/octet-stream",
                 }
             );
 
@@ -109,6 +127,7 @@ function AdminReports() {
             setMessage(
                 `${reportTitle} (${selectedFormat.toUpperCase()}) download has started successfully.`
             );
+
         } catch (err) {
             let errorMessage = "Failed to download the report.";
 
@@ -116,26 +135,34 @@ function AdminReports() {
                 const data = err.response?.data;
 
                 if (data instanceof Blob) {
-                    const text = await data.text();
+                    const responseText = await data.text();
 
                     try {
-                        const parsed = JSON.parse(text);
-                        errorMessage = parsed.message || errorMessage;
+                        const parsed = JSON.parse(responseText);
+                        errorMessage =
+                            parsed.message || errorMessage;
                     } catch {
-                        errorMessage = text || errorMessage;
+                        errorMessage =
+                            responseText || errorMessage;
                     }
                 } else {
-                    errorMessage = data?.message || errorMessage;
+                    errorMessage =
+                        data?.message || errorMessage;
                 }
             } catch {
-                // Keep the default error message.
+                // Keep default error message.
             }
 
             setError(errorMessage);
+
         } finally {
             setLoadingReport("");
         }
     };
+
+    // ==========================================
+    // CLEAR DATE FILTER
+    // ==========================================
 
     const clearDates = () => {
         setStartDate("");
@@ -145,11 +172,31 @@ function AdminReports() {
         setError("");
     };
 
+    // ==========================================
+    // CHANGE REPORT FORMAT
+    // ==========================================
+
+    const handleFormatChange = (reportId, format) => {
+        setSelectedFormats((prev) => ({
+            ...prev,
+            [reportId]: format,
+        }));
+
+        setMessage("");
+        setError("");
+    };
+
     return (
         <main className="admin-reports-page">
-            {/* HEADER */}
+
+            {/* ==========================================
+                HEADER
+            ========================================== */}
+
             <header className="admin-reports-header">
+
                 <div className="admin-reports-heading">
+
                     <span className="admin-reports-eyebrow">
                         ADMINISTRATION
                     </span>
@@ -157,8 +204,10 @@ function AdminReports() {
                     <h1>Reports Center</h1>
 
                     <p>
-                        Export your project reports in CSV format.
+                        Download project reports in CSV, PDF,
+                        Word or Excel format.
                     </p>
+
                 </div>
 
                 <button
@@ -168,30 +217,40 @@ function AdminReports() {
                 >
                     ← Dashboard
                 </button>
+
             </header>
 
-            {/* DATE RANGE FILTER */}
+            {/* ==========================================
+                DATE RANGE FILTER
+            ========================================== */}
+
             <section className="admin-reports-filter">
+
                 <div className="admin-reports-filter-title">
+
                     <div className="admin-reports-filter-icon">
                         📅
                     </div>
 
                     <div>
                         <h2>Date Range</h2>
-                        <p>Filter reports by a specific date range.</p>
+                        <p>
+                            Filter all reports by a specific date range.
+                        </p>
                     </div>
+
                 </div>
 
                 <div className="admin-reports-filter-fields">
+
                     <label className="admin-reports-date-field">
+
                         <span>Start Date</span>
 
                         <input
                             type="date"
                             value={startDate}
                             max={endDate || undefined}
-                            onInput={() => setDatesChanged(true)}
                             onChange={(e) => {
                                 setStartDate(e.target.value);
                                 setDatesChanged(true);
@@ -199,16 +258,17 @@ function AdminReports() {
                                 setError("");
                             }}
                         />
+
                     </label>
 
                     <label className="admin-reports-date-field">
+
                         <span>End Date</span>
 
                         <input
                             type="date"
                             value={endDate}
                             min={startDate || undefined}
-                            onInput={() => setDatesChanged(true)}
                             onChange={(e) => {
                                 setEndDate(e.target.value);
                                 setDatesChanged(true);
@@ -216,6 +276,7 @@ function AdminReports() {
                                 setError("");
                             }}
                         />
+
                     </label>
 
                     {datesChanged && (
@@ -228,10 +289,15 @@ function AdminReports() {
                             Clear Dates
                         </button>
                     )}
+
                 </div>
+
             </section>
 
-            {/* STATUS MESSAGES */}
+            {/* ==========================================
+                STATUS MESSAGES
+            ========================================== */}
+
             {message && (
                 <div
                     className="admin-reports-message success"
@@ -252,81 +318,124 @@ function AdminReports() {
                 </div>
             )}
 
-            {/* REPORT CARDS */}
+            {/* ==========================================
+                AVAILABLE REPORTS
+            ========================================== */}
+
             <section className="admin-reports-section">
+
                 <div className="admin-reports-section-heading">
+
                     <div>
                         <h2>Available Reports</h2>
-                        <p>Select a report to download.</p>
+
+                        <p>
+                            Select a report and choose your preferred
+                            download format: CSV, PDF, Word or Excel.
+                        </p>
                     </div>
 
                     <span className="admin-reports-count">
                         {REPORTS.length} Reports
                     </span>
+
                 </div>
 
+                {/* 2 COLUMN REPORT GRID */}
+
                 <div className="admin-reports-grid">
+
                     {REPORTS.map((report) => (
+
                         <article
                             className={`admin-report-card ${report.color}`}
                             key={report.id}
                         >
+
+                            {/* CARD TOP */}
+
                             <div className="admin-report-card-top">
+
                                 <div className="admin-report-icon">
                                     {report.icon}
                                 </div>
 
-                                {/* REPORT FORMAT DROPDOWN */}
-                                <select
-                                    className="admin-report-format-select"
-                                    value={selectedFormats[report.id]}
-                                    onChange={(e) => {
-                                        setSelectedFormats((prev) => ({
-                                            ...prev,
-                                            [report.id]: e.target.value,
-                                        }));
+                                {/* FORMAT DROPDOWN */}
 
-                                        setMessage("");
-                                        setError("");
-                                    }}
-                                    aria-label={`Select ${report.title} download format`}
-                                    disabled={Boolean(loadingReport)}
-                                >
-                                    <option value="csv">CSV</option>
-                                    <option value="pdf">PDF</option>
-                                    <option value="docx">Word (.docx)</option>
-                                    <option value="xlsx">Excel (.xlsx)</option>
-                                </select>
+                                <div className="admin-report-format-wrapper">
+                                    <label
+                                        className="admin-report-format-label"
+                                        htmlFor={`format-${report.id}`}
+                                    >
+                                        Export Format:
+                                    </label>
+
+                                    <select
+                                        id={`format-${report.id}`}
+                                        className="admin-report-format-select"
+                                        value={selectedFormats[report.id]}
+                                        onChange={(e) =>
+                                            handleFormatChange(report.id, e.target.value)
+                                        }
+                                        aria-label={`Select ${report.title} download format`}
+                                        disabled={Boolean(loadingReport)}
+                                    >
+                                        <option value="csv">CSV</option>
+                                        <option value="pdf">PDF</option>
+                                        <option value="docx">Word (.docx)</option>
+                                        <option value="xlsx">Excel (.xlsx)</option>
+                                    </select>
+                                </div>
+
                             </div>
+
+                            {/* CARD DETAILS */}
 
                             <h3>{report.title}</h3>
 
                             <p>{report.description}</p>
 
+                            {/* DOWNLOAD BUTTON */}
+
                             <button
                                 type="button"
                                 className="admin-report-download-btn"
-                                onClick={() => downloadReport(report.id)}
+                                onClick={() =>
+                                    downloadReport(report.id)
+                                }
                                 disabled={Boolean(loadingReport)}
                             >
+
                                 {loadingReport === report.id
                                     ? "Downloading..."
                                     : `↓ Download ${selectedFormats[report.id].toUpperCase()}`}
+
                             </button>
+
                         </article>
+
                     ))}
+
                 </div>
+
             </section>
 
-            {/* INFORMATION NOTE */}
+            {/* ==========================================
+                INFORMATION NOTE
+            ========================================== */}
+
             <div className="admin-reports-note">
+
                 <span aria-hidden="true">ℹ️</span>
+
                 <p>
-                    <strong>Note:</strong> CSV files can be opened in
-                    Microsoft Excel. Date filtering depends on the date
-                    field configured in the backend.
+                    <strong>Note:</strong> CSV files can be opened
+                    in Microsoft Excel. Date filtering depends on
+                    the date field configured in the backend.
                 </p>
+
             </div>
+
         </main>
     );
 }
