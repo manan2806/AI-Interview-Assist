@@ -178,6 +178,9 @@ function AdminActivityLogs() {
         });
     }, [activities, filters.sort]);
 
+    const startItem = total === 0 ? 0 : (page - 1) * perPage + 1;
+    const endItem = Math.min(page * perPage, total);
+
     const handleSearchChange = (value) => {
         setSearch(value);
         setPage(1);
@@ -349,7 +352,7 @@ function AdminActivityLogs() {
                     <div>
                         <h2>All Activity Logs</h2>
                         <p>
-                            Showing {activities.length} of {total} activities
+                            Showing {startItem}-{endItem} of {total} activities
                         </p>
                     </div>
 

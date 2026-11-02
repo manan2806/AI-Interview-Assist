@@ -22,9 +22,9 @@
 
 .admin-activity-page .admin-interviews-heading h1 {
     margin: 8px 0;
+    color: #172033;
     font-size: 32px;
     font-weight: 800;
-    color: #172033;
 }
 
 .admin-activity-page .admin-interviews-heading p {
@@ -74,11 +74,11 @@
     max-width: 900px;
 }
 
-/* FILTER WRAPPER */
+/* FILTER */
 .admin-activity-page .admin-filter-wrapper {
     position: relative;
-    flex-shrink: 0;
     z-index: 20;
+    flex-shrink: 0;
 }
 
 .admin-activity-page .admin-filter-button {
@@ -90,7 +90,7 @@
     padding: 0 15px;
     border: 1px solid #dce1eb;
     border-radius: 9px;
-    background: white;
+    background: #ffffff;
     color: #39445a;
     font-size: 13px;
     font-weight: 700;
@@ -101,8 +101,8 @@
 .admin-activity-page .admin-filter-button:hover,
 .admin-activity-page .admin-filter-button.active {
     border-color: #7565e8;
-    color: #6254d9;
     background: #f8f7ff;
+    color: #6254d9;
 }
 
 .admin-activity-page .admin-filter-count {
@@ -123,15 +123,15 @@
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
+    z-index: 100;
     width: 310px;
     max-height: 75vh;
     overflow-y: auto;
     padding: 20px;
     border: 1px solid #e5e7ef;
     border-radius: 13px;
-    background: white;
+    background: #ffffff;
     box-shadow: 0 12px 35px rgba(25, 35, 60, 0.14);
-    z-index: 100;
 }
 
 .admin-activity-page .admin-filter-dropdown-header {
@@ -188,7 +188,7 @@
     border: 1px solid #dce1eb;
     border-radius: 8px;
     outline: none;
-    background: white;
+    background: #ffffff;
     color: #273248;
     font-size: 13px;
 }
@@ -206,7 +206,7 @@
     border: none;
     border-radius: 8px;
     background: #6254d9;
-    color: white;
+    color: #ffffff;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
@@ -222,39 +222,8 @@
     flex-shrink: 0;
 }
 
-/* PAGE SIZE SELECTOR */
-.activity-page-size-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.activity-page-size-control label {
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.activity-page-size-control select {
-    min-width: 68px;
-    padding: 8px 10px;
-    border: 1px solid #dbe1eb;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #263247;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-}
-
-.activity-page-size-control select:focus {
-    border-color: #7565e8;
-    box-shadow: 0 0 0 3px rgba(117, 101, 232, 0.12);
-}
-
 /* ==========================================
-   TABLE CARD
+   TABLE CARD & HEADING
 ========================================== */
 .admin-activity-page .admin-interviews-table-card {
     width: 100%;
@@ -282,16 +251,63 @@
     font-size: 13px;
 }
 
-.activity-logs-heading-right {
+/* ==========================================
+   PAGINATION HEADER & PAGE SIZE
+========================================== */
+.admin-activity-page .activity-logs-heading-right {
     display: flex;
+    color: #64748b;
+    font-size: 18px;
+    font-weight: 700;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 15px;
+    justify-content: flex-end;
+    gap: 18px;
+    width: auto;
     margin-left: auto;
 }
 
-.activity-logs-heading-right p {
+.admin-activity-page .activity-logs-heading-right>p {
+    flex-shrink: 0;
     margin: 0;
     white-space: nowrap;
+}
+
+.admin-activity-page .activity-page-size-control {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.admin-activity-page .activity-page-size-control label {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.admin-activity-page .activity-page-size-control select {
+    width: 86px;
+    height: 43px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    color: #172033;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-activity-page .activity-page-size-control select:focus {
+    border-color: #7565e8;
+    box-shadow: 0 0 0 3px rgba(117, 101, 232, 0.13);
 }
 
 /* ==========================================
@@ -367,7 +383,7 @@
     overflow-wrap: anywhere;
 }
 
-/* ROLE BADGES */
+/* ROLE & ACTION BADGES */
 .admin-activity-page .activity-role-tag,
 .admin-activity-page .activity-action-tag {
     display: inline-block;
@@ -379,50 +395,51 @@
     text-transform: capitalize;
 }
 
+/* ROLE */
 .admin-activity-page .activity-role-tag.admin {
-    color: #6941c6;
     background: #f0eaff;
+    color: #6941c6;
 }
 
 .admin-activity-page .activity-role-tag.user {
-    color: #1874bc;
     background: #e8f4ff;
+    color: #1874bc;
 }
 
-/* ACTION BADGES */
+/* ACTION */
 .admin-activity-page .activity-action-tag.activity-success {
-    color: #16804b;
     background: #e7f8ef;
+    color: #16804b;
 }
 
 .admin-activity-page .activity-action-tag.activity-logout {
-    color: #68738a;
     background: #edf0f5;
+    color: #68738a;
 }
 
 .admin-activity-page .activity-action-tag.activity-delete {
-    color: #c33b46;
     background: #ffebed;
+    color: #c33b46;
 }
 
 .admin-activity-page .activity-action-tag.activity-password {
-    color: #a56a12;
     background: #fff5dc;
+    color: #a56a12;
 }
 
 .admin-activity-page .activity-action-tag.activity-interview {
-    color: #2867bb;
     background: #e9f2ff;
+    color: #2867bb;
 }
 
 .admin-activity-page .activity-action-tag.activity-profile {
-    color: #7951b9;
     background: #f2eaff;
+    color: #7951b9;
 }
 
 .admin-activity-page .activity-action-tag.activity-default {
-    color: #515b70;
     background: #eff1f5;
+    color: #515b70;
 }
 
 /* DESCRIPTION */
@@ -495,9 +512,9 @@
 }
 
 /* ==========================================
-   PAGINATION
+   BOTTOM PAGINATION
 ========================================== */
-.activity-logs-pagination {
+.admin-activity-page .activity-logs-pagination {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -505,18 +522,18 @@
     margin-top: 25px;
 }
 
-.activity-logs-pagination>div {
+.admin-activity-page .activity-logs-pagination>div {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
 }
 
-.activity-logs-pagination button {
+.admin-activity-page .activity-logs-pagination button {
     padding: 9px 18px;
     border: 1px solid #d8ddeb;
     border-radius: 8px;
-    background: #fff;
+    background: #ffffff;
     color: #334155;
     font-size: 14px;
     font-weight: 600;
@@ -524,18 +541,18 @@
     transition: 0.2s ease;
 }
 
-.activity-logs-pagination button:hover:not(:disabled) {
-    background: #5b4bdb;
-    color: #fff;
+.admin-activity-page .activity-logs-pagination button:hover:not(:disabled) {
     border-color: #5b4bdb;
+    background: #5b4bdb;
+    color: #ffffff;
 }
 
-.activity-logs-pagination button:disabled {
+.admin-activity-page .activity-logs-pagination button:disabled {
     opacity: 0.45;
     cursor: not-allowed;
 }
 
-.activity-logs-pagination span {
+.admin-activity-page .activity-logs-pagination span {
     min-width: 36px;
     text-align: center;
     font-weight: 700;
@@ -569,13 +586,13 @@
 }
 
 [data-theme="dark"] .admin-activity-page .combined-toolbar {
-    background: #1f2937;
     border-color: #374151;
+    background: #1f2937;
 }
 
 [data-theme="dark"] .admin-activity-page .admin-interviews-search input {
-    background: #111827;
     border-color: #4b5563;
+    background: #111827;
     color: #e5e7eb;
 }
 
@@ -583,17 +600,17 @@
     color: #8792a5;
 }
 
-/* FILTER BUTTON */
+/* FILTER */
 [data-theme="dark"] .admin-activity-page .admin-filter-button {
-    background: #111827;
     border-color: #4b5563;
+    background: #111827;
     color: #e5e7eb;
 }
 
 [data-theme="dark"] .admin-activity-page .admin-filter-button:hover,
 [data-theme="dark"] .admin-activity-page .admin-filter-button.active {
-    background: #332c5e;
     border-color: #7565e8;
+    background: #332c5e;
     color: #c4b5fd;
 }
 
@@ -604,8 +621,8 @@
 
 /* FILTER DROPDOWN */
 [data-theme="dark"] .admin-activity-page .admin-filter-dropdown {
-    background: #1f2937;
     border-color: #374151;
+    background: #1f2937;
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 }
 
@@ -627,8 +644,8 @@
 
 [data-theme="dark"] .admin-activity-page .admin-filter-field input,
 [data-theme="dark"] .admin-activity-page .admin-filter-field select {
-    background: #111827;
     border-color: #4b5563;
+    background: #111827;
     color: #e5e7eb;
     color-scheme: dark;
 }
@@ -642,20 +659,21 @@
 }
 
 /* PAGE SIZE SELECTOR */
-[data-theme="dark"] .activity-page-size-control label {
+[data-theme="dark"] .admin-activity-page .activity-logs-heading-right>p,
+[data-theme="dark"] .admin-activity-page .activity-page-size-control label {
     color: #cbd5e1;
 }
 
-[data-theme="dark"] .activity-page-size-control select {
-    background: #283548;
-    color: #e5e7eb;
+[data-theme="dark"] .admin-activity-page .activity-page-size-control select {
     border-color: #475569;
+    background: #283548;
+    color: #f1f5f9;
 }
 
 /* TABLE CARD */
 [data-theme="dark"] .admin-activity-page .admin-interviews-table-card {
-    background: #1f2937;
     border-color: #374151;
+    background: #1f2937;
 }
 
 [data-theme="dark"] .admin-activity-page .admin-interviews-table-heading h2 {
@@ -701,51 +719,51 @@
     color: #aeb9ca;
 }
 
-/* DARK ROLE BADGES */
+/* ROLE BADGES */
 [data-theme="dark"] .admin-activity-page .activity-role-tag.admin {
-    color: #c4b5fd;
     background: #3b2d5e;
+    color: #c4b5fd;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-role-tag.user {
-    color: #7dd3fc;
     background: #173b52;
+    color: #7dd3fc;
 }
 
-/* DARK ACTION BADGES */
+/* ACTION BADGES */
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-success {
-    color: #86efac;
     background: #17432f;
+    color: #86efac;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-logout {
-    color: #cbd5e1;
     background: #374151;
+    color: #cbd5e1;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-delete {
-    color: #fca5a5;
     background: #51272d;
+    color: #fca5a5;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-password {
-    color: #fcd34d;
     background: #493a1d;
+    color: #fcd34d;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-interview {
-    color: #93c5fd;
     background: #1e3a5f;
+    color: #93c5fd;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-profile {
-    color: #d8b4fe;
     background: #42265c;
+    color: #d8b4fe;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-action-tag.activity-default {
-    color: #d1d5db;
     background: #374151;
+    color: #d1d5db;
 }
 
 /* EMPTY STATE */
@@ -759,8 +777,8 @@
 
 /* ERROR */
 [data-theme="dark"] .admin-activity-page .admin-interviews-error {
-    background: #451f27;
     border-color: #7f303b;
+    background: #451f27;
     color: #fca5a5;
 }
 
@@ -768,33 +786,37 @@
     color: #fca5a5;
 }
 
-/* PAGINATION */
-[data-theme="dark"] .admin-activity-page .activity-logs-pagination {
-    border-top-color: #374151;
-}
-
-[data-theme="dark"] .admin-activity-page .activity-logs-pagination p {
-    color: #9ca3af;
-}
-
-[data-theme="dark"] .admin-activity-page .activity-logs-pagination button,
-[data-theme="dark"] .admin-activity-page .activity-logs-pagination span {
-    background: #283548;
+/* BOTTOM PAGINATION */
+[data-theme="dark"] .admin-activity-page .activity-logs-pagination button {
     border-color: #4b5563;
+    background: #283548;
     color: #e5e7eb;
 }
 
 [data-theme="dark"] .admin-activity-page .activity-logs-pagination span {
-    background: #6254d9;
     border-color: #6254d9;
-    color: white;
+    background: #6254d9;
+    color: #ffffff;
 }
 
+/* ==========================================
+   RESPONSIVE DESIGN - TABLET
+========================================== */
+@media (max-width: 900px) {
+    .admin-activity-page {
+        padding: 28px 3%;
+    }
+
+    .admin-activity-page .admin-interviews-search {
+        order: 5;
+        width: 100%;
+        max-width: 100%;
+    }
+}
 
 /* ==========================================
-   IMPROVED MOBILE RESPONSIVE - ACTIVITY LOGS
+   RESPONSIVE DESIGN - MOBILE
 ========================================== */
-
 @media (max-width: 600px) {
     .admin-activity-page {
         width: 100%;
@@ -854,7 +876,7 @@
         font-size: 23px;
     }
 
-    /* SEARCH FULL WIDTH */
+    /* SEARCH */
     .admin-activity-page .admin-interviews-search {
         grid-column: 1 / -1;
         grid-row: 2;
@@ -870,7 +892,7 @@
         font-size: 13px;
     }
 
-    /* FILTER AND REFRESH */
+    /* FILTER */
     .admin-activity-page .admin-filter-wrapper {
         grid-column: 1;
         grid-row: 3;
@@ -891,15 +913,16 @@
         top: 50%;
         left: 50%;
         right: auto;
+        z-index: 9999;
         width: calc(100% - 24px);
         max-width: 380px;
         max-height: 82dvh;
         overflow-y: auto;
         padding: 17px;
         transform: translate(-50%, -50%);
-        z-index: 9999;
     }
 
+    /* REFRESH */
     .admin-activity-page .admin-interviews-refresh-btn {
         grid-column: 2;
         grid-row: 3;
@@ -910,28 +933,20 @@
         font-size: 12px;
     }
 
-    /* PAGE SIZE SELECTOR */
-    .activity-page-size-control {
-        justify-content: flex-end;
-    }
-
-    .activity-page-size-control select {
-        padding: 7px 8px;
-    }
-
     /* TABLE CARD */
     .admin-activity-page .admin-interviews-table-card {
         width: 100%;
         margin-top: 16px;
-        border-radius: 13px;
         overflow: hidden;
+        border-radius: 13px;
     }
 
     .admin-activity-page .admin-interviews-table-heading {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: flex-start;
-        gap: 12px;
+        justify-content: space-between;
+        gap: 10px;
         padding: 16px 14px;
     }
 
@@ -943,11 +958,37 @@
         font-size: 12px;
     }
 
+    /* TWO-LINE PAGE CONTROLS */
     .admin-activity-page .activity-logs-heading-right {
-        width: 100%;
-        margin: 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
         justify-content: space-between;
-        gap: 8px;
+        align-items: center;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .admin-activity-page .activity-logs-heading-right>p {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .admin-activity-page .activity-page-size-control {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .admin-activity-page .activity-page-size-control label {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .admin-activity-page .activity-page-size-control select {
+        width: 72px;
+        height: 38px;
+        flex-shrink: 0;
     }
 
     /* TABLE TO MOBILE CARDS */
@@ -1023,8 +1064,8 @@
         min-width: 0;
         max-width: calc(100% - 107px);
         align-items: flex-end;
-        text-align: right;
         gap: 4px;
+        text-align: right;
     }
 
     .admin-activity-page .activity-table-user strong {
@@ -1050,19 +1091,18 @@
         text-align: right;
     }
 
-    /* PAGINATION */
+    /* BOTTOM PAGINATION */
     .admin-activity-page .activity-logs-pagination {
         width: 100%;
         margin: 0;
         padding: 14px;
-        align-items: center;
     }
 
     .admin-activity-page .activity-logs-pagination>div {
-        width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        width: 100%;
         gap: 8px;
     }
 
@@ -1077,23 +1117,29 @@
         flex: 0 0 35px;
     }
 
-    /* EMPTY AND ERROR */
+    /* EMPTY STATE */
     .admin-activity-page .admin-interviews-state {
         min-height: 200px;
         padding: 25px 15px;
     }
 
+    /* ERROR */
     .admin-activity-page .admin-interviews-error {
         flex-direction: column;
         align-items: flex-start;
         margin: 12px;
         font-size: 12px;
     }
+}
 
-    /* DARK MODE MOBILE CARDS */
+/* ==========================================
+   DARK THEME - MOBILE CARDS
+========================================== */
+@media (max-width: 600px) {
+
     [data-theme="dark"] .admin-activity-page .activity-logs-table tbody tr {
-        background: #283548;
         border-color: #46546a;
+        background: #283548;
         box-shadow: none;
     }
 
@@ -1111,7 +1157,9 @@
     }
 }
 
-/* SMALL MOBILE DEVICES */
+/* ==========================================
+   SMALL MOBILE DEVICES
+========================================== */
 @media (max-width: 360px) {
 
     .admin-activity-page {
@@ -1119,13 +1167,35 @@
     }
 
     .admin-activity-page .combined-toolbar {
-        padding: 12px;
         gap: 10px;
+        padding: 12px;
     }
 
     .admin-activity-page .admin-filter-button {
-        font-size: 11px;
         gap: 4px;
+        font-size: 11px;
+    }
+
+    .admin-activity-page .admin-interviews-table-heading {
+        gap: 7px;
+        padding: 14px 10px;
+    }
+
+    .admin-activity-page .activity-logs-heading-right {
+        gap: 7px;
+    }
+
+    .admin-activity-page .activity-logs-heading-right>p {
+        font-size: 11px;
+    }
+
+    .admin-activity-page .activity-page-size-control label {
+        font-size: 11px;
+    }
+
+    .admin-activity-page .activity-page-size-control select {
+        width: 62px;
+        height: 34px;
     }
 
     .admin-activity-page .activity-logs-table td::before {

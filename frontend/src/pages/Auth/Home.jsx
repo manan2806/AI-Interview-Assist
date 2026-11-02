@@ -229,32 +229,6 @@ function Home() {
                                 Discover More
                             </a>
                         </div>
-
-                        <div className="hero-trust-row">
-                            <div className="hero-trust-item">
-                                <span className="trust-icon trust-purple">✦</span>
-                                <div>
-                                    <strong>AI-Powered</strong>
-                                    <small>Smart Questions</small>
-                                </div>
-                            </div>
-
-                            <div className="hero-trust-item">
-                                <span className="trust-icon trust-blue">◈</span>
-                                <div>
-                                    <strong>Personalized</strong>
-                                    <small>Instant Feedback</small>
-                                </div>
-                            </div>
-
-                            <div className="hero-trust-item">
-                                <span className="trust-icon trust-green">↗</span>
-                                <div>
-                                    <strong>Skill Growth</strong>
-                                    <small>Track Progress</small>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* RIGHT SIDE: AI DASHBOARD VISUAL */}
