@@ -113,7 +113,7 @@ def admin_get_activity_logs(current_user):
         # PAGINATION
         try:
             page = int(request.args.get("page", 1))
-            per_page = int(request.args.get("per_page", 20))
+            per_page = int(request.args.get("per_page", 10))
         except ValueError:
             return (
                 jsonify(
@@ -209,7 +209,7 @@ def admin_get_user_activity_logs(current_user, user_id):
 
         try:
             page = int(request.args.get("page", 1))
-            per_page = int(request.args.get("per_page", 20))
+            per_page = int(request.args.get("per_page", 10))
         except ValueError:
             return (
                 jsonify(

@@ -1,6 +1,5 @@
 /* ==========================================
    ADMIN ACTIVITY LOGS
-   ADMIN INTERVIEW STYLE LAYOUT
 ========================================== */
 .admin-activity-page {
     min-height: 100vh;
@@ -221,6 +220,37 @@
 /* REFRESH */
 .admin-activity-page .admin-interviews-refresh-btn {
     flex-shrink: 0;
+}
+
+/* PAGE SIZE SELECTOR */
+.activity-page-size-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.activity-page-size-control label {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.activity-page-size-control select {
+    min-width: 68px;
+    padding: 8px 10px;
+    border: 1px solid #dbe1eb;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #263247;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+.activity-page-size-control select:focus {
+    border-color: #7565e8;
+    box-shadow: 0 0 0 3px rgba(117, 101, 232, 0.12);
 }
 
 /* ==========================================
@@ -611,6 +641,17 @@
     background: #6254d9;
 }
 
+/* PAGE SIZE SELECTOR */
+[data-theme="dark"] .activity-page-size-control label {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .activity-page-size-control select {
+    background: #283548;
+    color: #e5e7eb;
+    border-color: #475569;
+}
+
 /* TABLE CARD */
 [data-theme="dark"] .admin-activity-page .admin-interviews-table-card {
     background: #1f2937;
@@ -749,69 +790,100 @@
     color: white;
 }
 
+
 /* ==========================================
-   RESPONSIVE
+   IMPROVED MOBILE RESPONSIVE - ACTIVITY LOGS
 ========================================== */
-@media (max-width: 900px) {
-    .admin-activity-page {
-        padding: 28px 3%;
-    }
-
-    .admin-activity-page .combined-toolbar {
-        gap: 12px;
-    }
-
-    .admin-activity-page .admin-interviews-search {
-        order: 5;
-        flex-basis: 100%;
-        max-width: 100%;
-    }
-
-    .admin-activity-page .admin-filter-dropdown {
-        right: 0;
-    }
-}
 
 @media (max-width: 600px) {
     .admin-activity-page {
-        padding: 22px 15px;
+        width: 100%;
+        min-height: 100vh;
+        padding: 18px 12px;
+        overflow-x: hidden;
     }
 
+    /* PAGE HEADER */
     .admin-activity-page .admin-interviews-heading {
-        align-items: flex-start;
         flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 18px;
     }
 
     .admin-activity-page .admin-interviews-heading h1 {
-        font-size: 27px;
+        font-size: 25px;
+        line-height: 1.3;
     }
 
-    .activity-logs-heading-right {
-        width: 100%;
-        justify-content: space-between;
+    .admin-activity-page .admin-interviews-heading p {
+        font-size: 12px;
+        line-height: 1.6;
     }
 
+    .admin-activity-page .admin-interviews-back-btn {
+        align-self: flex-start;
+    }
+
+    /* TOOLBAR */
     .admin-activity-page .combined-toolbar {
-        align-items: center;
+        display: grid;
+        grid-template-columns: auto 1fr;
         gap: 12px;
+        padding: 15px;
+        border-radius: 13px;
+    }
+
+    .admin-activity-page .admin-interviews-summary-icon {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 25px;
     }
 
     .admin-activity-page .admin-interviews-summary-info {
-        flex: 1;
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
     }
 
+    .admin-activity-page .admin-interviews-summary-info span {
+        font-size: 11px;
+    }
+
+    .admin-activity-page .admin-interviews-summary-info strong {
+        font-size: 23px;
+    }
+
+    /* SEARCH FULL WIDTH */
     .admin-activity-page .admin-interviews-search {
-        order: 5;
-        flex-basis: 100%;
-        min-width: 100%;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        order: initial;
     }
 
+    .admin-activity-page .admin-interviews-search input {
+        width: 100%;
+        min-width: 0;
+        font-size: 13px;
+    }
+
+    /* FILTER AND REFRESH */
     .admin-activity-page .admin-filter-wrapper {
-        flex: 1;
+        grid-column: 1;
+        grid-row: 3;
+        width: 100%;
+        min-width: 0;
     }
 
     .admin-activity-page .admin-filter-button {
         width: 100%;
+        min-height: 42px;
+        padding: 0 9px;
+        gap: 5px;
+        font-size: 12px;
     }
 
     .admin-activity-page .admin-filter-dropdown {
@@ -819,29 +891,250 @@
         top: 50%;
         left: 50%;
         right: auto;
-        width: calc(100% - 30px);
-        max-width: 360px;
-        max-height: 80vh;
+        width: calc(100% - 24px);
+        max-width: 380px;
+        max-height: 82dvh;
+        overflow-y: auto;
+        padding: 17px;
         transform: translate(-50%, -50%);
+        z-index: 9999;
     }
 
     .admin-activity-page .admin-interviews-refresh-btn {
-        flex: 1;
+        grid-column: 2;
+        grid-row: 3;
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+    /* PAGE SIZE SELECTOR */
+    .activity-page-size-control {
+        justify-content: flex-end;
+    }
+
+    .activity-page-size-control select {
+        padding: 7px 8px;
+    }
+
+    /* TABLE CARD */
+    .admin-activity-page .admin-interviews-table-card {
+        width: 100%;
+        margin-top: 16px;
+        border-radius: 13px;
+        overflow: hidden;
     }
 
     .admin-activity-page .admin-interviews-table-heading {
-        align-items: flex-start;
+        display: flex;
         flex-direction: column;
-        padding: 18px;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px 14px;
     }
 
-    .admin-activity-page .activity-logs-pagination {
-        align-items: flex-start;
+    .admin-activity-page .admin-interviews-table-heading h2 {
+        font-size: 17px;
+    }
+
+    .admin-activity-page .admin-interviews-table-heading p {
+        font-size: 12px;
+    }
+
+    .admin-activity-page .activity-logs-heading-right {
+        width: 100%;
+        margin: 0;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    /* TABLE TO MOBILE CARDS */
+    .admin-activity-page .admin-interviews-table-scroll {
+        width: 100%;
+        overflow: visible;
+        padding: 0 12px 12px;
+    }
+
+    .admin-activity-page .activity-logs-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-activity-page .activity-logs-table thead {
+        display: none;
+    }
+
+    .admin-activity-page .activity-logs-table tbody {
+        display: flex;
         flex-direction: column;
-        padding: 18px;
+        gap: 13px;
+        width: 100%;
+    }
+
+    .admin-activity-page .activity-logs-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e4e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 3px 12px rgba(20, 30, 55, 0.04);
+    }
+
+    .admin-activity-page .activity-logs-table tbody tr:hover {
+        background: #fafaff;
+    }
+
+    .admin-activity-page .activity-logs-table td {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 9px 0;
+        border-bottom: 1px solid #edf0f5;
+        font-size: 12px;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .admin-activity-page .activity-logs-table td:last-child {
+        border-bottom: none;
+    }
+
+    .admin-activity-page .activity-logs-table td::before {
+        content: attr(data-label);
+        flex: 0 0 95px;
+        color: #778196;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .admin-activity-page .activity-table-user {
+        min-width: 0;
+        max-width: calc(100% - 107px);
+        align-items: flex-end;
+        text-align: right;
+        gap: 4px;
+    }
+
+    .admin-activity-page .activity-table-user strong {
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .admin-activity-page .activity-table-user span,
+    .admin-activity-page .activity-table-user small {
+        font-size: 11px;
+        overflow-wrap: anywhere;
+    }
+
+    .admin-activity-page .activity-table-description {
+        min-width: 0;
+        max-width: calc(100% - 107px);
+        line-height: 1.5;
+    }
+
+    .admin-activity-page .admin-interviews-date {
+        min-width: 0;
+        white-space: normal;
+        text-align: right;
+    }
+
+    /* PAGINATION */
+    .admin-activity-page .activity-logs-pagination {
+        width: 100%;
+        margin: 0;
+        padding: 14px;
+        align-items: center;
     }
 
     .admin-activity-page .activity-logs-pagination>div {
-        flex-wrap: wrap;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .admin-activity-page .activity-logs-pagination button {
+        flex: 1;
+        min-width: 0;
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .admin-activity-page .activity-logs-pagination span {
+        flex: 0 0 35px;
+    }
+
+    /* EMPTY AND ERROR */
+    .admin-activity-page .admin-interviews-state {
+        min-height: 200px;
+        padding: 25px 15px;
+    }
+
+    .admin-activity-page .admin-interviews-error {
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 12px;
+        font-size: 12px;
+    }
+
+    /* DARK MODE MOBILE CARDS */
+    [data-theme="dark"] .admin-activity-page .activity-logs-table tbody tr {
+        background: #283548;
+        border-color: #46546a;
+        box-shadow: none;
+    }
+
+    [data-theme="dark"] .admin-activity-page .activity-logs-table tbody tr:hover {
+        background: #334155;
+    }
+
+    [data-theme="dark"] .admin-activity-page .activity-logs-table td {
+        border-bottom-color: #46546a;
+        color: #e5e7eb;
+    }
+
+    [data-theme="dark"] .admin-activity-page .activity-logs-table td::before {
+        color: #aeb9ca;
+    }
+}
+
+/* SMALL MOBILE DEVICES */
+@media (max-width: 360px) {
+
+    .admin-activity-page {
+        padding: 15px 9px;
+    }
+
+    .admin-activity-page .combined-toolbar {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .admin-activity-page .admin-filter-button {
+        font-size: 11px;
+        gap: 4px;
+    }
+
+    .admin-activity-page .activity-logs-table td::before {
+        flex-basis: 80px;
+        font-size: 10px;
+    }
+
+    .admin-activity-page .activity-table-user,
+    .admin-activity-page .activity-table-description {
+        max-width: calc(100% - 92px);
     }
 }

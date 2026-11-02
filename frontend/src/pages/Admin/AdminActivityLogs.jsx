@@ -57,7 +57,7 @@ function AdminActivityLogs() {
         users: [],
     });
     const [page, setPage] = useState(1);
-    const [perPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [overallTotal, setOverallTotal] = useState(0);
@@ -349,12 +349,30 @@ function AdminActivityLogs() {
                     <div>
                         <h2>All Activity Logs</h2>
                         <p>
-                            Showing {total === 0 ? 0 : activities.length} of {overallTotal} activities
+                            Showing {activities.length} of {total} activities
                         </p>
                     </div>
 
                     <div className="activity-logs-heading-right">
                         <p>Page {page} of {totalPages}</p>
+
+                        <div className="activity-page-size-control">
+                            <label htmlFor="activity-page-size">Show:</label>
+
+                            <select
+                                id="activity-page-size"
+                                value={perPage}
+                                onChange={(event) => {
+                                    setPerPage(Number(event.target.value));
+                                    setPage(1);
+                                }}
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                        </div>
 
                         {(search || activeFilterCount > 0) && (
                             <button
@@ -411,33 +429,41 @@ function AdminActivityLogs() {
                                 <tbody>
                                     {sortedActivities.map((activity, index) => (
                                         <tr key={activity.log_id || `${activity.user_id}-${index}`}>
-                                            <td>
+                                            <td data-label="Log ID">
                                                 <span className="admin-interviews-user-id">
                                                     {activity.log_id || "—"}
                                                 </span>
                                             </td>
-                                            <td>
+
+                                            <td data-label="User Details">
                                                 <div className="activity-table-user">
                                                     <strong>{activity.user_name || "Unknown User"}</strong>
                                                     <span>{activity.user_email || "—"}</span>
                                                     <small>{activity.user_id || "—"}</small>
                                                 </div>
                                             </td>
-                                            <td>
+
+                                            <td data-label="Role">
                                                 <span className={`activity-role-tag ${String(activity.role).toLowerCase() === "admin" ? "admin" : "user"}`}>
                                                     {activity.role || "user"}
                                                 </span>
                                             </td>
-                                            <td>
+
+                                            <td data-label="Activity">
                                                 <span className={`activity-action-tag ${getActionClass(activity.action)}`}>
                                                     {formatAction(activity.action)}
                                                 </span>
                                             </td>
-                                            <td className="activity-table-description">
+
+                                            <td data-label="Description" className="activity-table-description">
                                                 {activity.description || "—"}
                                             </td>
-                                            <td>{activity.ip_address || "—"}</td>
-                                            <td className="admin-interviews-date">
+
+                                            <td data-label="IP Address">
+                                                {activity.ip_address || "—"}
+                                            </td>
+
+                                            <td data-label="Date & Time" className="admin-interviews-date">
                                                 {formatDate(activity.created_at)}
                                             </td>
                                         </tr>
