@@ -306,7 +306,6 @@ function AdminDashboard() {
     // ==========================================
     return (
         <div className="admin-dashboard">
-
             {/* NAVBAR */}
             <nav className="admin-navbar">
                 <Link to="/admin-dashboard" className="admin-brand">
@@ -543,7 +542,7 @@ function AdminDashboard() {
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     <span>📊</span>
-                                    <span>Reports Center</span>
+                                    <span>Export Reports</span>
                                 </Link>
 
                                 <Link
@@ -807,10 +806,10 @@ function AdminDashboard() {
                             </div>
 
                             <div className="admin-action-content">
-                                <h3>Reports Center</h3>
+                                <h3>Export Reports</h3>
                                 <p>
-                                    Export users, interviews, problem reports, and
-                                    reviews as CSV files with optional date filters.
+                                    Export users, interviews, problem reports, activity logs and
+                                    reviews as PDF, Excel, Word, CSV files with optional date filters.
                                 </p>
                             </div>
 
