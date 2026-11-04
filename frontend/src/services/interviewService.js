@@ -99,3 +99,33 @@ export const submitProblemReport = async (problemType, subject, description) => 
 
     return response.data;
 };
+
+// LIVE CODING INTERVIEW APIs
+export const generateCodingQuestion = async (codingData) => {
+    const response = await api.post(
+        "/api/coding-interview/generate-question",
+        codingData
+    );
+
+    return response.data;
+};
+
+// RUN CODE
+export const runCodingCode = async (codeData) => {
+    const response = await api.post(
+        "/api/coding-interview/run-code",
+        codeData
+    );
+
+    return response.data;
+};
+
+// SUBMIT CODE
+export const submitCodingCode = async (submissionData) => {
+    const response = await api.post(
+        "/api/coding-interview/submit-code",
+        submissionData
+    );
+
+    return response.data;
+};
