@@ -138,8 +138,19 @@ function CodingInterview() {
                 )
             );
 
-            setStdin("");
+            // Automatically load the first sample input
+            const firstExample = Array.isArray(setup.question.examples)
+                ? setup.question.examples[0]
+                : null;
+
+            setStdin(
+                getExampleValue(firstExample, ["input", "stdin"]) || ""
+            );
+
             setResult(null);
+            setSubmissionResult(null);
+            setError("");
+            
             setSubmissionResult(null);
             setError("");
         } catch (err) {

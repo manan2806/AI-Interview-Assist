@@ -549,87 +549,147 @@ def generate_ai_coding_question(
     field, target_role, experience_level, difficulty, language
 ):
 
-    prompt = f"""
-You are an expert technical interviewer conducting a
-real-time programming interview.
+    difficulty_topics = {
+        "Easy": """
+        Reference topics:
+        - Reverse a string without slicing
+        - Prime number checking
+        - Palindrome checking
+        - Factorial
+        - Largest number in a list
+        - Sum and frequency of elements
+        - Basic loops and conditions
+        """,
+        "Medium": """
+        Reference topics:
+        - Second largest number in a list
+        - Character frequency
+        - Anagram checking
+        - Missing number in an array
+        - Flatten a nested list
+        - Hash maps and dictionaries
+        - Recursion and searching
+        """,
+        "Hard": """
+        Reference topics:
+        - LRU Cache implementation
+        - Custom decorators
+        - Longest substring without repeating characters
+        - Binary Search implementation
+        - Longest palindromic substring
+        - Advanced data structures
+        - Algorithm optimization
+        """,
+    }
 
-Generate exactly ONE original programming interview question.
+    topics = difficulty_topics.get(difficulty)
+
+    if not topics:
+        raise ValueError("Invalid difficulty level.")
+
+    prompt = f"""
+You are an expert technical coding interviewer.
+
+Generate EXACTLY ONE original coding interview problem.
 
 CANDIDATE DETAILS:
 
 Technical Field: {field}
-Target Technical Role: {target_role}
+Target Role: {target_role}
 Experience Level: {experience_level}
 Difficulty: {difficulty}
-Preferred Programming Language: {language}
+Programming Language: {language}
 
-QUESTION REQUIREMENTS:
+REFERENCE TOPICS FOR {difficulty.upper()} LEVEL:
 
-1. The question must be relevant to the selected technical field.
-2. The question must match the actual target role.
-3. The question must match the candidate's experience level.
-4. The question must match the selected difficulty.
-5. Use the preferred programming language.
-6. Generate a practical coding interview problem.
-7. Do not generate unrelated generic questions.
-8. Generate only ONE question.
+{topics}
 
-DIFFICULTY RULES:
+QUESTION GENERATION RULES:
 
-Easy:
-- Basic input/output
-- Arithmetic operations
-- Conditions and loops
-- Simple strings and numbers
+1. Generate a practical programming interview problem.
+2. Use the reference topics as inspiration.
+3. Do not simply copy a reference question.
+4. Generate an original variation of a programming problem.
+5. Match the selected technical field and target role.
+6. Match the selected experience level.
+7. Respect the selected difficulty.
+8. Avoid unnecessarily advanced concepts for Fresher candidates.
+9. Generate exactly ONE question.
 
-Medium:
-- Functions
-- Arrays and lists
-- String manipulation
-- Searching and sorting
-- Logical programming problems
+DIFFICULTY GUIDELINES:
 
-Hard:
-- Advanced algorithms
-- Data structures
-- Complex logical problems
-- Optimization problems
+EASY:
+Basic programming, loops, conditions, strings,
+numbers, lists and simple problem solving.
 
-QUESTION STYLE:
+MEDIUM:
+Arrays, strings, dictionaries, hash maps,
+recursion, searching, sorting and nested structures.
 
-Use natural interview question styles.
-Do not always start with "Write a program to".
+HARD:
+Advanced algorithms, data structures,
+optimization, caching, decorators and complex
+problem solving.
 
-IMPORTANT:
+INPUT/OUTPUT RULES:
 
-1. Keep the description clear and concise.
-2. Description must contain only the actual question.
-3. Do not include sample input/output.
-4. Do not include explanations or solutions.
-5. Do not include hints.
-6. Generate valid starter code.
-7. Starter code must not contain the complete solution.
-8. Generate at least 4 meaningful test cases.
-9. At least 2 test cases must be hidden.
-10. Test cases must match the actual question.
+1. Every question MUST use standard input (stdin)
+   and standard output (stdout).
+2. Define an exact Input Format.
+3. Define an exact Output Format.
+4. Include sample input and expected sample output.
+5. Every test case input must follow the same format.
+6. Every expected_output must be the exact stdout result.
+7. Do not use Python function arguments as test input.
+8. Do not mix function-based and stdin-based formats.
+9. Generate starter code for the selected language.
+10. Starter code must be executable and must not
+    contain the complete solution.
+
+EXAMPLES:
+
+Generate 1 or 2 sample examples.
+
+TEST CASE RULES:
+
+1. Generate at least 5 test cases.
+2. Generate between 5 and 10 test cases.
+3. At least 2 test cases must be hidden.
+4. Include normal, boundary and edge cases.
+5. Include empty input where applicable.
+6. All inputs must follow the declared Input Format.
+7. All expected outputs must be correct.
+8. Do not reveal hidden test case input/output
+   in the public question.
 
 Return ONLY valid JSON using this exact structure:
 
 {{
-    "title": "Short question title",
-    "description": "Actual interview question only",
-    "examples": [],
-    "constraints": [],
-    "starter_code": "Starter code here",
+    "title": "Question title",
+    "description": "Complete problem description",
+    "input_format": "Input format description",
+    "output_format": "Output format description",
+    "examples": [
+        {{
+            "input": "Sample input",
+            "output": "Expected output",
+            "explanation": "Explanation"
+        }}
+    ],
+    "constraints": [
+        "Constraint 1",
+        "Constraint 2"
+    ],
+    "starter_code": "Executable starter code",
     "test_cases": [
         {{
-            "input": "input value",
-            "expected_output": "expected result",
+            "input": "Standard input",
+            "expected_output": "Expected output",
             "is_hidden": false
         }},
         {{
-            "input": "input value",
-            "expected_output": "expected result",
+            "input": "Standard input",
+            "expected_output": "Expected output",
             "is_hidden": true
         }}
     ]
@@ -655,6 +715,8 @@ Return valid JSON only.
     required_fields = [
         "title",
         "description",
+        "input_format",
+        "output_format",
         "examples",
         "constraints",
         "starter_code",
@@ -665,39 +727,44 @@ Return valid JSON only.
         if key not in question:
             raise ValueError(f"Generated question is missing: {key}")
 
-    if not isinstance(question["title"], str) or not question["title"].strip():
-        raise ValueError("Invalid question title.")
-
-    if (
-        not isinstance(question["description"], str)
-        or not question["description"].strip()
-    ):
-        raise ValueError("Invalid question description.")
+    for key in [
+        "title",
+        "description",
+        "input_format",
+        "output_format",
+        "starter_code",
+    ]:
+        if not isinstance(question[key], str) or not question[key].strip():
+            raise ValueError(f"Invalid generated {key}.")
 
     if not isinstance(question["examples"], list):
         raise ValueError("Invalid question examples.")
 
-    question["examples"] = []
-
     if not isinstance(question["constraints"], list):
         raise ValueError("Invalid question constraints.")
-
-    question["constraints"] = []
-
-    if (
-        not isinstance(question["starter_code"], str)
-        or not question["starter_code"].strip()
-    ):
-        raise ValueError("Invalid starter code.")
 
     if not isinstance(question["test_cases"], list):
         raise ValueError("Invalid test cases.")
 
-    if len(question["test_cases"]) < 4 or len(question["test_cases"]) > 20:
-        raise ValueError("Question must contain between 4 and 20 test cases.")
+    if len(question["test_cases"]) < 5 or len(question["test_cases"]) > 10:
+        raise ValueError("Question must contain between 5 and 10 test cases.")
+
+    if not question["examples"]:
+        raise ValueError("At least one sample example is required.")
+
+    for example in question["examples"]:
+        if not isinstance(example, dict):
+            raise ValueError("Invalid example format.")
+
+        for key in ["input", "output", "explanation"]:
+            if not isinstance(example.get(key), str):
+                raise ValueError(f"Invalid example {key}.")
+
+    for constraint in question["constraints"]:
+        if not isinstance(constraint, str):
+            raise ValueError("Invalid constraint format.")
 
     for test_case in question["test_cases"]:
-
         if not isinstance(test_case, dict):
             raise ValueError("Invalid test case format.")
 
@@ -710,9 +777,7 @@ Return valid JSON only.
         if not isinstance(test_case.get("is_hidden"), bool):
             raise ValueError("Invalid hidden test case flag.")
 
-    hidden_count = sum(
-        1 for test_case in question["test_cases"] if test_case["is_hidden"]
-    )
+    hidden_count = sum(1 for tc in question["test_cases"] if tc["is_hidden"])
 
     if hidden_count < 2:
         raise ValueError("At least 2 hidden test cases are required.")
@@ -857,6 +922,8 @@ def generate_coding_question():
         public_question = {
             "title": question["title"],
             "description": question["description"],
+            "input_format": question["input_format"],
+            "output_format": question["output_format"],
             "examples": question["examples"],
             "constraints": question["constraints"],
             "starter_code": question["starter_code"],
