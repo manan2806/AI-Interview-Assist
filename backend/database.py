@@ -15,7 +15,6 @@ users = None
 interviews = None
 problem_reports = None
 activity_logs = None
-coding_interviews = None
 
 # MONGODB CONNECTION
 try:
@@ -38,17 +37,11 @@ try:
     interviews = db["interviews"]
     problem_reports = db["problem_reports"]
     activity_logs = db["activity_logs"]
-    coding_interviews = db["coding_interviews"]
 
     # ACTIVITY LOGS INDEXES
     activity_logs.create_index([("user_id", 1), ("created_at", -1)])
     activity_logs.create_index([("created_at", -1)])
     activity_logs.create_index([("action", 1)])
-
-    # CODING INTERVIEW INDEXES
-    coding_interviews.create_index([("user_id", 1), ("created_at", -1)])
-    coding_interviews.create_index([("coding_interview_id", 1)], unique=True)
-    coding_interviews.create_index([("status", 1)])
 
     print("✅ MongoDB Connected Successfully!")
 except Exception as e:
@@ -61,4 +54,3 @@ except Exception as e:
     interviews = None
     problem_reports = None
     activity_logs = None
-    coding_interviews = None

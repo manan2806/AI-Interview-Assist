@@ -23,7 +23,6 @@ import Settings from "./pages/User/Settings";
 import Announcements from "./pages/User/Announcements";
 import Reviews from "./pages/User/Reviews";
 import AdminActivityLogs from "./pages/Admin/AdminActivityLogs";
-import CodingInterview from "./pages/User/CodingInterview";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -169,12 +168,6 @@ function App() {
                     <Route
                         path="/reviews"
                         element={<Reviews />}
-                    />
-
-                    {/* Live Coding Interview */}
-                    <Route
-                        path="/coding-interview/start"
-                        element={<CodingInterview />}
                     />
                 </Route>
 

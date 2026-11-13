@@ -15,8 +15,6 @@ from routes.announcements_routes import admin_announcements_bp, user_announcemen
 from routes.reviews_routes import reviews_bp
 from routes.reports_routes import reports_bp
 from routes.activity_logs_routes import activity_logs_bp
-from routes.coding_interview_routes import coding_bp
-
 
 def create_app():
     load_dotenv()
@@ -63,7 +61,6 @@ def create_app():
     app.register_blueprint(reviews_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(activity_logs_bp)
-    app.register_blueprint(coding_bp, url_prefix="/api/coding-interview")
 
     @app.route("/", methods=["GET"])
     def home():
