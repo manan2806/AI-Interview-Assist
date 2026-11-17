@@ -22,7 +22,6 @@ import Support from "./pages/User/Support";
 import Settings from "./pages/User/Settings";
 import Announcements from "./pages/User/Announcements";
 import Reviews from "./pages/User/Reviews";
-import AdminActivityLogs from "./pages/Admin/AdminActivityLogs";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -34,6 +33,7 @@ import AdminProblemReports from "./pages/Admin/AdminProblemReports";
 import AdminAnnouncements from "./pages/Admin/AdminAnnouncements";
 import AdminReviews from "./pages/Admin/AdminReviews";
 import AdminReports from "./pages/Admin/AdminReports";
+import AdminActivityLogs from "./pages/Admin/AdminActivityLogs";
 
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
