@@ -15,43 +15,20 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as SecureStore from "expo-secure-store";
 import { useAuth } from "../../context/AuthContext";
-
-type AuthStackParamList = {
-    Login: undefined;
-    Register: undefined;
-};
+import type { AuthStackParamList } from "../../navigation/AuthNavigator";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
 const generateCaptcha = () => {
-    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-    const numbers = "23456789";
-
-    const randomChar = (chars: string) =>
-        chars[Math.floor(Math.random() * chars.length)];
-
-    const characters = [
-        randomChar(letters),
-        randomChar(letters),
-        randomChar(numbers),
-        randomChar(numbers),
-        randomChar(letters),
-        randomChar(numbers),
-    ];
-
-    for (let i = characters.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [characters[i], characters[j]] = [
-            characters[j],
-            characters[i],
-        ];
-    }
-
-    return characters.join("");
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    return Array.from({ length: 6 }, () =>
+        chars[Math.floor(Math.random() * chars.length)]
+    ).join("");
 };
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const { login } = useAuth();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [captchaCode, setCaptchaCode] = useState(generateCaptcha);
@@ -63,22 +40,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     useEffect(() => {
         const restoreLock = async () => {
-            const stored = await SecureStore.getItemAsync(
-                "loginLockedUntil"
-            );
+            const stored = await SecureStore.getItemAsync("loginLockedUntil");
 
             if (stored) {
                 const remaining = Math.max(
                     0,
                     Math.ceil((Number(stored) - Date.now()) / 1000)
                 );
-
                 setLockSeconds(remaining);
 
                 if (remaining === 0) {
-                    await SecureStore.deleteItemAsync(
-                        "loginLockedUntil"
-                    );
+                    await SecureStore.deleteItemAsync("loginLockedUntil");
                 }
             }
         };
@@ -89,11 +61,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     useEffect(() => {
         if (lockSeconds <= 0) return;
 
-        const timer = setTimeout(async () => {
-            setLockSeconds((previous) => {
-                const next = Math.max(0, previous - 1);
-                return next;
-            });
+        const timer = setTimeout(() => {
+            setLockSeconds((previous) => Math.max(0, previous - 1));
         }, 1000);
 
         return () => clearTimeout(timer);
@@ -131,10 +100,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         );
 
         setLockSeconds(seconds);
-        setError(
-            `Login temporarily blocked. Try again in ${seconds} seconds.`
-        );
-
+        setError(`Login temporarily blocked. Try again in ${seconds} seconds.`);
         return true;
     };
 
@@ -142,9 +108,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         setError("");
 
         if (lockSeconds > 0) {
-            setError(
-                `Login temporarily blocked. Try again in ${lockSeconds} seconds.`
-            );
+            setError(`Please try again in ${lockSeconds} seconds.`);
             return;
         }
 
@@ -180,27 +144,20 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             if (data.success && data.token && data.user) {
                 await SecureStore.deleteItemAsync("loginLockedUntil");
 
-                if (data.user.role === "admin") {
-                    Alert.alert(
-                        "Login Successful",
-                        `Welcome, ${data.user.name}! Admin login successful.`
-                    );
-                } else if (data.user.role === "user") {
+                if (
+                    data.user.role === "admin" ||
+                    data.user.role === "user"
+                ) {
                     Alert.alert(
                         "Login Successful",
                         `Welcome, ${data.user.name}!`
                     );
                 } else {
                     await SecureStore.deleteItemAsync("access_token");
-                    setError(
-                        "Unable to verify account role. Please contact support."
-                    );
+                    setError("Unable to verify account role. Please contact support.");
                 }
             } else {
-                const message =
-                    data.message || "Invalid email or password.";
-
-                setError(message);
+                setError(data.message || "Invalid email or password.");
                 refreshCaptcha();
             }
         } catch (err: any) {
@@ -227,15 +184,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         }
     };
 
-    const captchaColors = [
-        "#DC2626",
-        "#2563EB",
-        "#059669",
-        "#9333EA",
-        "#D97706",
-        "#0891B2",
-    ];
-
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -244,23 +192,27 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
-                <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.navigate("Home")}
+                >
+                    <Text style={styles.backText}>‹  Back to Home</Text>
+                </TouchableOpacity>
+
+                <View style={styles.brandSection}>
                     <View style={styles.logo}>
                         <Text style={styles.logoText}>AI</Text>
                     </View>
-
-                    <Text style={styles.appName}>
-                        AI Interview Assist
-                    </Text>
-
+                    <Text style={styles.appName}>AI Interview Assist</Text>
                     <Text style={styles.tagline}>
-                        Prepare smarter and perform better with AI-powered interview practice.
+                        Your journey to interview success starts here.
                     </Text>
                 </View>
 
                 <View style={styles.card}>
-                    <Text style={styles.title}>Welcome Back</Text>
+                    <Text style={styles.title}>Welcome Back!</Text>
                     <Text style={styles.subtitle}>
                         Sign in to continue your interview preparation.
                     </Text>
@@ -275,7 +227,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                     <TextInput
                         style={styles.input}
                         placeholder="Enter your email"
-                        placeholderTextColor="#999"
+                        placeholderTextColor="#94A3B8"
                         value={email}
                         onChangeText={setEmail}
                         keyboardType="email-address"
@@ -289,50 +241,30 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         <TextInput
                             style={styles.passwordInput}
                             placeholder="Enter your password"
-                            placeholderTextColor="#999"
+                            placeholderTextColor="#94A3B8"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}
                             autoCapitalize="none"
                             editable={!loading && lockSeconds === 0}
                         />
-
                         <TouchableOpacity
-                            onPress={() =>
-                                setShowPassword(!showPassword)
-                            }
+                            onPress={() => setShowPassword(!showPassword)}
                             disabled={loading}
                         >
-                            <Text style={styles.showPassword}>
-                                {showPassword ? "🙈" : "👁️"}
+                            <Text style={styles.eyeIcon}>
+                                {showPassword ? "Hide" : "Show"}
                             </Text>
                         </TouchableOpacity>
                     </View>
 
-                    <Text style={styles.label}>
-                        Security Verification
-                    </Text>
+                    <Text style={styles.label}>Security Verification</Text>
 
                     <View style={styles.captchaRow}>
                         <View style={styles.captchaPanel}>
-                            {captchaCode.split("").map((character, index) => (
-                                <Text
-                                    key={`${captchaCode}-${index}`}
-                                    style={[
-                                        styles.captchaCharacter,
-                                        {
-                                            color: captchaColors[index],
-                                            transform: [
-                                                {
-                                                    rotate: `${(index % 2 === 0 ? -1 : 1) * (index + 2)}deg`,
-                                                },
-                                            ],
-                                        },
-                                    ]}
-                                >
-                                    {character}
-                                </Text>
-                            ))}
+                            <Text style={styles.captchaText}>
+                                {captchaCode.split("").join("  ")}
+                            </Text>
                         </View>
 
                         <TouchableOpacity
@@ -346,13 +278,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter CAPTCHA code"
-                        placeholderTextColor="#999"
+                        placeholder="Enter the 6-character code"
+                        placeholderTextColor="#94A3B8"
                         value={captchaInput}
                         onChangeText={(value) =>
-                            setCaptchaInput(
-                                value.toUpperCase().slice(0, 6)
-                            )
+                            setCaptchaInput(value.toUpperCase().slice(0, 6))
                         }
                         autoCapitalize="characters"
                         autoCorrect={false}
@@ -360,29 +290,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         editable={!loading && lockSeconds === 0}
                     />
 
-                    <Text style={styles.helperText}>
-                        Enter the 6-character code shown above.
-                    </Text>
-
                     <TouchableOpacity
                         style={styles.forgotButton}
-                        onPress={() =>
-                            Alert.alert(
-                                "Coming Soon",
-                                "Forgot Password screen will be connected in a later step."
-                            )
-                        }
+                        onPress={() => navigation.navigate("ForgotPassword")}
                     >
-                        <Text style={styles.forgotText}>
-                            Forgot Password?
-                        </Text>
+                        <Text style={styles.forgotText}>Forgot Password?</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={[
                             styles.loginButton,
-                            (loading || lockSeconds > 0) &&
-                            styles.disabledButton,
+                            (loading || lockSeconds > 0) && styles.disabledButton,
                         ]}
                         onPress={handleLogin}
                         disabled={loading || lockSeconds > 0}
@@ -405,9 +323,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         <TouchableOpacity
                             onPress={() => navigation.navigate("Register")}
                         >
-                            <Text style={styles.linkText}>
-                                Create Account
-                            </Text>
+                            <Text style={styles.linkText}>Create Account</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -423,21 +339,35 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F3F6FC",
+        backgroundColor: "#F1F5F9",
     },
     scrollContent: {
         flexGrow: 1,
         justifyContent: "center",
-        padding: 22,
+        paddingHorizontal: 22,
+        paddingVertical: 28,
     },
-    header: {
-        alignItems: "center",
+    backButton: {
+        alignSelf: "flex-start",
+        paddingVertical: 9,
+        paddingHorizontal: 14,
+        backgroundColor: "#E0E7FF",
+        borderRadius: 9,
         marginBottom: 25,
     },
+    backText: {
+        color: "#1D4ED8",
+        fontSize: 14,
+        fontWeight: "700",
+    },
+    brandSection: {
+        alignItems: "center",
+        marginBottom: 26,
+    },
     logo: {
-        width: 68,
-        height: 68,
-        borderRadius: 20,
+        width: 64,
+        height: 64,
+        borderRadius: 18,
         backgroundColor: "#2563EB",
         alignItems: "center",
         justifyContent: "center",
@@ -445,83 +375,92 @@ const styles = StyleSheet.create({
     },
     logoText: {
         color: "#FFFFFF",
-        fontSize: 28,
-        fontWeight: "bold",
+        fontSize: 27,
+        fontWeight: "900",
     },
     appName: {
-        fontSize: 25,
-        fontWeight: "bold",
         color: "#172554",
+        fontSize: 24,
+        fontWeight: "800",
     },
     tagline: {
-        fontSize: 13,
         color: "#64748B",
+        fontSize: 13,
         marginTop: 7,
         textAlign: "center",
     },
     card: {
         backgroundColor: "#FFFFFF",
-        padding: 22,
-        borderRadius: 18,
-        elevation: 4,
-        shadowColor: "#000",
-        shadowOpacity: 0.07,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 4 },
+        padding: 23,
+        borderRadius: 20,
+        elevation: 5,
+        shadowColor: "#0F172A",
+        shadowOpacity: 0.08,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 5 },
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 25,
+        fontWeight: "800",
         color: "#172554",
     },
     subtitle: {
         color: "#64748B",
         fontSize: 13,
+        lineHeight: 20,
         marginTop: 7,
-        marginBottom: 20,
+        marginBottom: 17,
     },
     errorBox: {
-        backgroundColor: "#FEE2E2",
+        backgroundColor: "#FEF2F2",
+        borderColor: "#FECACA",
+        borderWidth: 1,
         padding: 12,
-        borderRadius: 9,
+        borderRadius: 10,
         marginBottom: 12,
     },
     errorText: {
         color: "#B91C1C",
         fontSize: 13,
+        lineHeight: 19,
     },
     label: {
-        fontSize: 14,
-        fontWeight: "600",
+        fontSize: 13,
+        fontWeight: "700",
         color: "#334155",
         marginBottom: 8,
-        marginTop: 12,
+        marginTop: 15,
     },
     input: {
-        height: 52,
+        height: 51,
         borderWidth: 1,
-        borderColor: "#DCE3EF",
-        borderRadius: 10,
+        borderColor: "#CBD5E1",
+        borderRadius: 11,
         paddingHorizontal: 14,
         color: "#172554",
         fontSize: 14,
+        backgroundColor: "#FFFFFF",
     },
     passwordContainer: {
-        height: 52,
+        height: 51,
         borderWidth: 1,
-        borderColor: "#DCE3EF",
-        borderRadius: 10,
+        borderColor: "#CBD5E1",
+        borderRadius: 11,
         paddingHorizontal: 14,
         flexDirection: "row",
         alignItems: "center",
+        backgroundColor: "#FFFFFF",
     },
     passwordInput: {
         flex: 1,
         color: "#172554",
         fontSize: 14,
     },
-    showPassword: {
-        fontSize: 18,
+    eyeIcon: {
+        color: "#2563EB",
+        fontSize: 12,
+        fontWeight: "700",
+        padding: 5,
     },
     captchaRow: {
         flexDirection: "row",
@@ -531,67 +470,64 @@ const styles = StyleSheet.create({
     },
     captchaPanel: {
         flex: 1,
-        height: 58,
-        backgroundColor: "#EEF2FF",
+        height: 53,
+        backgroundColor: "#EFF6FF",
         borderWidth: 1,
-        borderColor: "#C7D2FE",
-        borderRadius: 10,
-        flexDirection: "row",
-        justifyContent: "space-evenly",
+        borderColor: "#BFDBFE",
+        borderRadius: 11,
         alignItems: "center",
+        justifyContent: "center",
     },
-    captchaCharacter: {
-        fontSize: 24,
+    captchaText: {
+        color: "#1E3A8A",
+        fontSize: 18,
         fontWeight: "900",
-        letterSpacing: 1,
+        letterSpacing: 2,
     },
     refreshButton: {
         width: 48,
         height: 48,
-        backgroundColor: "#E0E7FF",
-        borderRadius: 10,
+        backgroundColor: "#DBEAFE",
+        borderRadius: 11,
         alignItems: "center",
         justifyContent: "center",
     },
     refreshText: {
         color: "#2563EB",
-        fontSize: 30,
-        fontWeight: "bold",
-    },
-    helperText: {
-        color: "#64748B",
-        fontSize: 11,
-        marginTop: 7,
+        fontSize: 29,
+        fontWeight: "700",
     },
     forgotButton: {
         alignSelf: "flex-end",
         marginTop: 15,
-        marginBottom: 18,
+        marginBottom: 20,
     },
     forgotText: {
         color: "#2563EB",
         fontSize: 13,
-        fontWeight: "600",
+        fontWeight: "700",
     },
     loginButton: {
         height: 52,
         backgroundColor: "#2563EB",
-        borderRadius: 10,
+        borderRadius: 11,
         justifyContent: "center",
         alignItems: "center",
+        elevation: 2,
     },
     disabledButton: {
         opacity: 0.6,
     },
     loginButtonText: {
         color: "#FFFFFF",
-        fontSize: 16,
-        fontWeight: "bold",
+        fontSize: 15,
+        fontWeight: "800",
     },
     footer: {
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 24,
+        flexWrap: "wrap",
+        marginTop: 23,
     },
     footerText: {
         color: "#64748B",
@@ -599,14 +535,14 @@ const styles = StyleSheet.create({
     },
     linkText: {
         color: "#2563EB",
-        fontWeight: "bold",
+        fontWeight: "800",
         fontSize: 13,
     },
     bottomText: {
         textAlign: "center",
         color: "#94A3B8",
         fontSize: 12,
-        marginTop: 24,
+        marginTop: 23,
     },
 });
 

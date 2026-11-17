@@ -16,6 +16,7 @@ const AdminNavigator = () => {
             initialRouteName="AdminDashboard"
             screenOptions={{
                 headerShown: false,
+                animation: "slide_from_right",
             }}
         >
             <Stack.Screen

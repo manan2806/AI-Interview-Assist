@@ -1,4 +1,5 @@
 //( in mongodb atlas) Username : rangoonwalamanan_db_user  Password : AIInterview2026 
+// for generate Fresh Gmail_token run (python generate_gmail_token.py)
 
 *** Backend ***
 ✅ STEP 1 — Project Setup + Flask Backend
@@ -52,18 +53,6 @@
 ✅ 2. Export & Reports Center
 ✅ 3. User Activity Logs
 4. Live Coding Interview (Technical Roles)
-
-*** Live Coding Interview (Technical roles ke liye) ***
--> implementation plan (User) :-
-1. Backend setup + MongoDB integration.
-2. Gemini se coding questions generate karna.
-3. Monaco Code Editor integration.
-4. Judge0 se code execute karna.
-5. Test cases verification.
-6. AI code evaluation.
-7. User Coding Result page.
-8. User Coding History + Dashboard integration.
-9. Responsive UI + complete testing.
 
 -> Admin Side — Postponed
 1. Coding questions management.

@@ -13,14 +13,20 @@ import {
     ScrollView,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { registerUser } from "../../services/authService";
 
 type AuthStackParamList = {
+    Home: undefined;
     Login: undefined;
     Register: undefined;
 };
 
-type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
+type Props = NativeStackScreenProps<
+    AuthStackParamList,
+    "Register"
+>;
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const [name, setName] = useState("");
@@ -50,6 +56,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
         if (!email.trim()) {
             setError("Please enter your email address.");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email.trim())) {
+            setError("Please enter a valid email address.");
             return;
         }
 
@@ -98,22 +111,24 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     data.message || "Account created successfully."
                 );
 
-                setName("");
-                setEmail("");
-                setPassword("");
-                setConfirmPassword("");
-                setAdminSecret("");
-                setRole("user");
-
                 Alert.alert(
                     "Registration Successful",
-                    data.message || "Your account has been created.",
+                    data.message || "Your account has been created successfully.",
                     [
                         {
                             text: "Go to Login",
-                            onPress: () => navigation.navigate("Login"),
+                            onPress: () => {
+                                setName("");
+                                setEmail("");
+                                setPassword("");
+                                setConfirmPassword("");
+                                setAdminSecret("");
+                                setRole("user");
+                                navigation.navigate("Login");
+                            },
                         },
-                    ]
+                    ],
+                    { cancelable: false }
                 );
             } else {
                 setError(
@@ -143,271 +158,307 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         }
     };
 
+    const renderPasswordField = (
+        label: string,
+        placeholder: string,
+        value: string,
+        onChangeText: (value: string) => void,
+        visible: boolean,
+        toggleVisibility: () => void
+    ) => (
+        <>
+            <Text style={styles.label}>{label}</Text>
+
+            <View style={styles.passwordContainer}>
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder={placeholder}
+                    placeholderTextColor="#94A3B8"
+                    value={value}
+                    onChangeText={onChangeText}
+                    secureTextEntry={!visible}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!loading}
+                />
+
+                <TouchableOpacity
+                    onPress={toggleVisibility}
+                    disabled={loading}
+                    style={styles.visibilityButton}
+                >
+                    <Text style={styles.visibilityText}>
+                        {visible ? "Hide" : "Show"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </>
+    );
+
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
+        <SafeAreaView style={styles.safeArea}>
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
-                <View style={styles.header}>
-                    <View style={styles.logo}>
-                        <Text style={styles.logoText}>AI</Text>
-                    </View>
-
-                    <Text style={styles.appName}>
-                        AI Interview Assist
-                    </Text>
-
-                    <Text style={styles.tagline}>
-                        Prepare smarter and perform better with AI-powered interview practice.
-                    </Text>
-                </View>
-
-                <View style={styles.card}>
-                    <Text style={styles.title}>Create Account</Text>
-
-                    <Text style={styles.subtitle}>
-                        Start your AI-powered interview preparation.
-                    </Text>
-
-                    {error ? (
-                        <View style={styles.errorBox}>
-                            <Text style={styles.errorText}>{error}</Text>
-                        </View>
-                    ) : null}
-
-                    {success ? (
-                        <View style={styles.successBox}>
-                            <Text style={styles.successText}>
-                                {success}
-                            </Text>
-                        </View>
-                    ) : null}
-
-                    <Text style={styles.label}>Full Name</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter your full name"
-                        placeholderTextColor="#999"
-                        value={name}
-                        onChangeText={setName}
-                        autoCapitalize="words"
-                        editable={!loading}
-                    />
-
-                    <Text style={styles.label}>Email Address</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter your email"
-                        placeholderTextColor="#999"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        editable={!loading}
-                    />
-
-                    <Text style={styles.label}>Password</Text>
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={styles.passwordInput}
-                            placeholder="Create a password"
-                            placeholderTextColor="#999"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={!showPassword}
-                            autoCapitalize="none"
-                            editable={!loading}
-                        />
-
-                        <TouchableOpacity
-                            onPress={() =>
-                                setShowPassword(!showPassword)
-                            }
-                            disabled={loading}
-                        >
-                            <Text style={styles.showPassword}>
-                                {showPassword ? "🙈" : "👁️"}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <Text style={styles.label}>Confirm Password</Text>
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={styles.passwordInput}
-                            placeholder="Confirm your password"
-                            placeholderTextColor="#999"
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            secureTextEntry={!showConfirmPassword}
-                            autoCapitalize="none"
-                            editable={!loading}
-                        />
-
-                        <TouchableOpacity
-                            onPress={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                            }
-                            disabled={loading}
-                        >
-                            <Text style={styles.showPassword}>
-                                {showConfirmPassword ? "🙈" : "👁️"}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <Text style={styles.label}>Account Type</Text>
-
-                    <View style={styles.roleContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.roleOption,
-                                role === "user" && styles.roleSelected,
-                            ]}
-                            onPress={() => toggleRole("user")}
-                            disabled={loading}
-                        >
-                            <View style={styles.radioOuter}>
-                                {role === "user" && (
-                                    <View style={styles.radioInner} />
-                                )}
-                            </View>
-
-                            <Text
-                                style={[
-                                    styles.roleText,
-                                    role === "user" && styles.roleTextSelected,
-                                ]}
-                            >
-                                User
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[
-                                styles.roleOption,
-                                role === "admin" && styles.roleSelected,
-                            ]}
-                            onPress={() => toggleRole("admin")}
-                            disabled={loading}
-                        >
-                            <View style={styles.radioOuter}>
-                                {role === "admin" && (
-                                    <View style={styles.radioInner} />
-                                )}
-                            </View>
-
-                            <Text
-                                style={[
-                                    styles.roleText,
-                                    role === "admin" && styles.roleTextSelected,
-                                ]}
-                            >
-                                Admin
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {role === "admin" && (
-                        <>
-                            <Text style={styles.label}>
-                                Admin Registration Secret
-                            </Text>
-
-                            <View style={styles.passwordContainer}>
-                                <TextInput
-                                    style={styles.passwordInput}
-                                    placeholder="Enter admin secret key"
-                                    placeholderTextColor="#999"
-                                    value={adminSecret}
-                                    onChangeText={setAdminSecret}
-                                    secureTextEntry={!showAdminSecret}
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    editable={!loading}
-                                />
-
-                                <TouchableOpacity
-                                    onPress={() =>
-                                        setShowAdminSecret(!showAdminSecret)
-                                    }
-                                    disabled={loading}
-                                >
-                                    <Text style={styles.showPassword}>
-                                        {showAdminSecret ? "🙈" : "👁️"}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-
-                            <Text style={styles.helperText}>
-                                Authorized administrators only.
-                            </Text>
-                        </>
-                    )}
-
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     <TouchableOpacity
-                        style={[
-                            styles.registerButton,
-                            loading && styles.disabledButton,
-                        ]}
-                        onPress={handleRegister}
+                        style={styles.backButton}
+                        onPress={() => navigation.navigate("Home")}
                         disabled={loading}
                     >
-                        {loading ? (
-                            <ActivityIndicator color="#FFFFFF" />
-                        ) : (
-                            <Text style={styles.registerButtonText}>
-                                {role === "admin"
-                                    ? "Create Admin Account"
-                                    : "Create Account"}
-                            </Text>
-                        )}
+                        <Text style={styles.backText}>
+                            ←  Back to Home
+                        </Text>
                     </TouchableOpacity>
 
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>
-                            Already have an account?{" "}
+                    <View style={styles.header}>
+                        <View style={styles.logo}>
+                            <Text style={styles.logoText}>AI</Text>
+                        </View>
+
+                        <Text style={styles.appName}>
+                            AI Interview Assist
                         </Text>
 
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate("Login")}
-                        >
-                            <Text style={styles.linkText}>Sign In</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.tagline}>
+                            Your journey towards interview success starts here.
+                        </Text>
                     </View>
-                </View>
 
-                <Text style={styles.bottomText}>
-                    Practice. Improve. Succeed.
-                </Text>
-            </ScrollView>
-        </KeyboardAvoidingView>
+                    <View style={styles.card}>
+                        <Text style={styles.title}>
+                            Create Account
+                        </Text>
+
+                        <Text style={styles.subtitle}>
+                            Join us and start preparing for your next interview.
+                        </Text>
+
+                        {error ? (
+                            <View style={styles.errorBox}>
+                                <Text style={styles.errorText}>
+                                    {error}
+                                </Text>
+                            </View>
+                        ) : null}
+
+                        {success ? (
+                            <View style={styles.successBox}>
+                                <Text style={styles.successText}>
+                                    {success}
+                                </Text>
+                            </View>
+                        ) : null}
+
+                        <Text style={styles.label}>Full Name</Text>
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter your full name"
+                            placeholderTextColor="#94A3B8"
+                            value={name}
+                            onChangeText={setName}
+                            autoCapitalize="words"
+                            autoCorrect={false}
+                            editable={!loading}
+                        />
+
+                        <Text style={styles.label}>Email Address</Text>
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter your email address"
+                            placeholderTextColor="#94A3B8"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            editable={!loading}
+                        />
+
+                        {renderPasswordField(
+                            "Password",
+                            "Create a password",
+                            password,
+                            setPassword,
+                            showPassword,
+                            () => setShowPassword(!showPassword)
+                        )}
+
+                        {renderPasswordField(
+                            "Confirm Password",
+                            "Re-enter your password",
+                            confirmPassword,
+                            setConfirmPassword,
+                            showConfirmPassword,
+                            () => setShowConfirmPassword(!showConfirmPassword)
+                        )}
+
+                        <Text style={styles.label}>
+                            Account Type
+                        </Text>
+
+                        <View style={styles.roleContainer}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.roleOption,
+                                    role === "user" && styles.roleSelected,
+                                ]}
+                                onPress={() => toggleRole("user")}
+                                disabled={loading}
+                            >
+                                <View style={styles.radioOuter}>
+                                    {role === "user" && (
+                                        <View style={styles.radioInner} />
+                                    )}
+                                </View>
+
+                                <View>
+                                    <Text
+                                        style={[
+                                            styles.roleText,
+                                            role === "user" && styles.roleTextSelected,
+                                        ]}
+                                    >
+                                        User
+                                    </Text>
+                                    <Text style={styles.roleDescription}>
+                                        Practice interviews
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.roleOption,
+                                    role === "admin" && styles.roleSelected,
+                                ]}
+                                onPress={() => toggleRole("admin")}
+                                disabled={loading}
+                            >
+                                <View style={styles.radioOuter}>
+                                    {role === "admin" && (
+                                        <View style={styles.radioInner} />
+                                    )}
+                                </View>
+
+                                <View>
+                                    <Text
+                                        style={[
+                                            styles.roleText,
+                                            role === "admin" && styles.roleTextSelected,
+                                        ]}
+                                    >
+                                        Admin
+                                    </Text>
+                                    <Text style={styles.roleDescription}>
+                                        Manage platform
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+
+                        {role === "admin" && (
+                            <>
+                                {renderPasswordField(
+                                    "Admin Registration Secret",
+                                    "Enter admin secret key",
+                                    adminSecret,
+                                    setAdminSecret,
+                                    showAdminSecret,
+                                    () => setShowAdminSecret(!showAdminSecret)
+                                )}
+
+                                <Text style={styles.helperText}>
+                                    Only authorized administrators can register.
+                                </Text>
+                            </>
+                        )}
+
+                        <TouchableOpacity
+                            style={[
+                                styles.registerButton,
+                                loading && styles.disabledButton,
+                            ]}
+                            onPress={handleRegister}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#FFFFFF" />
+                            ) : (
+                                <Text style={styles.registerButtonText}>
+                                    {role === "admin"
+                                        ? "Create Admin Account"
+                                        : "Create Account"}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>
+                                Already have an account?{" "}
+                            </Text>
+
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate("Login")}
+                                disabled={loading}
+                            >
+                                <Text style={styles.linkText}>
+                                    Sign In
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <Text style={styles.bottomText}>
+                        Practice. Improve. Succeed.
+                    </Text>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
         flex: 1,
         backgroundColor: "#F3F6FC",
     },
+    container: {
+        flex: 1,
+    },
     scrollContent: {
         flexGrow: 1,
-        justifyContent: "center",
         padding: 22,
+        paddingBottom: 35,
+    },
+    backButton: {
+        alignSelf: "flex-start",
+        paddingVertical: 9,
+        paddingHorizontal: 14,
+        backgroundColor: "#E0E7FF",
+        borderRadius: 9,
+        marginBottom: 22,
+    },
+    backText: {
+        color: "#2563EB",
+        fontSize: 14,
+        fontWeight: "600",
     },
     header: {
         alignItems: "center",
         marginBottom: 25,
     },
     logo: {
-        width: 68,
-        height: 68,
-        borderRadius: 20,
+        width: 64,
+        height: 64,
+        borderRadius: 19,
         backgroundColor: "#2563EB",
         alignItems: "center",
         justifyContent: "center",
@@ -415,11 +466,11 @@ const styles = StyleSheet.create({
     },
     logoText: {
         color: "#FFFFFF",
-        fontSize: 28,
+        fontSize: 27,
         fontWeight: "bold",
     },
     appName: {
-        fontSize: 25,
+        fontSize: 23,
         fontWeight: "bold",
         color: "#172554",
     },
@@ -440,7 +491,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
     },
     title: {
-        fontSize: 24,
+        fontSize: 25,
         fontWeight: "bold",
         color: "#172554",
     },
@@ -449,9 +500,12 @@ const styles = StyleSheet.create({
         fontSize: 13,
         marginTop: 7,
         marginBottom: 18,
+        lineHeight: 19,
     },
     errorBox: {
         backgroundColor: "#FEE2E2",
+        borderWidth: 1,
+        borderColor: "#FECACA",
         padding: 12,
         borderRadius: 9,
         marginBottom: 12,
@@ -462,6 +516,8 @@ const styles = StyleSheet.create({
     },
     successBox: {
         backgroundColor: "#DCFCE7",
+        borderWidth: 1,
+        borderColor: "#BBF7D0",
         padding: 12,
         borderRadius: 9,
         marginBottom: 12,
@@ -475,7 +531,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: "#334155",
         marginBottom: 8,
-        marginTop: 12,
+        marginTop: 15,
     },
     input: {
         height: 52,
@@ -485,6 +541,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         color: "#172554",
         fontSize: 14,
+        backgroundColor: "#FFFFFF",
     },
     passwordContainer: {
         height: 52,
@@ -494,29 +551,36 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         flexDirection: "row",
         alignItems: "center",
+        backgroundColor: "#FFFFFF",
     },
     passwordInput: {
         flex: 1,
         color: "#172554",
         fontSize: 14,
     },
-    showPassword: {
-        fontSize: 18,
+    visibilityButton: {
+        paddingVertical: 8,
+        paddingLeft: 10,
+    },
+    visibilityText: {
+        color: "#2563EB",
+        fontSize: 12,
+        fontWeight: "700",
     },
     roleContainer: {
         flexDirection: "row",
-        gap: 12,
+        gap: 10,
     },
     roleOption: {
         flex: 1,
-        height: 50,
+        minHeight: 68,
         borderWidth: 1,
         borderColor: "#DCE3EF",
         borderRadius: 10,
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 14,
-        gap: 10,
+        paddingHorizontal: 11,
+        gap: 9,
     },
     roleSelected: {
         borderColor: "#6366F1",
@@ -540,23 +604,28 @@ const styles = StyleSheet.create({
     roleText: {
         color: "#475569",
         fontSize: 14,
+        fontWeight: "600",
     },
     roleTextSelected: {
         color: "#4338CA",
-        fontWeight: "bold",
+    },
+    roleDescription: {
+        color: "#64748B",
+        fontSize: 10,
+        marginTop: 3,
     },
     helperText: {
         color: "#64748B",
         fontSize: 11,
-        marginTop: 7,
+        marginTop: 8,
     },
     registerButton: {
-        height: 52,
+        height: 53,
         backgroundColor: "#2563EB",
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 25,
+        marginTop: 27,
     },
     disabledButton: {
         opacity: 0.6,
@@ -569,6 +638,7 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: "row",
         justifyContent: "center",
+        flexWrap: "wrap",
         marginTop: 24,
     },
     footerText: {
