@@ -157,3 +157,34 @@ export const deleteAccount = async (
 
     return response.data;
 };
+
+// ==========================================
+// GET PROFILE
+// ==========================================
+
+export const getProfile = async () => {
+    const response = await api.get("/api/profile");
+    return response.data;
+};
+
+// ==========================================
+// UPDATE PROFILE
+// ==========================================
+
+export interface ProfileUpdateData {
+    name: string;
+    target_role: string;
+    experience_level: string;
+    skills: string[];
+}
+
+export const updateProfile = async (
+    profileData: ProfileUpdateData
+) => {
+    const response = await api.put(
+        "/api/profile",
+        profileData
+    );
+
+    return response.data;
+};
