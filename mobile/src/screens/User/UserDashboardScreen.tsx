@@ -390,116 +390,118 @@ const UserDashboardScreen = ({ navigation }: any) => {
 
             {/* DROPDOWN MENU */}
             {mobileMenuOpen && (
-                <View
-                    style={[
-                        styles.mobileMenu,
-                        {
-                            backgroundColor: colors.card,
-                            borderColor: colors.border,
-                        },
-                    ]}
-                >
-                    {/* MENU HEADER */}
+                <View style={styles.menuOverlay}>
                     <View
                         style={[
-                            styles.menuHeading,
-                            { backgroundColor: colors.header },
+                            styles.mobileMenu,
+                            {
+                                backgroundColor: colors.card,
+                                borderColor: colors.border,
+                            },
                         ]}
                     >
-                        <View style={styles.menuHeadingIcon}>
-                            <Text style={styles.menuHeadingEmoji}>👤</Text>
+                        {/* MENU HEADER */}
+                        <View
+                            style={[
+                                styles.menuHeading,
+                                { backgroundColor: colors.header },
+                            ]}
+                        >
+                            <View style={styles.menuHeadingIcon}>
+                                <Text style={styles.menuHeadingEmoji}>👤</Text>
+                            </View>
+
+                            <View style={styles.menuHeadingInfo}>
+                                <Text style={[styles.menuHeadingTitle, { color: colors.text }]}>
+                                    My Dashboard
+                                </Text>
+
+                                <Text style={[styles.menuHeadingSubtitle, { color: colors.muted }]}>
+                                    User Panel
+                                </Text>
+                            </View>
                         </View>
 
-                        <View style={styles.menuHeadingInfo}>
-                            <Text style={[styles.menuHeadingTitle, { color: colors.text }]}>
-                                My Dashboard
-                            </Text>
+                        <View style={styles.menuDivider} />
 
-                            <Text style={[styles.menuHeadingSubtitle, { color: colors.muted }]}>
-                                User Panel
-                            </Text>
-                        </View>
+                        {/* ANNOUNCEMENTS */}
+                        <MenuItem
+                            icon="🔔"
+                            title="Announcements"
+                            badge={unreadAnnouncementCount}
+                            onPress={() => {
+                                setMobileMenuOpen(false);
+                                navigation.navigate("Announcements");
+                            }}
+                        />
+
+                        {/* DASHBOARD */}
+                        <MenuItem
+                            icon="🏠"
+                            title="Dashboard"
+                            onPress={() => setMobileMenuOpen(false)}
+                        />
+
+                        {/* PROFILE */}
+                        <MenuItem
+                            icon="👤"
+                            title="Profile"
+                            onPress={() => {
+                                setMobileMenuOpen(false);
+                                navigation.navigate("Profile");
+                            }}
+                        />
+
+                        {/* INTERVIEW HISTORY */}
+                        <MenuItem
+                            icon="📋"
+                            title="Interview History"
+                            onPress={() => {
+                                setMobileMenuOpen(false);
+                                navigation.navigate("InterviewHistory");
+                            }}
+                        />
+
+                        {/* WRITE REVIEW */}
+                        <MenuItem
+                            icon="⭐"
+                            title="Write a Review"
+                            onPress={() => navigation.navigate("Reviews")}
+                        />
+
+                        {/* SETTINGS */}
+                        <MenuItem
+                            icon="⚙️"
+                            title="Settings"
+                            onPress={() => {
+                                setMobileMenuOpen(false);
+                                navigation.navigate("Settings");
+                            }}
+                        />
+
+                        {/* SUPPORT */}
+                        <MenuItem
+                            icon="📞"
+                            title="Help & Support"
+                            onPress={() => {
+                                setMobileMenuOpen(false);
+                                navigation.navigate("Support");
+                            }}
+                        />
+
+                        <View style={styles.menuDivider} />
+
+                        {/* LOGOUT */}
+                        <MenuItem
+                            icon="🚪"
+                            title="Logout"
+                            danger
+                            onPress={() => {
+                                setMobileMenuOpen(false);
+                                handleLogout();
+                            }}
+                        />
                     </View>
-
-                    <View style={styles.menuDivider} />
-
-                    {/* ANNOUNCEMENTS */}
-                    <MenuItem
-                        icon="🔔"
-                        title="Announcements"
-                        badge={unreadAnnouncementCount}
-                        onPress={() => {
-                            setMobileMenuOpen(false);
-                            navigation.navigate("Announcements");
-                        }}
-                    />
-
-                    {/* DASHBOARD */}
-                    <MenuItem
-                        icon="🏠"
-                        title="Dashboard"
-                        onPress={() => setMobileMenuOpen(false)}
-                    />
-
-                    {/* PROFILE */}
-                    <MenuItem
-                        icon="👤"
-                        title="Profile"
-                        onPress={() => {
-                            setMobileMenuOpen(false);
-                            navigation.navigate("Profile");
-                        }}
-                    />
-
-                    {/* INTERVIEW HISTORY */}
-                    <MenuItem
-                        icon="📋"
-                        title="Interview History"
-                        onPress={() => {
-                            setMobileMenuOpen(false);
-                            navigation.navigate("InterviewHistory");
-                        }}
-                    />
-
-                    {/* WRITE REVIEW */}
-                    <MenuItem
-                        icon="⭐"
-                        title="Write a Review"
-                        onPress={() => navigation.navigate("Reviews")}
-                    />
-
-                    {/* SETTINGS */}
-                    <MenuItem
-                        icon="⚙️"
-                        title="Settings"
-                        onPress={() => {
-                            setMobileMenuOpen(false);
-                            navigation.navigate("Settings");
-                        }}
-                    />
-
-                    {/* SUPPORT */}
-                    <MenuItem
-                        icon="📞"
-                        title="Help & Support"
-                        onPress={() => {
-                            setMobileMenuOpen(false);
-                            navigation.navigate("Support");
-                        }}
-                    />
-
-                    <View style={styles.menuDivider} />
-
-                    {/* LOGOUT */}
-                    <MenuItem
-                        icon="🚪"
-                        title="Logout"
-                        danger
-                        onPress={() => {
-                            setMobileMenuOpen(false);
-                            handleLogout();
-                        }}
-                    />
                 </View>
             )}
 
@@ -1258,36 +1260,43 @@ const createStyles = (colors: any, isDark: boolean) =>
         },
 
         menuIcon: {
-            fontSize: 23,
+            fontSize: 18,
             fontWeight: "800",
             color: colors.text,
         },
-
         // MENU
-        mobileMenu: {
-            backgroundColor: "#FFFFFF",
-            borderRadius: 17,
-            padding: 10,
-            marginBottom: 22,
-            borderWidth: 1,
-            borderColor: "#E5E7EB",
-            elevation: 5,
-            shadowColor: "#0F172A",
-            shadowOffset: {
-                width: 0,
-                height: 3,
-            },
-            shadowOpacity: 0.09,
-            shadowRadius: 8,
+        menuOverlay: {
+            position: "absolute",
+            top: 86,
+            left: 0,
+            right: 10,
+            zIndex: 999,
+            elevation: 999,
+            alignItems: "flex-end",
+            paddingHorizontal: 12,
         },
 
+        mobileMenu: {
+            backgroundColor: "#FFFFFF",
+            width: "78%",
+            maxWidth: 310,
+            borderRadius: 15,
+            padding: 9,
+            borderWidth: 1,
+            borderColor: "#E5E7EB",
+            elevation: 10,
+            shadowColor: "#0F172A",
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+        },
         menuHeading: {
             flexDirection: "row",
             alignItems: "center",
             backgroundColor: "#EEF2FF",
-            borderRadius: 12,
-            padding: 13,
-            marginBottom: 7,
+            borderRadius: 11,
+            padding: 9,
+            marginBottom: 4,
         },
 
         menuHeadingIcon: {
@@ -1329,24 +1338,23 @@ const createStyles = (colors: any, isDark: boolean) =>
         menuItem: {
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 9,
+            paddingVertical: 5,
             paddingHorizontal: 7,
-            borderRadius: 11,
-            minHeight: 52,
+            borderRadius: 10,
+            minHeight: 42,
         },
 
         menuIconContainer: {
-            width: 42,
-            height: 42,
-            borderRadius: 12,
+            width: 34,
+            height: 34,
+            borderRadius: 10,
             backgroundColor: isDark ? "#30264F" : "#EAE8FF",
             borderWidth: 1,
             borderColor: isDark ? "#59458A" : "#D5CEFF",
             alignItems: "center",
             justifyContent: "center",
-            marginRight: 12,
+            marginRight: 10,
         },
-
         menuItemText: {
             fontSize: 14,
             fontWeight: "600",

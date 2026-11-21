@@ -395,12 +395,29 @@ const SettingsScreen = () => {
 
     if (loading) {
         return (
-            <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-                <ActivityIndicator size="large" color="#8064E8" />
-                <Text style={[styles.loadingText, { color: colors.text }]}>
+            <View
+                style={[
+                    styles.loadingContainer,
+                    { backgroundColor: colors.background },
+                ]}
+            >
+                <ActivityIndicator size="large" color="#A78BFA" />
+
+                <Text
+                    style={[
+                        styles.loadingText,
+                        { color: isDark ? "#F4F5FF" : "#20264A" },
+                    ]}
+                >
                     Loading Settings...
                 </Text>
-                <Text style={[styles.mutedText, { color: colors.muted }]}>
+
+                <Text
+                    style={[
+                        styles.mutedText,
+                        { color: isDark ? "#AAB3D0" : "#737B99" },
+                    ]}
+                >
                     Please wait while we load your preferences.
                 </Text>
             </View>
@@ -431,33 +448,74 @@ const SettingsScreen = () => {
 
                         {/* BACK BUTTON */}
                         <TouchableOpacity
-                            style={styles.backButton}
+                            style={[
+                                styles.backButton,
+                                {
+                                    backgroundColor: isDark ? "#252F50" : "#E8EDFF",
+                                    borderColor: isDark ? "#454F75" : "#D5DEFF",
+                                },
+                            ]}
                             onPress={() => navigation.goBack()}
                         >
-                            <Text style={styles.backButtonText}>← DashBoard</Text>
+                            <Text
+                                style={[
+                                    styles.backButtonText,
+                                    { color: isDark ? "#C4B5FD" : "#4056B5" },
+                                ]}
+                            >
+                                ← Dashboard
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 {/* SAVE BUTTON */}
                 <TouchableOpacity
-                    style={[styles.saveButton, saving && { opacity: 0.6 }]}
+                    style={[
+                        styles.saveButton,
+                        {
+                            backgroundColor: isDark ? "#8064E8" : "#6257D9",
+                            opacity: saving ? 0.6 : 1,
+                        },
+                    ]}
                     onPress={handleSaveSettings}
                     disabled={saving}
                 >
                     {saving ? (
                         <ActivityIndicator color="#FFFFFF" />
                     ) : (
-                        <Text style={styles.saveButtonText}>✓ Save Changes</Text>
+                        <Text style={styles.saveButtonText}>
+                            ✓ Save Changes
+                        </Text>
                     )}
                 </TouchableOpacity>
 
                 {successMessage ? (
-                    <Text style={styles.successMessage}>✓ {successMessage}</Text>
+                    <Text
+                        style={[
+                            styles.successMessage,
+                            {
+                                color: isDark ? "#86EFAC" : "#16834C",
+                                backgroundColor: isDark ? "#173D32" : "#E6F8EF",
+                            },
+                        ]}
+                    >
+                        ✓ {successMessage}
+                    </Text>
                 ) : null}
 
                 {errorMessage ? (
-                    <Text style={styles.errorMessage}>⚠ {errorMessage}</Text>
+                    <Text
+                        style={[
+                            styles.errorMessage,
+                            {
+                                color: isDark ? "#FCA5A5" : "#C62828",
+                                backgroundColor: isDark ? "#49252D" : "#FDECEC",
+                            },
+                        ]}
+                    >
+                        ⚠ {errorMessage}
+                    </Text>
                 ) : null}
 
                 {/* SETTINGS NAVIGATION */}
@@ -1030,7 +1088,7 @@ const styles = StyleSheet.create({
         height: 1,
         width: "100%",
         marginTop: 6,
-        marginBottom: 18,
+        marginBottom: 6,
     },
     optionCard: {
         borderRadius: 15,
@@ -1178,7 +1236,7 @@ const styles = StyleSheet.create({
     modalHeader: {
         flexDirection: "row",
         alignItems: "flex-start",
-        marginBottom: 17,
+        marginBottom: 4,
     },
     modalTitle: {
         fontSize: 23,

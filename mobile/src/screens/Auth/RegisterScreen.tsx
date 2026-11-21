@@ -206,28 +206,32 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.navigate("Home")}
-                        disabled={loading}
-                    >
-                        <Text style={styles.backText}>
-                            ←  Back to Home
-                        </Text>
-                    </TouchableOpacity>
-
                     <View style={styles.header}>
-                        <View style={styles.logo}>
-                            <Text style={styles.logoText}>AI</Text>
+                        <View style={styles.brandRow}>
+                            <View style={styles.logo}>
+                                <Text style={styles.logoText}>AI</Text>
+                            </View>
+
+                            <View style={styles.brandText}>
+                                <Text style={styles.appName}>
+                                    Interview Assist
+                                </Text>
+
+                                <Text style={styles.tagline}>
+                                    Your journey towards interview success starts here.
+                                </Text>
+                            </View>
                         </View>
 
-                        <Text style={styles.appName}>
-                            AI Interview Assist
-                        </Text>
-
-                        <Text style={styles.tagline}>
-                            Your journey towards interview success starts here.
-                        </Text>
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() => navigation.navigate("Home")}
+                            disabled={loading}
+                        >
+                            <Text style={styles.backText}>
+                                ← Back to Home
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     <View style={styles.card}>
@@ -415,10 +419,6 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-
-                    <Text style={styles.bottomText}>
-                        Practice. Improve. Succeed.
-                    </Text>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -439,46 +439,64 @@ const styles = StyleSheet.create({
         paddingBottom: 35,
     },
     backButton: {
-        alignSelf: "flex-start",
-        paddingVertical: 9,
-        paddingHorizontal: 14,
+        width: "100%",
+        alignSelf: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 18,
         backgroundColor: "#E0E7FF",
-        borderRadius: 9,
-        marginBottom: 22,
+        borderRadius: 8,
+        marginTop: 18,
     },
     backText: {
-        color: "#2563EB",
+        color: "#1D4ED8",
         fontSize: 14,
-        fontWeight: "600",
+        fontWeight: "700",
+        textAlign: "center",
+        alignSelf: "center",
     },
     header: {
+        marginTop: -16,
+        backgroundColor: "#FFFFFF",
+        padding: 22,
+        borderRadius: 20,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+    },
+    brandRow: {
+        flexDirection: "row",
         alignItems: "center",
-        marginBottom: 25,
+        gap: 10,
+        width: "100%",
+    },
+    brandText: {
+        flex: 1,
+        alignItems: "flex-start",
     },
     logo: {
-        width: 64,
-        height: 64,
-        borderRadius: 19,
+        width: 52,
+        height: 52,
+        borderRadius: 14,
         backgroundColor: "#2563EB",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 12,
+        marginBottom: 0,
+        flexShrink: 0,
     },
     logoText: {
         color: "#FFFFFF",
-        fontSize: 27,
-        fontWeight: "bold",
+        fontSize: 24,
+        fontWeight: "900",
     },
     appName: {
-        fontSize: 23,
-        fontWeight: "bold",
+        fontSize: 22,
+        fontWeight: "800",
         color: "#172554",
     },
     tagline: {
-        fontSize: 13,
+        fontSize: 12,
         color: "#64748B",
-        marginTop: 7,
-        textAlign: "center",
+        marginTop: 3,
     },
     card: {
         backgroundColor: "#FFFFFF",
@@ -649,12 +667,6 @@ const styles = StyleSheet.create({
         color: "#2563EB",
         fontWeight: "bold",
         fontSize: 13,
-    },
-    bottomText: {
-        textAlign: "center",
-        color: "#94A3B8",
-        fontSize: 12,
-        marginTop: 24,
     },
 });
 

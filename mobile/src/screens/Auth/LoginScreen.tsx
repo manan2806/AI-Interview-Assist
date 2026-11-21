@@ -194,21 +194,30 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.navigate("Home")}
-                >
-                    <Text style={styles.backText}>‹  Back to Home</Text>
-                </TouchableOpacity>
-
                 <View style={styles.brandSection}>
-                    <View style={styles.logo}>
-                        <Text style={styles.logoText}>AI</Text>
+                    <View style={styles.brandRow}>
+                        <View style={styles.logo}>
+                            <Text style={styles.logoText}>AI</Text>
+                        </View>
+
+                        <View style={styles.brandText}>
+                            <Text style={styles.appName}>Interview Assist</Text>
+
+                            <Text style={styles.tagline}>
+                                Your journey to interview success starts here.
+                            </Text>
+                        </View>
                     </View>
-                    <Text style={styles.appName}>AI Interview Assist</Text>
-                    <Text style={styles.tagline}>
-                        Your journey to interview success starts here.
-                    </Text>
+
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.navigate("Home")}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.backText}>
+                            ← Back to Home
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.card}>
@@ -327,10 +336,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-
-                <Text style={styles.bottomText}>
-                    Practice. Improve. Succeed.
-                </Text>
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -348,46 +353,68 @@ const styles = StyleSheet.create({
         paddingVertical: 28,
     },
     backButton: {
-        alignSelf: "flex-start",
-        paddingVertical: 9,
-        paddingHorizontal: 14,
+        width: "100%",
+        alignSelf: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 18,
         backgroundColor: "#E0E7FF",
-        borderRadius: 9,
-        marginBottom: 25,
+        borderRadius: 8,
+        marginTop: 18,
     },
     backText: {
         color: "#1D4ED8",
         fontSize: 14,
         fontWeight: "700",
+        textAlign: "center",
+        alignSelf: "center",
     },
     brandSection: {
         alignItems: "center",
-        marginBottom: 26,
+        backgroundColor: "#FFFFFF",
+        padding: 22,
+        borderRadius: 20,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        width: "100%",
+    },
+    brandRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        width: "100%",
     },
     logo: {
-        width: 64,
-        height: 64,
-        borderRadius: 18,
+        width: 52,
+        height: 52,
+        borderRadius: 14,
         backgroundColor: "#2563EB",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 12,
+        marginBottom: 0,
+        marginLeft: 0,
+        flexShrink: 0,
     },
     logoText: {
         color: "#FFFFFF",
         fontSize: 27,
         fontWeight: "900",
     },
+
     appName: {
         color: "#172554",
         fontSize: 24,
         fontWeight: "800",
     },
+    brandText: {
+        flex: 1,
+        alignItems: "flex-start",
+    },
     tagline: {
+        fontSize: 12,
         color: "#64748B",
-        fontSize: 13,
-        marginTop: 7,
-        textAlign: "center",
+        marginTop: 3,
     },
     card: {
         backgroundColor: "#FFFFFF",

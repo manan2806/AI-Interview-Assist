@@ -225,11 +225,17 @@ const ProfileImprovementScreen = ({ navigation }: Props) => {
                 />
             }
         >
-            {/* HEADER */}
-            <View style={styles.header}>
+            {/* HEADER CONTAINER */}
+            <View style={[
+                styles.headerContainer,
+                {
+                    backgroundColor: colors.card,
+                    borderColor: colors.border,
+                },
+            ]}>
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.label}>
-                        PROFILE ANALYSIS
+                        ✦ PROFILE ANALYSIS
                     </Text>
 
                     <Text style={[
@@ -238,15 +244,15 @@ const ProfileImprovementScreen = ({ navigation }: Props) => {
                     ]}>
                         Improve Your Profile
                     </Text>
-
-                    <Text style={[
-                        styles.subtitle,
-                        { color: colors.muted },
-                    ]}>
-                        Complete your profile to get a more personalized
-                        interview experience.
-                    </Text>
                 </View>
+
+                <Text style={[
+                    styles.subtitle,
+                    { color: colors.muted },
+                ]}>
+                    Complete your profile to get a more personalized
+                    interview experience.
+                </Text>
 
                 <TouchableOpacity
                     style={[
@@ -259,7 +265,7 @@ const ProfileImprovementScreen = ({ navigation }: Props) => {
                         styles.headerButtonText,
                         { color: colors.primary },
                     ]}>
-                        Dashboard
+                        ← Back to Dashboard
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -453,16 +459,6 @@ const ProfileImprovementScreen = ({ navigation }: Props) => {
                     </View>
                 )}
             </View>
-
-            {/* BOTTOM BUTTON */}
-            <TouchableOpacity
-                style={styles.bottomButton}
-                onPress={() => navigation.navigate("UserDashboard")}
-            >
-                <Text style={styles.bottomButtonText}>
-                    ← Back to Dashboard
-                </Text>
-            </TouchableOpacity>
         </ScrollView>
     );
 };
@@ -520,6 +516,66 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         paddingTop: 30,
         paddingBottom: 35,
+    },
+
+    headerContainer: {
+        padding: 20,
+        borderRadius: 20,
+        borderWidth: 1,
+        marginBottom: 22,
+        elevation: 3,
+        shadowColor: "#6366F1",
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+    },
+
+    headerTop: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+
+    headerTextContainer: {
+        flex: 1,
+    },
+
+    label: {
+        fontSize: 11,
+        fontWeight: "900",
+        color: "#8B5CF6",
+        letterSpacing: 1.3,
+        marginBottom: 9,
+    },
+
+    title: {
+        fontSize: 23,
+        fontWeight: "900",
+    },
+
+    subtitle: {
+        fontSize: 13,
+        lineHeight: 20,
+        marginTop: 12,
+    },
+
+    headerButton: {
+        width: "100%",
+        alignSelf: "flex-start",
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        borderRadius: 8,
+        marginTop: 15,
+    },
+
+    headerButtonText: {
+        fontSize: 13,
+        fontWeight: "800",
+        textAlign: "center",
     },
 
     centerContainer: {
@@ -591,42 +647,6 @@ const styles = StyleSheet.create({
         marginBottom: 22,
         gap: 10,
     },
-
-    headerTextContainer: {
-        flex: 1,
-    },
-
-    label: {
-        fontSize: 12,
-        fontWeight: "800",
-        color: "#8B80FF",
-        letterSpacing: 1.2,
-        marginBottom: 8,
-    },
-
-    title: {
-        fontSize: 26,
-        fontWeight: "900",
-    },
-
-    subtitle: {
-        fontSize: 14,
-        lineHeight: 21,
-        marginTop: 8,
-    },
-
-    headerButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 10,
-        marginTop: 22,
-    },
-
-    headerButtonText: {
-        fontSize: 12,
-        fontWeight: "800",
-    },
-
     inlineError: {
         backgroundColor: "#FEF2F2",
         borderWidth: 1,
@@ -839,20 +859,6 @@ const styles = StyleSheet.create({
     improveButtonText: {
         color: "#FFFFFF",
         fontSize: 13,
-        fontWeight: "800",
-    },
-
-    bottomButton: {
-        backgroundColor: "#6366F1",
-        borderRadius: 13,
-        paddingVertical: 15,
-        alignItems: "center",
-        marginTop: 3,
-    },
-
-    bottomButtonText: {
-        color: "#FFFFFF",
-        fontSize: 15,
         fontWeight: "800",
     },
 });

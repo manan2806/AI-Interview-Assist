@@ -7,6 +7,7 @@ import React, {
 } from "react";
 
 import {
+    Animated,
     ActivityIndicator,
     Alert,
     Linking,
@@ -57,6 +58,71 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
     const scrollViewRef = useRef<ComponentRef<typeof ScrollView>>(null);
     const sectionPositions = useRef<Record<string, number>>({});
+
+    const leftEyeBlink = useRef(new Animated.Value(1)).current;
+    const rightEyeBlink = useRef(new Animated.Value(1)).current;
+    const mouthMovement = useRef(new Animated.Value(0.5)).current;
+
+    const [isSpeaking, setIsSpeaking] = useState(true);
+
+    // Automatic eye blinking
+    useEffect(() => {
+        const blinkAnimation = Animated.loop(
+            Animated.sequence([
+                Animated.delay(1800),
+                Animated.parallel([
+                    Animated.timing(leftEyeBlink, {
+                        toValue: 0.08,
+                        duration: 90,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(rightEyeBlink, {
+                        toValue: 0.08,
+                        duration: 90,
+                        useNativeDriver: true,
+                    }),
+                ]),
+                Animated.parallel([
+                    Animated.timing(leftEyeBlink, {
+                        toValue: 1,
+                        duration: 100,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(rightEyeBlink, {
+                        toValue: 1,
+                        duration: 100,
+                        useNativeDriver: true,
+                    }),
+                ]),
+            ])
+        );
+        blinkAnimation.start();
+        return () => blinkAnimation.stop();
+    }, [leftEyeBlink, rightEyeBlink]);
+
+    useEffect(() => {
+        const smileAnimation = Animated.loop(
+            Animated.sequence([
+                Animated.delay(2000),
+                Animated.timing(mouthMovement, {
+                    toValue: 1.5,
+                    duration: 250,
+                    useNativeDriver: true,
+                }),
+
+                // Hold smile
+                Animated.delay(500),
+
+                Animated.timing(mouthMovement, {
+                    toValue: 0.5,
+                    duration: 250,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+        smileAnimation.start();
+        return () => smileAnimation.stop();
+    }, [mouthMovement]);
 
     const scrollToSection = (section: string) => {
         setMenuOpen(false);
@@ -186,7 +252,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.container}>
 
                 {/* FIXED NAVBAR */}
-
                 <View style={styles.navbar}>
                     <TouchableOpacity
                         onPress={() => scrollToSection("home")}
@@ -198,8 +263,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                         </View>
 
                         <View>
-                            <Text style={styles.logoMain}>Interview</Text>
-                            <Text style={styles.logoSub}>ASSIST</Text>
+                            <View style={styles.logoTitleRow}>
+                                <Text style={styles.logoMain}>Interview</Text>
+                                <Text style={styles.logoAssist}>ASSIST</Text>
+                            </View>
+
+                            <Text style={styles.logoSub}>
+                                Trust • Practise • Success
+                            </Text>
                         </View>
                     </TouchableOpacity>
 
@@ -235,74 +306,73 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
 
                 {/* SINGLE NAVIGATION MENU */}
-
                 {menuOpen && (
-                    <View style={styles.navMenu}>
-                        <View style={styles.menuHeader}>
-                            <Text style={styles.menuHeading}>
-                                Explore
-                            </Text>
+                    <>
+                        <TouchableOpacity
+                            style={styles.navMenuBackdrop}
+                            activeOpacity={1}
+                            onPress={() => setMenuOpen(false)}
+                        />
 
-                            <Text style={styles.menuSubtitle}>
-                                Discover AI Interview Assist
-                            </Text>
-                        </View>
+                        <View style={styles.navMenu}>
+                            <View style={styles.menuHeader}>
+                                <Text style={styles.menuHeading}>Explore</Text>
 
-                        {menuItems.map(item => (
-                            <TouchableOpacity
-                                key={item.value}
-                                style={styles.navMenuItem}
-                                activeOpacity={0.7}
-                                onPress={() =>
-                                    scrollToSection(item.value)
-                                }
-                            >
-                                <View style={styles.navMenuItemLeft}>
-                                    <View style={styles.navMenuIconBox}>
-                                        <Text style={styles.navMenuIcon}>
-                                            {item.icon}
+                                <Text style={styles.menuSubtitle}>
+                                    Discover AI Interview Assist
+                                </Text>
+                            </View>
+
+                            {menuItems.map(item => (
+                                <TouchableOpacity
+                                    key={item.value}
+                                    style={styles.navMenuItem}
+                                    activeOpacity={0.7}
+                                    onPress={() => scrollToSection(item.value)}
+                                >
+                                    <View style={styles.navMenuItemLeft}>
+                                        <View style={styles.navMenuIconBox}>
+                                            <Text style={styles.navMenuIcon}>
+                                                {item.icon}
+                                            </Text>
+                                        </View>
+
+                                        <Text style={styles.navMenuText}>
+                                            {item.label}
                                         </Text>
                                     </View>
 
-                                    <Text style={styles.navMenuText}>
-                                        {item.label}
-                                    </Text>
-                                </View>
+                                    <Text style={styles.navMenuArrow}>›</Text>
+                                </TouchableOpacity>
+                            ))}
 
-                                <Text style={styles.navMenuArrow}>
-                                    ›
+                            <TouchableOpacity
+                                style={styles.menuLoginButton}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    setMenuOpen(false);
+                                    goToLogin();
+                                }}
+                            >
+                                <Text style={styles.menuLoginText}>
+                                    Login to Your Account
                                 </Text>
                             </TouchableOpacity>
-                        ))}
 
-                        <View style={styles.navMenuDivider} />
-
-                        <TouchableOpacity
-                            style={styles.menuLoginButton}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                setMenuOpen(false);
-                                goToLogin();
-                            }}
-                        >
-                            <Text style={styles.menuLoginText}>
-                                Login to Your Account
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.navRegisterButton}
-                            activeOpacity={0.85}
-                            onPress={() => {
-                                setMenuOpen(false);
-                                goToRegister();
-                            }}
-                        >
-                            <Text style={styles.navRegisterText}>
-                                Create Free Account →
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                            <TouchableOpacity
+                                style={styles.navRegisterButton}
+                                activeOpacity={0.85}
+                                onPress={() => {
+                                    setMenuOpen(false);
+                                    goToRegister();
+                                }}
+                            >
+                                <Text style={styles.navRegisterText}>
+                                    Create Free Account →
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </>
                 )}
 
                 {/* SCROLLABLE PAGE CONTENT */}
@@ -386,14 +456,50 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                             </View>
 
                             <View style={styles.aiPreview}>
-                                <Text style={styles.aiPreviewIcon}>✦</Text>
+                                <View style={styles.avatarGlow}>
+                                    <View style={styles.avatarFace}>
+
+                                        <View style={styles.avatarEyes}>
+                                            <Animated.View
+                                                style={[
+                                                    styles.avatarEye,
+                                                    {
+                                                        transform: [{ scaleY: leftEyeBlink }],
+                                                    },
+                                                ]}
+                                            />
+
+                                            <Animated.View
+                                                style={[
+                                                    styles.avatarEye,
+                                                    {
+                                                        transform: [{ scaleY: rightEyeBlink }],
+                                                    },
+                                                ]}
+                                            />
+                                        </View>
+
+                                        <Animated.View
+                                            style={[
+                                                styles.avatarSmile,
+                                                {
+                                                    transform: [{ scaleY: mouthMovement }],
+                                                },
+                                            ]}
+                                        />
+                                    </View>
+                                </View>
 
                                 <Text style={styles.aiPreviewTitle}>
-                                    AI COACH
+                                    AI AVATAR
                                 </Text>
 
                                 <Text style={styles.aiPreviewText}>
-                                    Practice. Learn. Improve.
+                                    Your Personal AI Interview Partner
+                                </Text>
+
+                                <Text style={styles.avatarStatus}>
+                                    ● {isSpeaking ? "AI IS SPEAKING" : "LISTENING"}
                                 </Text>
                             </View>
 
@@ -887,17 +993,28 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: "900",
     },
+    logoTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+    },
     logoMain: {
         color: "#312E81",
         fontSize: 16,
         fontWeight: "900",
     },
     logoSub: {
-        color: "#818CF8",
-        fontSize: 10,
-        fontWeight: "800",
-        letterSpacing: 2,
+        fontSize: 9,
+        fontWeight: "600",
+        color: "#64748B",
+        letterSpacing: 0.5,
         marginTop: 2,
+    },
+    logoAssist: {
+        fontSize: 15,
+        fontWeight: "900",
+        color: "#7C3AED",
+        letterSpacing: 0.8,
     },
     menuButton: {
         width: 45,
@@ -935,17 +1052,34 @@ const styles = StyleSheet.create({
     },
 
     // MENU
+    navMenuBackdrop: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 90,
+        backgroundColor: "rgba(15, 23, 42, 0.12)",
+    },
     navMenu: {
+        position: "absolute",
+        top: 76,
+        right: 12,
+        width: "88%",
+        maxWidth: 360,
         backgroundColor: "#FFFFFF",
-        width: 360,
-        alignSelf: "flex-end",
-        paddingHorizontal: 18,
-        paddingTop: 18,
-        paddingBottom: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E2E8F0",
-        elevation: 8,
-        zIndex: 15,
+        paddingHorizontal: 16,
+        paddingTop: 15,
+        paddingBottom: 17,
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        elevation: 15,
+        zIndex: 100,
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.18,
+        shadowRadius: 10,
     },
     menuHeader: {
         marginBottom: 13,
@@ -1006,6 +1140,7 @@ const styles = StyleSheet.create({
         borderRadius: 11,
         alignItems: "center",
         marginBottom: 10,
+        marginTop: 10,
     },
     menuLoginText: {
         color: "#4338CA",
@@ -1142,26 +1277,95 @@ const styles = StyleSheet.create({
         marginVertical: 7,
     },
     aiPreview: {
-        backgroundColor: "#F3E8FF",
-        padding: 21,
-        borderRadius: 14,
         alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 28,
+        paddingHorizontal: 18,
+        borderRadius: 22,
+        backgroundColor: "#EEF2FF",
+        borderWidth: 1,
+        borderColor: "#C7D2FE",
+        marginVertical: 15,
     },
-    aiPreviewIcon: {
-        fontSize: 42,
-        color: "#9333EA",
+
+    avatarGlow: {
+        width: 110,
+        height: 110,
+        borderRadius: 55,
+        backgroundColor: "#C7D2FE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
     },
-    aiPreviewTitle: {
-        color: "#7E22CE",
-        fontSize: 13,
-        fontWeight: "900",
-        marginTop: 6,
+
+    avatarFace: {
+        width: 82,
+        height: 82,
+        borderRadius: 28,
+        backgroundColor: "#6257D9",
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 3,
+        borderColor: "#FFFFFF",
     },
-    aiPreviewText: {
-        color: "#64748B",
+
+    avatarEyes: {
+        flexDirection: "row",
+        gap: 18,
         marginTop: 5,
-        fontSize: 12,
     },
+
+    avatarEye: {
+        width: 9,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: "#FFFFFF",
+    },
+
+    avatarSmile: {
+        width: 23,
+        height: 12,
+        borderRadius: 12,
+        backgroundColor: "#FFFFFF",
+        marginTop: 10,
+    },
+
+    aiPreviewTitle: {
+        fontSize: 18,
+        fontWeight: "900",
+        color: "#3730A3",
+        letterSpacing: 2,
+    },
+
+    aiPreviewText: {
+        fontSize: 13,
+        color: "#475569",
+        marginTop: 6,
+        textAlign: "center",
+    },
+
+    avatarStatus: {
+        fontSize: 10,
+        fontWeight: "800",
+        color: "#059669",
+        marginTop: 12,
+        letterSpacing: 1,
+    },
+    // aiPreviewIcon: {
+    //     fontSize: 42,
+    //     color: "#9333EA",
+    // },
+    // aiPreviewTitle: {
+    //     color: "#7E22CE",
+    //     fontSize: 13,
+    //     fontWeight: "900",
+    //     marginTop: 6,
+    // },
+    // aiPreviewText: {
+    //     color: "#64748B",
+    //     marginTop: 5,
+    //     fontSize: 12,
+    // },
     performancePreview: {
         backgroundColor: "#F0FDFA",
         padding: 14,

@@ -1,29 +1,34 @@
+
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 // ==========================================
 // API BASE URL
 // ==========================================
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
-if (!API_BASE_URL) {
-    console.warn("EXPO_PUBLIC_API_URL is not configured!");
-}
+const API_BASE_URL = (
+    process.env.EXPO_PUBLIC_API_URL ||
+    "https://ai-interview-assist-backend.onrender.com"
+).replace(/\/+$/, "");
+
+console.log("API BASE URL:", API_BASE_URL);
 
 // ==========================================
 // AXIOS INSTANCE
 // ==========================================
+
 const api = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 30000,
+    timeout: 60000,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
 // ==========================================
-// REQUEST INTERCEPTOR - JWT TOKEN
+// REQUEST INTERCEPTOR
 // ==========================================
+
 api.interceptors.request.use(
     async (config) => {
         try {
@@ -44,13 +49,17 @@ api.interceptors.request.use(
 // ==========================================
 // RESPONSE INTERCEPTOR
 // ==========================================
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.error(
-            "API Error:",
-            error.response?.data || error.message
-        );
+        console.error("API Error:", {
+            message: error.message,
+            url: error.config?.url,
+            baseURL: error.config?.baseURL,
+            status: error.response?.status,
+            data: error.response?.data,
+        });
 
         return Promise.reject(error);
     }
@@ -59,6 +68,7 @@ api.interceptors.response.use(
 // ==========================================
 // GET SETTINGS
 // ==========================================
+
 export const getSettings = async () => {
     const response = await api.get("/api/settings");
     return response.data;
@@ -67,6 +77,7 @@ export const getSettings = async () => {
 // ==========================================
 // UPDATE SETTINGS
 // ==========================================
+
 export const updateSettings = async (settings: {
     interview_type: string;
     difficulty: string;

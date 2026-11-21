@@ -157,22 +157,28 @@ const SupportScreen = ({ navigation }: any) => {
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
         >
-            {/* HEADER */}
-            <View style={styles.header}>
-                <View style={{ flex: 1 }}>
-                    <Text style={styles.headerLabel}>
-                        HELP & SUPPORT
-                    </Text>
+            {/* HEADER CONTAINER */}
+            <View
+                style={[
+                    styles.headerContainer,
+                    {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                    },
+                ]}
+            >
+                <Text style={styles.headerLabel}>
+                    HELP & SUPPORT
+                </Text>
 
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>
-                        How can we help you?
-                    </Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>
+                    How can we help you?
+                </Text>
 
-                    <Text style={[styles.headerDescription, { color: colors.muted }]}>
-                        Find help, report a problem, or contact us
-                        if you need assistance with your interview.
-                    </Text>
-                </View>
+                <Text style={[styles.headerDescription, { color: colors.muted }]}>
+                    Find help, report a problem, or contact us
+                    if you need assistance with your interview.
+                </Text>
 
                 <TouchableOpacity
                     style={[
@@ -183,6 +189,7 @@ const SupportScreen = ({ navigation }: any) => {
                         },
                     ]}
                     onPress={() => navigation.navigate("UserDashboard")}
+                    activeOpacity={0.8}
                 >
                     <Text style={[styles.backButtonText, { color: colors.primary }]}>
                         ← Dashboard
@@ -578,8 +585,17 @@ const styles = StyleSheet.create({
         paddingTop: 33,
         paddingBottom: 40,
     },
-    header: {
-        marginBottom: 22,
+    headerContainer: {
+        width: "100%",
+        borderWidth: 1,
+        borderRadius: 18,
+        padding: 20,
+        marginBottom: 20,
+        elevation: 3,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
     },
     headerLabel: {
         color: "#6366F1",
@@ -588,21 +604,30 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         marginBottom: 8,
     },
+    header: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+        width: "100%",
+        gap: 14,
+    },
     headerTitle: {
         fontSize: 24,
         fontWeight: "900",
     },
+
     headerDescription: {
         fontSize: 13,
         lineHeight: 21,
         marginTop: 8,
-        marginBottom: 15,
+        marginBottom: 18,
     },
     backButton: {
-        alignSelf: "flex-start",
-        paddingHorizontal: 120,
-        paddingVertical: 10,
-        borderRadius: 10,
+        width: "100%",
+        alignSelf: "center",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 12,
+        borderRadius: 11,
         borderWidth: 1,
     },
     backButtonText: {
@@ -680,7 +705,7 @@ const styles = StyleSheet.create({
     modalHeader: {
         flexDirection: "row",
         alignItems: "flex-start",
-        marginBottom: 20,
+        marginBottom: 2,
     },
     modalTitle: {
         fontSize: 20,

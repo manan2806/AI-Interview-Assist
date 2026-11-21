@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+    Platform,
     ActivityIndicator,
     FlatList,
     Modal,
@@ -13,6 +14,8 @@ import {
 } from "react-native";
 import api from "../../services/api";
 import { useTheme } from "../../context/ThemeContext";
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 interface Announcement {
     id: string;
     title: string;
@@ -63,6 +66,9 @@ function AnnouncementsScreen({ navigation }: Props) {
 
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
     const loadAnnouncements = useCallback(async (isRefresh = false) => {
         try {
@@ -220,6 +226,19 @@ function AnnouncementsScreen({ navigation }: Props) {
         endDate,
         sortOrder,
     ]);
+
+    const formatDateForInput = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const parseDateValue = (value: string) => {
+        if (!value) return new Date();
+        const [year, month, day] = value.split("-").map(Number);
+        return new Date(year, month - 1, day);
+    };
 
     const formatDate = (date?: string) => {
         if (!date) return "Date unavailable";
@@ -626,30 +645,84 @@ function AnnouncementsScreen({ navigation }: Props) {
                             </View>
 
                             <Text style={styles.filterLabel}>
-                                From Date (YYYY-MM-DD)
+                                From Date
                             </Text>
 
-                            <TextInput
-                                style={styles.dateInput}
-                                placeholder="2026-01-01"
-                                placeholderTextColor={isDark ? "#8993B0" : "#9CA3AF"}
-                                value={startDate}
-                                onChangeText={setStartDate}
-                                autoCapitalize="none"
-                            />
+                            <TouchableOpacity
+                                style={styles.datePickerButton}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    setShowEndDatePicker(false);
+                                    setShowStartDatePicker(true);
+                                }}
+                            >
+                                <Text
+                                    style={[
+                                        styles.datePickerText,
+                                        !startDate && styles.datePickerPlaceholder,
+                                    ]}
+                                >
+                                    {startDate || "Select Start Date"}
+                                </Text>
+
+                                <Text style={styles.datePickerIcon}>📅</Text>
+                            </TouchableOpacity>
+
+                            {showStartDatePicker && (
+                                <DateTimePicker
+                                    value={parseDateValue(startDate)}
+                                    mode="date"
+                                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                                    maximumDate={endDate ? parseDateValue(endDate) : undefined}
+                                    onChange={(event, selectedDate) => {
+                                        setShowStartDatePicker(false);
+
+                                        if (event.type === "set" && selectedDate) {
+                                            setStartDate(formatDateForInput(selectedDate));
+                                        }
+                                    }}
+                                />
+                            )}
 
                             <Text style={styles.filterLabel}>
-                                To Date (YYYY-MM-DD)
+                                To Date
                             </Text>
 
-                            <TextInput
-                                style={styles.dateInput}
-                                placeholder="2026-12-31"
-                                placeholderTextColor={isDark ? "#8993B0" : "#9CA3AF"}
-                                value={endDate}
-                                onChangeText={setEndDate}
-                                autoCapitalize="none"
-                            />
+                            <TouchableOpacity
+                                style={styles.datePickerButton}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    setShowStartDatePicker(false);
+                                    setShowEndDatePicker(true);
+                                }}
+                            >
+                                <Text
+                                    style={[
+                                        styles.datePickerText,
+                                        !endDate && styles.datePickerPlaceholder,
+                                    ]}
+                                >
+                                    {endDate || "Select End Date"}
+                                </Text>
+
+                                <Text style={styles.datePickerIcon}>📅</Text>
+                            </TouchableOpacity>
+
+                            {showEndDatePicker && (
+                                <DateTimePicker
+                                    value={parseDateValue(endDate || startDate)}
+                                    mode="date"
+                                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                                    minimumDate={startDate ? parseDateValue(startDate) : undefined}
+                                    onChange={(event, selectedDate) => {
+                                        setShowEndDatePicker(false);
+
+                                        if (event.type === "set" && selectedDate) {
+                                            setEndDate(formatDateForInput(selectedDate));
+                                        }
+                                    }}
+                                />
+                            )}
 
                             <Text style={styles.filterLabel}>
                                 Sort By
@@ -1222,6 +1295,32 @@ const createStyles = (colors: any, isDark: boolean) =>
             fontWeight: "800",
             marginTop: 17,
             marginBottom: 9,
+        },
+        datePickerButton: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: isDark ? colors.input : "#F9FAFB",
+            borderWidth: 1,
+            borderColor: isDark ? colors.border : "#D1D5DB",
+            borderRadius: 10,
+            paddingHorizontal: 14,
+            paddingVertical: 14,
+        },
+
+        datePickerText: {
+            color: isDark ? colors.text : "#374151",
+            fontSize: 13,
+            fontWeight: "700",
+        },
+
+        datePickerPlaceholder: {
+            color: isDark ? "#8993B0" : "#9CA3AF",
+            fontWeight: "500",
+        },
+
+        datePickerIcon: {
+            fontSize: 17,
         },
         typeDropdownContainer: {
             marginTop: 5,
