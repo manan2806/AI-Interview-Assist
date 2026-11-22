@@ -163,6 +163,44 @@ html {
     box-shadow: 0 9px 22px rgba(113, 103, 239, 0.3);
 }
 
+/* INSTALL APP BUTTON */
+.home-nav-links .home-install-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 19px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #7167ef, #594fd0);
+    box-shadow: 0 6px 16px rgba(113, 103, 239, 0.2);
+    color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+    white-space: nowrap;
+}
+
+.home-nav-links .home-install-btn::after {
+    display: none;
+}
+
+.home-nav-links .home-install-btn:hover {
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 9px 22px rgba(113, 103, 239, 0.3);
+}
+
+.home-install-icon {
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 900;
+}
+
 /* Hamburger */
 .home-menu-btn {
     display: none;
@@ -1414,12 +1452,47 @@ html {
         color: #6258dc;
     }
 
-    .home-nav-links .home-register-btn {
+    /* Mobile Register & Install App Buttons */
+    .home-nav-links .home-register-btn,
+    .home-nav-links .home-install-btn {
+        display: flex;
+        align-items: center;
         justify-content: center;
+        width: 100%;
+        min-height: 44px;
         margin-top: 5px;
-        padding: 12px;
-        color: #ffffff;
+        padding: 11px 14px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #7167ef, #594fd0);
+        box-shadow: 0 5px 14px rgba(113, 103, 239, 0.18);
+        color: #ffffff !important;
+        font-size: 13px;
+        font-weight: 800;
         text-align: center;
+        text-decoration: none;
+    }
+
+    .home-nav-links .home-register-btn:hover,
+    .home-nav-links .home-register-btn:focus,
+    .home-nav-links .home-register-btn:active,
+    .home-nav-links .home-install-btn:hover,
+    .home-nav-links .home-install-btn:focus,
+    .home-nav-links .home-install-btn:active {
+        background: linear-gradient(135deg, #6255e8, #4f45c5) !important;
+        color: #ffffff !important;
+        border-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(113, 103, 239, 0.25);
+    }
+
+    .home-nav-links .home-install-btn {
+        gap: 8px;
+    }
+
+    .home-nav-links .home-install-icon {
+        font-size: 19px;
+        line-height: 1;
     }
 
     /* Mobile hero */

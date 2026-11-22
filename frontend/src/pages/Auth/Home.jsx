@@ -168,6 +168,16 @@ function Home() {
                     >
                         Register
                     </Link>
+                    <a
+                        href="/ai-interview-assist.apk"
+                        className="home-install-btn"
+                        download="ai-interview-assist.apk"
+                        onClick={closeMenu}
+                    >
+                        <span className="home-install-icon">↓</span>
+                        Install App
+                    </a>
+
                 </div>
 
                 <button
