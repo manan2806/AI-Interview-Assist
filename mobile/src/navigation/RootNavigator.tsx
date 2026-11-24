@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
     ActivityIndicator,
@@ -27,15 +26,9 @@ const RootNavigator = () => {
         return <AuthNavigator />;
     }
 
-    // console.log("Logged In User:", user);
-    // console.log("User Role:", user?.role);
-
     if (user?.role?.trim().toLowerCase() === "admin") {
-        console.log("Opening Admin Dashboard");
         return <AdminNavigator />;
     }
-
-    // console.log("Opening User Dashboard");
     return <UserNavigator />;
 };
 

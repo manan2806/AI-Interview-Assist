@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React, { useState, useCallback } from "react";
+import SplashScreen from "./components/SplashScreen";
 
 // Auth Pages
 import Home from "./pages/Auth/Home";
@@ -39,6 +41,19 @@ import AdminActivityLogs from "./pages/Admin/AdminActivityLogs";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
+    const [showSplash, setShowSplash] = useState(true);
+    const handleSplashComplete = useCallback(() => {
+        setShowSplash(false);
+    }, []);
+
+    if (showSplash) {
+        return (
+            <SplashScreen
+                onComplete={handleSplashComplete}
+            />
+        );
+    }
+
     return (
         <BrowserRouter>
 
