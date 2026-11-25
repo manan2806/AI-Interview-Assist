@@ -8,6 +8,12 @@ import {
   Animated,
 } from "react-native";
 
+import * as Application from "expo-application";
+import {
+  fetchLatestUpdate,
+  isUpdateAvailable,
+} from "./src/services/updateService";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -37,6 +43,50 @@ function AppContent() {
       progress.stopAnimation();
     };
   }, [progress]);
+
+  useEffect(() => {
+    if (showSplash) return;
+
+    let isActive = true;
+
+    const checkForUpdates = async () => {
+      try {
+        const currentVersion = Application.nativeApplicationVersion;
+        const currentVersionCode = Number(
+          Application.nativeBuildVersion
+        );
+
+        console.log("Current App Version:", currentVersion);
+        console.log("Current Version Code:", currentVersionCode);
+
+        const latestUpdate = await fetchLatestUpdate();
+
+        console.log("Latest App Version:", latestUpdate.version);
+        console.log("Latest Version Code:", latestUpdate.versionCode);
+
+        if (
+          isUpdateAvailable(
+            currentVersionCode,
+            latestUpdate.versionCode
+          )
+        ) {
+          if (isActive) {
+            console.log("New Update Available:", latestUpdate);
+          }
+        } else {
+          console.log("App is already up to date.");
+        }
+      } catch (error) {
+        console.log("Unable to check for app updates:", error);
+      }
+    };
+
+    checkForUpdates();
+
+    return () => {
+      isActive = false;
+    };
+  }, [showSplash]);
 
   const progressWidth = progress.interpolate({
     inputRange: [0, 100],
