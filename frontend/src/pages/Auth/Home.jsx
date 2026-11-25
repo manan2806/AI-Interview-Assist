@@ -170,7 +170,7 @@ function Home() {
                     </Link>
 
                     <a
-                        href="https://github.com/manan2806/AI-Interview-Assist/releases/latest/download/AI-Interview-Assist.apk"
+                        href="https://github.com/manan2806/AI-Interview-Assist/releases/download/v1.0.2/AI-Interview-Assist.apk"
                         className="home-install-btn"
                         onClick={closeMenu}
                     >
