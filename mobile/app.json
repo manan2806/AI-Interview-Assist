@@ -4,7 +4,7 @@
     "slug": "ai-interview-assist",
     "version": "1.0.3",
     "orientation": "portrait",
-    "icon": "./assets/ai-interview-assist-Icon.png",
+    "icon": "./assets/ai-interview-assist-adaptive-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
@@ -15,7 +15,7 @@
       "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/ai-interview-assist-Icon.png"
+        "foregroundImage": "./assets/ai-interview-assist-adaptive-icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
