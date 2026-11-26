@@ -2,7 +2,7 @@
   "expo": {
     "name": "AI Interview Assist",
     "slug": "ai-interview-assist",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/ai-interview-assist-Icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.aiinterviewassist.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/ai-interview-assist-Icon.png"
