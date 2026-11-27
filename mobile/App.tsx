@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   StatusBar,
@@ -6,9 +7,13 @@ import {
   StyleSheet,
   Text,
   Animated,
+  Pressable,
 } from "react-native";
 
 import * as Application from "expo-application";
+import * as Network from "expo-network";
+import Constants from "expo-constants";
+
 import {
   fetchLatestUpdate,
   isUpdateAvailable,
@@ -23,10 +28,34 @@ import RootNavigator from "./src/navigation/RootNavigator";
 
 function AppContent() {
   const { theme } = useTheme();
+
   const [showSplash, setShowSplash] = useState(true);
+  const [networkAvailable, setNetworkAvailable] = useState<boolean | null>(null);
+  const [checkingNetwork, setCheckingNetwork] = useState(false);
 
   const progress = useRef(new Animated.Value(0)).current;
 
+  // Check Internet Connection
+  const checkInternetConnection = async () => {
+    try {
+      setCheckingNetwork(true);
+
+      const networkState = await Network.getNetworkStateAsync();
+
+      const connected =
+        networkState.isConnected === true &&
+        networkState.isInternetReachable !== false;
+
+      setNetworkAvailable(connected);
+    } catch (error) {
+      console.log("Internet Check Error:", error);
+      setNetworkAvailable(false);
+    } finally {
+      setCheckingNetwork(false);
+    }
+  };
+
+  // Splash Screen
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
@@ -44,16 +73,35 @@ function AppContent() {
     };
   }, [progress]);
 
+  // Initial Internet Check + Live Connection Monitoring
   useEffect(() => {
-    if (showSplash) return;
+    checkInternetConnection();
+
+    const subscription = Network.addNetworkStateListener((state) => {
+      const connected =
+        state.isConnected === true &&
+        state.isInternetReachable !== false;
+
+      setNetworkAvailable(connected);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Check App Updates
+  useEffect(() => {
+    if (showSplash || networkAvailable !== true) return;
 
     let isActive = true;
 
     const checkForUpdates = async () => {
       try {
-        const currentVersion = Application.nativeApplicationVersion;
+        const currentVersion = Constants.expoConfig?.version ?? "1.0.0";
+
         const currentVersionCode = Number(
-          Application.nativeBuildVersion
+          Constants.expoConfig?.android?.versionCode ?? 1
         );
 
         console.log("Current App Version:", currentVersion);
@@ -86,26 +134,25 @@ function AppContent() {
     return () => {
       isActive = false;
     };
-  }, [showSplash]);
+  }, [showSplash, networkAvailable]);
 
   const progressWidth = progress.interpolate({
     inputRange: [0, 100],
     outputRange: ["0%", "100%"],
   });
 
+  // Splash Screen
   if (showSplash) {
     return (
       <View style={styles.splashContainer}>
         <StatusBar barStyle="dark-content" />
 
-        {/* App Logo */}
         <Image
           source={require("./assets/ai-interview-assist-logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        {/* Loading Section */}
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>
             Preparing Your Interview Experience...
@@ -131,12 +178,63 @@ function AppContent() {
           <Text style={styles.footerTagline}>
             Trust  •  Practise  •  Success
           </Text>
-
         </View>
       </View>
     );
   }
 
+  // Checking Internet
+  if (networkAvailable === null) {
+    return (
+      <View style={styles.connectionContainer}>
+        <StatusBar barStyle="dark-content" />
+
+        <Text style={styles.connectionTitle}>
+          Checking Internet Connection...
+        </Text>
+
+        <Text style={styles.connectionMessage}>
+          Please wait while we check your connection.
+        </Text>
+      </View>
+    );
+  }
+
+  // Internet Not Available
+  if (!networkAvailable) {
+    return (
+      <View style={styles.connectionContainer}>
+        <StatusBar barStyle="dark-content" />
+
+        <View style={styles.connectionIcon}>
+          <Text style={styles.wifiIcon}>!</Text>
+        </View>
+
+        <Text style={styles.connectionTitle}>
+          Please Connect to Internet
+        </Text>
+
+        <Text style={styles.connectionMessage}>
+          Please turn on your internet connection to use AI Interview Assist.
+        </Text>
+
+        <Pressable
+          style={[
+            styles.retryButton,
+            checkingNetwork && styles.retryButtonDisabled,
+          ]}
+          onPress={checkInternetConnection}
+          disabled={checkingNetwork}
+        >
+          <Text style={styles.retryButtonText}>
+            {checkingNetwork ? "Checking..." : "Retry"}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // Main Application
   return (
     <NavigationContainer>
       <StatusBar
@@ -170,21 +268,6 @@ const styles = StyleSheet.create({
   logo: {
     width: "95%",
     height: 280,
-  },
-
-  badge: {
-    backgroundColor: "#F3E8FF",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 8,
-  },
-
-  badgeText: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "#7C3AED",
-    letterSpacing: 0.8,
   },
 
   loadingContainer: {
@@ -228,20 +311,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  footer: {
-    position: "absolute",
-    bottom: 45,
-    alignItems: "center",
-    paddingHorizontal: 15,
-  },
-
-  footerMessage: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#64748B",
-    textAlign: "center",
-  },
-
   footerTagline: {
     fontSize: 12,
     fontWeight: "800",
@@ -250,4 +319,60 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
 
+  connectionContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+  },
+
+  connectionIcon: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#FEE2E2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 25,
+  },
+
+  wifiIcon: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: "#DC2626",
+  },
+
+  connectionTitle: {
+    fontSize: 21,
+    fontWeight: "800",
+    color: "#1E293B",
+    textAlign: "center",
+  },
+
+  connectionMessage: {
+    fontSize: 14,
+    color: "#64748B",
+    textAlign: "center",
+    lineHeight: 22,
+    marginTop: 12,
+  },
+
+  retryButton: {
+    backgroundColor: "#6D5CE8",
+    paddingHorizontal: 45,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 28,
+  },
+
+  retryButtonDisabled: {
+    opacity: 0.6,
+  },
+
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
+  },
 });
