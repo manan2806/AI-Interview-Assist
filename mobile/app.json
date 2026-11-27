@@ -2,6 +2,7 @@
   "expo": {
     "name": "AI Interview Assist",
     "slug": "ai-interview-assist",
+    "scheme": "aiinterviewassist",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/ai-interview-assist-adaptive-icon.png",
