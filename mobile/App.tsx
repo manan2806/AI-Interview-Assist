@@ -44,7 +44,7 @@ function AppContent() {
 
       const connected =
         networkState.isConnected === true &&
-        networkState.isInternetReachable !== false;
+        networkState.isInternetReachable === true;
 
       setNetworkAvailable(connected);
     } catch (error) {
@@ -80,8 +80,7 @@ function AppContent() {
     const subscription = Network.addNetworkStateListener((state) => {
       const connected =
         state.isConnected === true &&
-        state.isInternetReachable !== false;
-
+        state.isInternetReachable === true;
       setNetworkAvailable(connected);
     });
 
