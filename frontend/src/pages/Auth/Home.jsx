@@ -169,15 +169,17 @@ function Home() {
                         Register
                     </Link>
 
+
+
                     <a
-                        // href="intent://open#Intent;scheme=aiinterviewassist;package=com.aiinterviewassist.app;S.browser_fallback_url=https%3A%2F%2Fgithub.com%2Fmanan2806%2FAI-Interview-Assist%2Freleases%2Fdownload%2Fv1.0.0%2FAI-Interview-Assist-v1.0.0.apk;end"
-                        href="aiinterviewassist://open"
+                        href="intent://open#Intent;scheme=aiinterviewassist;package=com.aiinterviewassist.app;S.browser_fallback_url=https%3A%2F%2Fgithub.com%2Fmanan2806%2FAI-Interview-Assist%2Freleases%2Fdownload%2Fv1.0.0%2FAI-Interview-Assist-v1.0.0.apk;end"
                         className="home-install-btn"
                         onClick={closeMenu}
                     >
                         <span className="home-install-icon">↓</span>
                         Install App
                     </a>
+
 
                 </div>
 

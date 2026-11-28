@@ -177,6 +177,10 @@ function AppContent() {
           <Text style={styles.footerTagline}>
             Trust  •  Practise  •  Success
           </Text>
+
+          <Text style={styles.appVersion}>
+            Version {Constants.expoConfig?.version ?? "1.0.0"}
+          </Text>
         </View>
       </View>
     );
@@ -316,6 +320,13 @@ const styles = StyleSheet.create({
     color: "#7C3AED",
     marginTop: 25,
     letterSpacing: 0.6,
+  },
+
+  appVersion: {
+    fontSize: 11,
+    color: "#94A3B8",
+    marginTop: 10,
+    fontWeight: "500",
   },
 
   connectionContainer: {
